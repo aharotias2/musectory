@@ -1,0 +1,35 @@
+/***********************************************************
+ *                  dplayer style sheet                    *
+ ***********************************************************/
+.title {
+    font-size: 17px;
+}
+
+.album {
+    font-size: 12px;
+}
+
+.artist, .genre {
+    font-size: 12px;
+    font-style: italic;
+}
+
+.artwork_background {
+    background-color: rgba(0, 0, 0, 0.85);
+    color: #ffffff;
+}
+
+.tooltip {
+    color: rgba(252, 252, 252, 1.0);
+    font-style: italic;
+    padding: 4px;
+    /* not working */
+    border-radius: 2px;
+    box-shadow: none;
+}
+
+.tooltip.background {
+    box-shadow: inset 0px 1px rgba(0, 0, 0, 0.5);
+    background-color: rgba(9, 9, 9, 0.5);
+}
+
