@@ -11,6 +11,6 @@ $(TARGET): $(TARGET).vala $(SRC)
 test-music: test-music.vala enums.vala Cli.vala DFileInfo.vala MPlayer.vala DFileUtils.vala Music.vala
 	valac $(VALAC_OPTS) -o $@ $^
 
-install:
-	cp ./dplayer ~/.local/bin; [ ! -d ~/.config ] && mkdir ~/.config; cp ./dplayer.css ~/.config/dplayer.css
+install: $(TARGET)
+	cp ./dplayer ~/.local/bin; [ ! -d ~/.config ] && mkdir ~/.config; cp ./dplayer.css ~/.config/dplayer.css; [ ! -d ~/.icons ] && mkdir ~/.icons; cp dplayer.png ~/.icons
 
