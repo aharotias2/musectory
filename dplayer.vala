@@ -65,7 +65,7 @@ int artwork_max_size;
 //--------------------------------------------------------------------------------------
 Window main_win;
 HeaderBar? win_header;
-Stack stack;
+DPlayerStack stack;
 Button artwork_button;
 Image artwork;
 Box controller;
@@ -361,6 +361,7 @@ void show_config_dialog(Window main_win) {
     }
 }
 
+
 //--------------------------------------------------------------------------------------
 // メイン関数
 //--------------------------------------------------------------------------------------
@@ -568,7 +569,7 @@ int main(string[] args) {
                     header_sidebar_button.get_style_context().add_class("titlebutton");
                     header_sidebar_button.add(new Image.from_icon_name("view-list-symbolic", IconSize.BUTTON));
                     header_sidebar_button.clicked.connect(() => {
-                            if (stack.visible_child_name == "finder") {
+                            if (stack.is_finder_visible()) {
                                 //hoge
                                 DFileInfo file_info = playlist.track_data();
 
@@ -589,10 +590,9 @@ int main(string[] args) {
                                     artwork_button.visible = true;
                                 }
                                 music_view_artwork.visible = false;
-                                stack.transition_type = StackTransitionType.UNDER_UP;
-                                stack.visible_child_name = "playlist";
+                                stack.show_playlist();
                                 header_sidebar_button.image = view_grid_image;
-                            } else if (stack.visible_child_name == "playlist") {
+                            } else if (stack.is_playlist_visible()) {
                                 if (options.use_csd) {
                                     win_header.set_title(finder.dir_path);
                                 } else {
@@ -602,8 +602,7 @@ int main(string[] args) {
                                     artwork_button.visible = true;
                                 }
                                 music_view_artwork.visible = false;
-                                stack.transition_type = StackTransitionType.OVER_DOWN;
-                                stack.visible_child_name = "finder";
+                                stack.show_finder();
                                 header_sidebar_button.image = view_list_image;
                             }
                         });
@@ -682,12 +681,12 @@ int main(string[] args) {
                 header_fold_button.add(new Image.from_icon_name("go-up-symbolic", IconSize.BUTTON));
                 header_fold_button.sensitive = true;
                 header_fold_button.clicked.connect(() => {
-                        if (stack.visible) {
+                        if (stack.is_visible()) {
                             saved_main_win_width = main_win.get_allocated_width();
                             saved_main_win_height = main_win.get_allocated_height();
                             main_win.resize(saved_main_win_width, 1);
                             header_fold_button.image = new Image.from_icon_name("go-down-symbolic", IconSize.BUTTON);
-                            stack.visible = false;
+                            stack.hide();
                             prev_track_button.visible = false;
                             next_track_button.visible = false;
                             toggle_repeat_button.visible = false;
@@ -697,7 +696,7 @@ int main(string[] args) {
                         } else {
                             main_win.resize(main_win.get_allocated_width(), saved_main_win_height);
                             header_fold_button.image = new Image.from_icon_name("go-up-symbolic", IconSize.BUTTON);
-                            stack.visible = true;
+                            stack.show();
                             prev_track_button.visible = true;
                             next_track_button.visible = true;
                             toggle_repeat_button.visible = true;
@@ -775,12 +774,11 @@ int main(string[] args) {
                             finder.change_cursor(Gdk.CursorType.WATCH);
                             Timeout.add(1, () => {
                                     debug("play-pause button was clicked. music is not playing. start it.");
-                                    if (stack.visible_child_name == "finder") {
+                                    if (stack.is_finder_visible()) {
                                         playlist.new_list_from_path(finder.dir_path);
                                         p_finder_next_button->visible = true;
                                     }
-                                    stack.transition_type = StackTransitionType.UNDER_UP;
-                                    stack.visible_child_name = "playlist";
+                                    stack.show_playlist();
                                     header_sidebar_button.sensitive = true;
                                     header_sidebar_button.image = view_grid_image;
                                     var file_path_list = playlist.get_file_path_list();
@@ -1193,10 +1191,9 @@ int main(string[] args) {
                             }
                             p_finder_next_button->visible = true;
                             ((Gtk.Image)play_pause_button.icon_widget).icon_name = "media-playback-pause-symbolic";
-                            stack.transition_type = StackTransitionType.UNDER_UP;
                             header_sidebar_button.image = view_grid_image;
                             header_sidebar_button.sensitive = true;
-                            stack.visible_child_name = "playlist";
+                            stack.show_playlist();
                             finder.change_cursor(Gdk.CursorType.LEFT_PTR);
                             return Source.REMOVE;
                         }
@@ -1411,13 +1408,8 @@ int main(string[] args) {
         {
             var main_overlay = new Overlay();
             {
-                stack = new Stack();
-                {
-                    stack.transition_type = StackTransitionType.UNDER_UP;
-                    stack.add_named(finder_hbox, "finder");
-                    stack.add_named(playlist_view_container, "playlist");
-                }
-
+                stack = new DPlayerStack(finder_hbox, playlist_view_container);
+                
                 main_overlay.add(stack);
                 main_overlay.add_overlay(music_view_overlay);
             }
@@ -1477,7 +1469,7 @@ int main(string[] args) {
     finder.hide_while_label();
     header_sidebar_button.image = view_list_image;
     header_sidebar_button.sensitive = false;
-    stack.visible_child_name = "finder";
+    stack.show_finder();
 
     Gtk.main();
 

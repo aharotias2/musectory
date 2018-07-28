@@ -1,7 +1,7 @@
 TARGET = dplayer
 #VALAC_OPTS = -g --save-temps --thread --pkg=posix --pkg=gtk+-3.0 --pkg=json-glib-1.0 -X -lm -D PREPROCESSOR_DEBUG
 VALAC_OPTS = --thread --pkg=posix --pkg=gtk+-3.0 --pkg=json-glib-1.0 -X -lm -X -O3
-SRC =  Cli.vala Tracker.vala enums.vala DFileInfo.vala DPlayerOptions.vala MPlayer.vala Finder.vala DFileUtils.vala PlaylistBox.vala MyUtils.vala PlaylistDrawingArea.vala Music.vala
+SRC =  Cli.vala Tracker.vala enums.vala DFileInfo.vala DPlayerOptions.vala MPlayer.vala Finder.vala DFileUtils.vala PlaylistBox.vala MyUtils.vala PlaylistDrawingArea.vala Music.vala DPlayerStack.vala
 
 all: dplayer
 

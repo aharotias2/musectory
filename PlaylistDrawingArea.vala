@@ -24,8 +24,8 @@ using MyUtils;
 
 namespace DPlayer {
     public enum PlaylistItemStatus {
-            NORMAL, PLAYING, PAUSED, HIDDEN,
-        }
+        NORMAL, PLAYING, PAUSED, HIDDEN,
+    }
     
     public class PlaylistDrawingArea : Bin {
         private DrawingArea area;
@@ -50,7 +50,7 @@ namespace DPlayer {
             pause_height_percentage = 0.27;
             circle_line_color = RGBAUtils.new_rgba_from_string("FFFFFF", 0.7);
             circle_fill_color = RGBAUtils.new_rgba_from_string("FFFFFF", 0.5);
-            foreground_color = RGBAUtils.new_rgba_from_string("000000", 0.7);
+            foreground_color = RGBAUtils.new_rgba_from_string("222222", 0.9);
             area = new DrawingArea();
             {
                 area.set_size_request(size, size);
