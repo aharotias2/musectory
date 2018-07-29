@@ -1489,6 +1489,8 @@ int main(string[] args) {
     config_file_contents += "use_csd=" + (options.use_csd ? "true\n" : "false\n");
 
     config_file_contents += "cwd=" + current_dir + "\n";
+
+    config_file_contents += "playlist_image_size=%d\n".printf(options.playlist_image_size);
     
     try {
         FileUtils.set_contents(config_file_path, config_file_contents);

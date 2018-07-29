@@ -62,6 +62,7 @@ namespace DPlayer {
         public void set_area_size(int new_size) {
             size = new_size;
             set_size_request(size, size);
+            area.set_size_request(size, size);
         }
         
         protected bool on_draw(Widget da, Context ctx) {

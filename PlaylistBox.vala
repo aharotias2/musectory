@@ -48,6 +48,8 @@ namespace DPlayer {
                                 image_artwork = new Image.from_pixbuf(scaled_artwork);
                                 {
                                     image_artwork.set_size_request(image_size, image_size);
+                                    image_artwork.halign = Align.CENTER;
+                                    image_artwork.valign = Align.CENTER;
                                 }
                             }
                             
@@ -61,7 +63,7 @@ namespace DPlayer {
                                 icon_area.index = get_index();
                                 icon_area.does_draw_outline = true;
                             }
-                            
+
                             image_overlay.add_overlay(image_artwork);
                             image_overlay.add_overlay(icon_area);
                         }
