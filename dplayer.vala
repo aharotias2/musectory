@@ -1149,108 +1149,143 @@ int main(string[] args) {
         //------------------------------------------------------------------------------
         // ファインダーの作成
         //------------------------------------------------------------------------------
-        finder = new DPlayer.Finder();
+        var finder_overlay = new Overlay();
         {
-            finder.bookmark_button_clicked_func = (file_path) => {
-                string file_name = file_path.slice(file_path.last_index_of_char('/') + 1, file_path.length);
-                TreeStore temp_store = (TreeStore)bookmark_tree.model;
-                dirs.append(file_path);
-                TreeIter temp_iter;
-                temp_store.append(out temp_iter, bookmark_root);
-                temp_store.set(temp_iter,
-                               0, "media-optical-symbolic",
-                               1, file_name,
-                               2, file_path,
-                               3, MenuType.FOLDER,
-                               4, "");
-            };
+            finder = new DPlayer.Finder();
+            {
+                finder.bookmark_button_clicked_func = (file_path) => {
+                    string file_name = file_path.slice(file_path.last_index_of_char('/') + 1, file_path.length);
+                    TreeStore temp_store = (TreeStore)bookmark_tree.model;
+                    dirs.append(file_path);
+                    TreeIter temp_iter;
+                    temp_store.append(out temp_iter, bookmark_root);
+                    temp_store.set(temp_iter,
+                                   0, "media-optical-symbolic",
+                                   1, file_name,
+                                   2, file_path,
+                                   3, MenuType.FOLDER,
+                                   4, "");
+                };
 
-            finder.play_button_clicked_func = (file_path) => {
+                finder.play_button_clicked_func = (file_path) => {
 
-                finder.change_cursor(Gdk.CursorType.WATCH);
+                    finder.change_cursor(Gdk.CursorType.WATCH);
                     
-                if (music.playing) {
-                    music.quit();
-                }
+                    if (music.playing) {
+                        music.quit();
+                    }
                     
-                Timeout.add(10, () => {
-                        if (music.playing) {
-                            return Source.CONTINUE;
-                        } else {
-                            debug("file_path: %s", file_path);
-                            playlist.new_list_from_path(file_path);
-                            var file_path_list = playlist.get_file_path_list();
-                            if (FileUtils.test(file_path, FileTest.IS_REGULAR)) {
-                                music.start(ref file_path_list, options.ao_type);
-                                int index = playlist.get_index_from_path(file_path);
-                                if (index > 0) {
-                                    music.play_next(index);
-                                }
+                    Timeout.add(10, () => {
+                            if (music.playing) {
+                                return Source.CONTINUE;
                             } else {
-                                music.start(ref file_path_list, options.ao_type);
+                                debug("file_path: %s", file_path);
+                                playlist.new_list_from_path(file_path);
+                                var file_path_list = playlist.get_file_path_list();
+                                if (FileUtils.test(file_path, FileTest.IS_REGULAR)) {
+                                    music.start(ref file_path_list, options.ao_type);
+                                    int index = playlist.get_index_from_path(file_path);
+                                    if (index > 0) {
+                                        music.play_next(index);
+                                    }
+                                } else {
+                                    music.start(ref file_path_list, options.ao_type);
+                                }
+                                p_finder_next_button->visible = true;
+                                ((Gtk.Image)play_pause_button.icon_widget).icon_name = "media-playback-pause-symbolic";
+                                header_sidebar_button.image = view_grid_image;
+                                header_sidebar_button.sensitive = true;
+                                stack.show_playlist();
+                                finder.change_cursor(Gdk.CursorType.LEFT_PTR);
+                                return Source.REMOVE;
                             }
-                            p_finder_next_button->visible = true;
-                            ((Gtk.Image)play_pause_button.icon_widget).icon_name = "media-playback-pause-symbolic";
-                            header_sidebar_button.image = view_grid_image;
-                            header_sidebar_button.sensitive = true;
-                            stack.show_playlist();
-                            finder.change_cursor(Gdk.CursorType.LEFT_PTR);
-                            return Source.REMOVE;
-                        }
+                        });
+                };
+
+                finder.add_button_clicked_func = (file_path) => {
+                    playlist.append_list_from_path(file_path);
+                    List<string> file_list = playlist.get_file_path_list();
+                    music.set_file_list(ref file_list);
+                    next_track_button.sensitive = true;
+                };
+
+                finder.use_popover = false;
+            }
+
+            var go_playlist_button = new Button.from_icon_name("go-next");
+            {
+                go_playlist_button.halign = Align.END;
+                go_playlist_button.valign = Align.CENTER;
+                go_playlist_button.clicked.connect(() => {
+                        stack.show_playlist();
                     });
-            };
+            }
 
-            finder.add_button_clicked_func = (file_path) => {
-                playlist.append_list_from_path(file_path);
-                List<string> file_list = playlist.get_file_path_list();
-                music.set_file_list(ref file_list);
-                next_track_button.sensitive = true;
-            };
-
-            finder.use_popover = false;
+            finder_overlay.add(finder);
+            if (!options.use_csd) {
+                finder_overlay.add_overlay(go_playlist_button);
+            }
         }
-    
+        
         finder_hbox.pack_start(bookmark_revealer, false, false);
-        finder_hbox.pack_start(finder, true, true);
+        finder_hbox.pack_start(finder_overlay, true, true);
     }
 
     //----------------------------------------------------------------------------------
     // プレイリスト画面作成
     //----------------------------------------------------------------------------------
-    var playlist_view_container = new ScrolledWindow(null, null);
-    {
-        playlist = new PlaylistBox();
-        {
-            playlist.image_size = options.playlist_image_size;
-            playlist.list_box.row_activated.connect((row) => {
-                    int index = row.get_index();
-                    debug("playlist view was clicked (row_activated at %u).", index);
-                    int step = ((int) index) - ((int) playlist.get_track());
-                        
-                    if (step == 0) {
-                        music.pause();
-                        playlist.toggle_status();
-                        if (music.paused) {
-                            ((Gtk.Image)play_pause_button.icon_widget).icon_name = "media-playback-start-symbolic";
-                        } else {
-                            ((Gtk.Image)play_pause_button.icon_widget).icon_name = "media-playback-pause-symbolic";
-                        }
-                    } else {
-                        debug("playlist restarted from track %d", index);
-                        if (step > 0) {
-                            music.play_next(step);
-                        } else if (step < 0) {
-                            music.play_prev(-step);
-                        }
-                        music.paused = false;
-                    }
 
-                    return;
+    var playlist_hbox = new Box(Orientation.HORIZONTAL, 0);
+    {
+        var playlist_view_container = new ScrolledWindow(null, null);
+        {
+            playlist = new PlaylistBox();
+            {
+                playlist.image_size = options.playlist_image_size;
+                playlist.list_box.row_activated.connect((row) => {
+                        int index = row.get_index();
+                        debug("playlist view was clicked (row_activated at %u).", index);
+                        int step = ((int) index) - ((int) playlist.get_track());
+                        
+                        if (step == 0) {
+                            music.pause();
+                            playlist.toggle_status();
+                            if (music.paused) {
+                                ((Gtk.Image)play_pause_button.icon_widget).icon_name = "media-playback-start-symbolic";
+                            } else {
+                                ((Gtk.Image)play_pause_button.icon_widget).icon_name = "media-playback-pause-symbolic";
+                            }
+                        } else {
+                            debug("playlist restarted from track %d", index);
+                            if (step > 0) {
+                                music.play_next(step);
+                            } else if (step < 0) {
+                                music.play_prev(-step);
+                            }
+                            music.paused = false;
+                        }
+
+                        return;
+                    });
+            }
+            playlist_view_container.add(playlist);
+        }
+        
+        var back_button = new Button.from_icon_name("go-previous");
+        {
+            back_button.valign = Align.CENTER;
+            back_button.halign = Align.CENTER;
+            back_button.clicked.connect(() => {
+                    stack.show_finder();
                 });
         }
-        playlist_view_container.add(playlist);
-    }
 
+        if (!options.use_csd) {
+            playlist_hbox.pack_start(back_button, false, false);
+        }
+        playlist_hbox.pack_start(playlist_view_container, true, true);
+    }
+    
     //----------------------------------------------------------------------------------
     // アートワーク表示画面作成
     //----------------------------------------------------------------------------------
@@ -1408,7 +1443,7 @@ int main(string[] args) {
         {
             var main_overlay = new Overlay();
             {
-                stack = new DPlayerStack(finder_hbox, playlist_view_container);
+                stack = new DPlayerStack(finder_hbox, playlist_hbox, options.use_csd);
                 
                 main_overlay.add(stack);
                 main_overlay.add_overlay(music_view_overlay);
