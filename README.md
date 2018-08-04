@@ -20,5 +20,8 @@ make install
 * It put a CSS file onto ~/.config
 * And It put a config file onto your HOME directory.
 ## TODO
-* Implement Directory Chooser dialog.
-* A way to switch back to file chooser window from playlist in server side decoration (opposite of CSD) mode.
+* Implement functions to edit playlist (move up, move down, remove),
+* functions to save playlists on sidebar,
+* functions to cache finder view on Gtk.Stack.
+* ~~Implement Directory Chooser dialog.~~
+* ~~A way to switch back to file chooser window from playlist in server side decoration (opposite of CSD) mode.~~
