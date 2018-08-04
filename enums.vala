@@ -40,6 +40,7 @@ namespace DPlayer {
         FOLDER,
         FINDER,
         PLAYLIST,
+        CHOOSER,
         CONFIG,
         ABOUT,
         QUIT,

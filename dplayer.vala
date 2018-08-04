@@ -1009,6 +1009,9 @@ int main(string[] args) {
                             bookmark_store.append(out bm_iter, null);
                             bookmark_store.set(bm_iter, 0, null, 1, null, 2, null,
                                                3, MenuType.SEPARATOR, 4, "");
+                            bookmark_store.append(out bm_iter, null);
+                            bookmark_store.set(bm_iter, 0, "folder-open-symbolic", 1, "Choose directory...",
+                                               2, null, 3, MenuType.CHOOSER, 4, "");
                             if (!options.use_csd) {
                                 bookmark_store.append(out bm_iter, null);
                                 bookmark_store.set(bm_iter,
@@ -1114,6 +1117,18 @@ int main(string[] args) {
                                             ((TreeStore)bookmark_tree.model).remove(ref bm_iter);
                                         }
                                     }
+                                    break;
+                                case MenuType.CHOOSER:
+                                    var file_chooser = new FileChooserDialog ("Open File", main_win,
+                                                                              FileChooserAction.SELECT_FOLDER,
+                                                                              "_Cancel", ResponseType.CANCEL,
+                                                                              "_Open", ResponseType.ACCEPT);
+                                    if (file_chooser.run () == ResponseType.ACCEPT) {
+                                        string selected_path = file_chooser.get_filename();
+                                        debug("selected file path: %s", selected_path);
+                                        finder.change_dir(selected_path);
+                                    }
+                                    file_chooser.destroy ();
                                     break;
                                 case MenuType.CONFIG:
                                     show_config_dialog(main_win);
