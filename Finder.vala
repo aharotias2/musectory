@@ -360,15 +360,15 @@ namespace DPlayer {
             icon_size = 128;
 
             try {
-                file_pixbuf = icon_theme.load_icon("audio-x-generic", icon_size, 0);
-                cd_pixbuf = icon_theme.load_icon("media-optical", icon_size, 0);
-                folder_pixbuf = icon_theme.load_icon("folder-music", icon_size, 0);
+                file_pixbuf = icon_theme.load_icon(IconName.AUDIO_FILE, icon_size, 0);
+                cd_pixbuf = icon_theme.load_icon(IconName.MEDIA_OPTICAL, icon_size, 0);
+                folder_pixbuf = icon_theme.load_icon(IconName.FOLDER_MUSIC, icon_size, 0);
                 if (folder_pixbuf == null) {
-                    folder_pixbuf = icon_theme.load_icon("folder", icon_size, 0);
+                    folder_pixbuf = icon_theme.load_icon(IconName.FOLDER, icon_size, 0);
                 }
-                parent_pixbuf = icon_theme.load_icon("go-up", icon_size, 0);
+                parent_pixbuf = icon_theme.load_icon(IconName.GO_UP, icon_size, 0);
             } catch (Error e) {
-                stderr.printf("icon file can not load.\n");
+                stderr.printf(Text.ERROR_LOAD_ICON);
                 Process.exit(1);
             }
 
@@ -378,7 +378,7 @@ namespace DPlayer {
                 {
                     finder_container = new ScrolledWindow(null, null);
                     {
-                        finder_container.get_style_context().add_class("view");
+                        finder_container.get_style_context().add_class(StyleClass.VIEW);
                     }
                 
                     progress_revealer = new Revealer();
@@ -434,10 +434,9 @@ namespace DPlayer {
             change_cursor(Gdk.CursorType.WATCH);
 
             while_label.visible = true;
-            while_label.label = "Loading data from disk...";
+            while_label.label = Text.FINDER_LOAD_FILES;
 
             Timeout.add(10, () => {
-                    //debug("start timeout routine (change_dir) level 1");
 
                     file_info_list = new DFileUtils(dir_path).get_file_info_and_artwork_list_in_dir();
 
@@ -458,28 +457,23 @@ namespace DPlayer {
                     uint i = 0;
                     finder_container.add(finder);
 
-
                     Timeout.add(40, () => {
-                            //debug("start timeout routine (change_dir) level 2: %u times", i);
                             if (i < this.file_info_list.length()) {
                                 DFileInfo file_info = this.file_info_list.nth_data(i);
-                                //debug("item is " + file_info.path + " (name:" + file_info.name + ")");
                                 if (file_info.name != "..") {
-                                    while_label.label = file_info.name + " is loaded.";
+                                    while_label.label = Text.FILE_LOADED.printf(file_info.name);
                                 }
                                 if (file_info.file_type == DFileType.DIRECTORY) {
                                     try {
                                         file_info.file_type = new DFileUtils(file_info.path).determine_file_type();
                                     } catch (FileError e) {
-                                        stderr.printf("FileError catched with file_info.path '" + file_info.path + "' which is cannot open");
+                                        stderr.printf(Text.ERROR_OPEN_FILE.printf(file_info.path));
                                         return Source.REMOVE;
                                     }
                                 }
 
                                 var item_widget = new FinderItem(ref file_info, icon_size, use_popover);
-                                if (item_widget == null) {
-                                    //debug("item is null (" + file_info.path + ")");
-                                } else {
+                                if (item_widget != null) {
                                     switch (file_info.file_type) {
                                       case DFileType.DIRECTORY:
                                       case DFileType.DISC:
@@ -508,10 +502,6 @@ namespace DPlayer {
                                 i++;
                                 double fraction = (double) i / (double) file_info_list.length();
                                 progress.fraction = fraction;
-                                //string percentage = "%0.0f%%".printf(fraction * 100);
-
-                                //debug("fraction: " + percentage);
-                                //debug("end timeout routine (change_dir) level 2: %u times",i);
 
                                 finder_container.show_all();
                                 for (int j = 0; j < file_info_list.length(); j++) {
@@ -535,25 +525,6 @@ namespace DPlayer {
                     return Source.REMOVE;
                 }, Priority.HIGH);
         }
-
-        /*
-        public void set_picture_size(int new_icon_size) {
-            try {
-                icon_size = new_icon_size;
-                file_pixbuf = icon_theme.load_icon("audio-x-generic", icon_size, 0);
-                cd_pixbuf = icon_theme.load_icon("media-optical", icon_size, 0);
-                folder_pixbuf = icon_theme.load_icon("folder-music", icon_size, 0);
-                if (folder_pixbuf == null) {
-                    folder_pixbuf = icon_theme.load_icon("folder", icon_size, 0);
-                }
-                parent_pixbuf = icon_theme.load_icon("go-up", icon_size, 0);
-                change_dir(dir_path);
-            } catch (Error e) {
-                stderr.printf("icon file can not load.\n");
-                Process.exit(1);
-            }
-        }
-        */
 
         public void change_cursor(Gdk.CursorType cursor_type) {
             finder_container.get_parent_window().set_cursor(new Gdk.Cursor.for_display(Gdk.Screen.get_default().get_display(), cursor_type));

@@ -107,6 +107,25 @@ namespace MyUtils {
         }
 
     }
-    
+
+    public class StringUtils {
+        public static List<string> array2list(string[] array) {
+            List<string> list = new List<string>();
+            foreach (string item in array) {
+                list.append(item);
+            }
+            return list;
+        }
+    }
+
+    public class FilePathUtils {
+        public static string extension_of(string file_path) {
+            return file_path.slice(file_path.last_index_of(".") + 1, file_path.length);
+        }
+
+        public static string remove_extension(string file_path) {
+            return file_path.slice(0, file_path.last_index_of("."));
+        }
+    }
 }
 

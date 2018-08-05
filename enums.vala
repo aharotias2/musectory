@@ -39,7 +39,8 @@ namespace DPlayer {
         BOOKMARK,
         FOLDER,
         FINDER,
-        PLAYLIST,
+        PLAYLIST_HEADER,
+        PLAYLIST_NAME,
         CHOOSER,
         CONFIG,
         ABOUT,
@@ -64,6 +65,11 @@ namespace DPlayer {
         COMMENT
     }
 
+    public enum SaveMode {
+        OVERWRITE,
+        CREATE
+    }
+    
 /* オプション用のデータ型 */
     public enum FinderLayout {
         GRID,

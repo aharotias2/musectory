@@ -16,12 +16,11 @@ make install
 ```
 ## Other informations
 * It uses /tmp/dplayer directory. You should chmod your user name on this directory.
-* It put an icon image onto ~/.icons.
-* It put a CSS file onto ~/.config
-* And It put a config file onto your HOME directory.
+* It creates directory "~/.dplayer" to put configuration and resource files.
 ## TODO
 * Implement functions to edit playlist (move up, move down, remove),
-* functions to save playlists on sidebar,
 * functions to cache finder view on Gtk.Stack.
+* functions to save playlists on sidebar on no-CSD mode,
+* ~~functions to save playlists on sidebar,~~
 * ~~Implement Directory Chooser dialog.~~
 * ~~A way to switch back to file chooser window from playlist in server side decoration (opposite of CSD) mode.~~

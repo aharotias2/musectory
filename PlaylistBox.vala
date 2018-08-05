@@ -206,8 +206,10 @@ namespace DPlayer {
         private Tracker tracker;
         public ListBox? list_box { get; set; }
         public int image_size { get; set; }
+        public string? name { get; set; }
         
         public PlaylistBox() {
+            name = null;
             store = new GLib.ListStore(typeof(DFileInfo));
             tracker = new Tracker();
             scrolled = new ScrolledWindow(null, null);
@@ -287,6 +289,11 @@ namespace DPlayer {
                     list.append(file.path);
                 }
             } while (file != null);
+
+            foreach (string a in list) {
+                debug("PlaylistBox.get_file_path_list: %s", a);
+            }
+            
             return list;
         }
 
@@ -301,8 +308,9 @@ namespace DPlayer {
         }
 
         public void append_list_from_path(string file_path) {
-            int index = 0;
 
+            int index = 0;
+            
             var new_playlist = new List<DFileInfo?>();
 
             var file_util = new DFileUtils(file_path);
@@ -330,15 +338,19 @@ namespace DPlayer {
                 return;
             }
 
-            int i = 0;
-
             append_list(new_playlist);
 
-            debug("playlist append list: current track = %u", tracker.current);
-
             tracker.reset(get_list_size(), tracker.current);
+            debug("playlist append list: current track = %u", tracker.current);
         }
-        
+
+        public void append_list_from_path_list(List<string> path_list) {
+            List<DFileInfo?> new_playlist = MPlayer.get_file_info_and_artwork_list_from_file_list(path_list);
+            append_list(new_playlist);
+            tracker.reset(get_list_size(), tracker.current);
+            debug("playlist append list: current track = %u", tracker.current);
+        }
+
         public void delete_track_at_index(int n) {
             store.remove(n);
             tracker.reset(get_list_size(), tracker.current < tracker.max ? tracker.current : tracker.max - 1);
@@ -436,6 +448,21 @@ namespace DPlayer {
             append_list_from_path(path);
         }
 
+        public void new_list_from_path_list(List<string> path_list) {
+            store.remove_all();
+            tracker.reset(0, 0);
+            append_list_from_path_list(path_list);
+        }
+        
+        public void load_list_from_file(string m3u_file_path) {
+            string contents;
+            if (FileUtils.test(m3u_file_path, FileTest.EXISTS)) {
+                FileUtils.get_contents(m3u_file_path, out contents);
+                List<string> list = MyUtils.StringUtils.array2list(contents.split("\n"));
+                new_list_from_path_list(list);
+            }
+        }
+        
         private void create_from_directory(string dir, ref List<DFileInfo?> playlist, bool recursive) {
             var dir_list = new List<string>();
             var file_list = new List<DFileInfo?>();
