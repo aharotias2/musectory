@@ -494,6 +494,22 @@ string get_playlist_path_from_name(string name) {
     return Environment.get_home_dir() + "/." + program_name + "/" + name + ".m3u";
 }
 
+void playlist_save_action() {
+    if (stack.is_finder_visible()) {
+        add_bookmark(finder.dir_path);
+    } else if (stack.is_playlist_visible()) {
+        if (playlist.name == null) {
+            save_playlist(playlist.get_file_path_list());
+        } else if (playlist_exists(playlist.name)) {
+            if (confirm(Text.CONFIRM_OVERWRITE.printf(playlist.name))) {
+                overwrite_playlist_file(playlist.name, playlist.get_file_path_list());
+            } else {
+                save_playlist(playlist.get_file_path_list());
+            }
+        }
+    }
+}
+
 //--------------------------------------------------------------------------------------
 // メイン関数
 //--------------------------------------------------------------------------------------
@@ -769,19 +785,7 @@ int main(string[] args) {
                             return true;
                         });
                     header_add_button.clicked.connect(() => {
-                            if (stack.is_finder_visible()) {
-                                add_bookmark(finder.dir_path);
-                            } else if (stack.is_playlist_visible()) {
-                                if (playlist.name == null) {
-                                    save_playlist(playlist.get_file_path_list());
-                                } else if (playlist_exists(playlist.name)) {
-                                    if (confirm(Text.CONFIRM_OVERWRITE.printf(playlist.name))) {
-                                        overwrite_playlist_file(playlist.name, playlist.get_file_path_list());
-                                    } else {
-                                        save_playlist(playlist.get_file_path_list());
-                                    }
-                                }
-                            }
+                            playlist_save_action();
                         });
                 }
 
@@ -1487,8 +1491,46 @@ int main(string[] args) {
     // プレイリスト画面作成
     //----------------------------------------------------------------------------------
 
-    var playlist_hbox = new Box(Orientation.HORIZONTAL, 0);
+    var playlist_vbox = new Box(Orientation.HORIZONTAL, 0);
     {
+        var playlist_toolbar = new Box(Orientation.VERTICAL, 0);
+        {
+            var back_button = new ToolButton(new Image.from_icon_name(IconName.GO_PREVIOUS,
+                                                                      IconSize.SMALL_TOOLBAR),
+                                             null);
+            {
+                back_button.halign = Align.CENTER;
+                back_button.valign = Align.START;
+                back_button.has_tooltip = true;
+                back_button.query_tooltip.connect((x, y, keyboard_tooltip, tooltip) => {
+                        tooltip.set_text(Text.TOOLTIP_SHOW_FINDER);
+                        return true;
+                    });
+                back_button.clicked.connect(() => {
+                        stack.show_finder();
+                    });
+            }
+
+            var save_button = new ToolButton(new Image.from_icon_name(IconName.DOCUMENT_SAVE,
+                                                                      IconSize.SMALL_TOOLBAR),
+                                             null);
+            {
+                save_button.halign = Align.CENTER;
+                save_button.valign = Align.START;
+                save_button.has_tooltip = true;
+                save_button.query_tooltip.connect((x, y, keyboard_tooltip, tooltip) => {
+                        tooltip.set_text(Text.TOOLTIP_SAVE_PLAYLIST);
+                        return true;
+                    });
+                save_button.clicked.connect(() => {
+                        playlist_save_action();
+                    });
+            }
+
+            playlist_toolbar.pack_start(back_button, false, false);
+            playlist_toolbar.pack_start(save_button, false, false);
+        }
+        
         var playlist_view_container = new ScrolledWindow(null, null);
         {
             playlist = new PlaylistBox();
@@ -1522,20 +1564,11 @@ int main(string[] args) {
             }
             playlist_view_container.add(playlist);
         }
-        
-        var back_button = new Button.from_icon_name(IconName.GO_PREVIOUS);
-        {
-            back_button.valign = Align.CENTER;
-            back_button.halign = Align.CENTER;
-            back_button.clicked.connect(() => {
-                    stack.show_finder();
-                });
-        }
 
         if (!options.use_csd) {
-            playlist_hbox.pack_start(back_button, false, false);
+            playlist_vbox.pack_start(playlist_toolbar, false, false);
         }
-        playlist_hbox.pack_start(playlist_view_container, true, true);
+        playlist_vbox.pack_start(playlist_view_container, true, true);
     }
     
     //----------------------------------------------------------------------------------
@@ -1695,7 +1728,9 @@ int main(string[] args) {
         {
             var main_overlay = new Overlay();
             {
-                stack = new DPlayerStack(finder_hbox, playlist_hbox, options.use_csd);
+                stack = new DPlayerStack(finder_hbox,
+                                         playlist_vbox,
+                                         options.use_csd);
                 
                 main_overlay.add(stack);
                 main_overlay.add_overlay(music_view_overlay);

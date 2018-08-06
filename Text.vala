@@ -38,6 +38,7 @@ namespace DPlayer {
             public const string PREFERENCES_SYSTEM = "preferences-system-symbolic";
             public const string LIST_REMOVE = "list-remove-symbolic";
             public const string WINDOW_CLOSE = "window-close-symbolic";
+            public const string DOCUMENT_SAVE = "document-save-symbolic";
         }
         public const string AUDIO_FILE = "audio-x-generic";
         public const string MEDIA_OPTICAL = "media-optical";
@@ -46,6 +47,7 @@ namespace DPlayer {
         public const string GO_UP = "go-up";
         public const string GO_NEXT = "go-next";
         public const string GO_PREVIOUS = "go-previous";
+        public const string DOCUMENT_SAVE = "document-save";
     }
     
     namespace Text {

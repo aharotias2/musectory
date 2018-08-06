@@ -20,7 +20,8 @@ make install
 ## TODO
 * Implement functions to edit playlist (move up, move down, remove),
 * functions to cache finder view on Gtk.Stack.
-* functions to save playlists on sidebar on no-CSD mode,
+* functions to update artwork file if audio file is newer than artwork file.
+* ~~functions to save playlists on sidebar on no-CSD mode,~~
 * ~~functions to save playlists on sidebar,~~
 * ~~Implement Directory Chooser dialog.~~
 * ~~A way to switch back to file chooser window from playlist in server side decoration (opposite of CSD) mode.~~
