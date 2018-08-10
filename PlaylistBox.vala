@@ -28,6 +28,8 @@ namespace DPlayer {
             private bool playing;
             private PlaylistDrawingArea icon_area;
             public string track_title { get; private set; }
+            private string tooltip_text;
+            private Gdk.Pixbuf tooltip_image;
             
             public PlaylistItem(DFileInfo file, int image_size) {
                 playing = false;
@@ -144,15 +146,17 @@ namespace DPlayer {
                 add(ev_box);
 
                 has_tooltip = true;
+                tooltip_text = "%s - %s\n%s%s%s".printf(
+                    (file.title != null ? file.title : (file.name != null ? file.name : "Unkown Track")),
+                    (file.artist != null ? file.artist : "Unkown Artist"),
+                    (file.album != null ? file.album : ""),
+                    (file.date != null ? " (%s)".printf(file.date) : ""),
+                    (file.genre != null ? " [%s]".printf(file.genre) : "")
+                    );
+                tooltip_image = file.artwork.scale_simple(image_size, image_size, Gdk.InterpType.BILINEAR);
                 query_tooltip.connect ((x, y, keyboard_tooltip, tooltip) => {
-                        tooltip.set_icon(file.artwork.scale_simple(256, 256, Gdk.InterpType.BILINEAR));
-                        tooltip.set_text(
-                            (file.title != null ? file.title : (file.name != null ? file.name : "Unkown Track")) + "\n" +
-                            (file.artist != null ? file.artist : "Unkown Artist") + "\n" + 
-                            (file.album != null ? file.album + "\n" : "") + 
-                            (file.genre != null ? file.genre + "\n" : "") +
-                            (file.date != null ? file.date : "")
-                            );
+                        tooltip.set_icon(tooltip_image);
+                        tooltip.set_text(tooltip_text);
                         return true;
                     });
             }
