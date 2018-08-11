@@ -118,10 +118,10 @@ namespace DPlayer {
                                 genre.get_style_context().add_class("genre");
                             }
 
-                            grid2.attach(title, 0, 0, 4, 1);
-                            grid2.attach(album, 0, 1, 4, 1);
-                            grid2.attach(artist, 4, 0, 2, 1);
-                            grid2.attach(genre, 4, 1, 2, 1);
+                            grid2.attach(title, 0, 0, 5, 1);
+                            grid2.attach(album, 0, 1, 5, 1);
+                            grid2.attach(artist, 5, 0, 2, 1);
+                            grid2.attach(genre, 5, 1, 2, 1);
                             grid2.row_homogeneous = false;
                             grid2.column_homogeneous = true;
                         }
@@ -179,9 +179,9 @@ namespace DPlayer {
                         }
 
                         grid.attach(image_overlay, 0, 0, 1, 1);
-                        grid.attach(grid2, 1, 0, 7, 1);
-                        grid.attach(time, 8, 0, 1, 1);
-                        grid.attach(button, 9, 0, 1, 1);
+                        grid.attach(grid2, 1, 0, 8, 1);
+                        grid.attach(time, 9, 0, 1, 1);
+                        grid.attach(button, 10, 0, 1, 1);
                         grid.row_homogeneous = false;
                         grid.column_homogeneous = true;
                     }
