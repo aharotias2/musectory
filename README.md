@@ -3,6 +3,7 @@ Windows's MFPlayer-like music player for GTK-3
 ## Requirements
 * vala
 * libgee-1.0
+* gdk-pixbuf
 * GTK+-3.18 or later
 * MPlayer (runtime only)
 ## Build
