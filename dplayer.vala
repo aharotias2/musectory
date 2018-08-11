@@ -815,7 +815,10 @@ int main(string[] args) {
                     var menu_item_config = new Gtk.ImageMenuItem.with_label(Text.MENU_CONFIG);
                     {
                         menu_item_config.always_show_image = true;
-                        menu_item_config.image = new Image.from_icon_name(IconName.Symbolic.PREFERENCES_SYSTEM, IconSize.SMALL_TOOLBAR);
+                        menu_item_config.image = new Image.from_icon_name(
+                            IconName.Symbolic.PREFERENCES_SYSTEM,
+                            IconSize.SMALL_TOOLBAR
+                            );
                         menu_item_config.activate.connect(() => {
                                 show_config_dialog(main_win);
                             });
@@ -824,7 +827,10 @@ int main(string[] args) {
                     var menu_item_about = new Gtk.ImageMenuItem.with_label(Text.MENU_ABOUT);
                     {
                         menu_item_about.always_show_image = true;
-                        menu_item_about.image = new Image.from_icon_name(IconName.Symbolic.HELP_FAQ, IconSize.SMALL_TOOLBAR);
+                        menu_item_about.image = new Image.from_icon_name(
+                            IconName.Symbolic.HELP_FAQ,
+                            IconSize.SMALL_TOOLBAR
+                            );
                         menu_item_about.activate.connect(() => {
                                 show_about_dialog(main_win);
                             });
@@ -833,7 +839,10 @@ int main(string[] args) {
                     var menu_item_quit = new ImageMenuItem.with_label(Text.MENU_QUIT);
                     {
                         menu_item_quit.always_show_image = true;
-                        menu_item_quit.image = new Image.from_icon_name(IconName.Symbolic.EXIT, IconSize.SMALL_TOOLBAR);
+                        menu_item_quit.image = new Image.from_icon_name(
+                            IconName.Symbolic.EXIT,
+                            IconSize.SMALL_TOOLBAR
+                            );
                         menu_item_quit.activate.connect(() => {
                                 if (music.playing) {
                                     music.quit();
@@ -1632,14 +1641,14 @@ int main(string[] args) {
     //----------------------------------------------------------------------------------
     music = new Music();
     {
-        music.set_on_quit_func((pid, status) => {
+        music.on_quit.connect((pid, status) => {
                 time_bar.fraction = 0.0;
                 time_label_set(0);
 
                 ((Gtk.Image)play_pause_button.icon_widget).icon_name = IconName.Symbolic.MEDIA_PLAYBACK_START;
             });
     
-        music.set_on_start_func((track_number, file_path) => {
+        music.on_start.connect((track_number, file_path) => {
                 debug("on start func start");
 
                 DFileInfo file_info = playlist.nth_track_data(track_number);
@@ -1736,8 +1745,9 @@ int main(string[] args) {
 
             });
 
-        music.set_on_end_func((track_number, track_name) => {
-                playlist.set_track(-1);
+        music.on_end.connect((track_number, track_name) => {
+                // ???
+                //playlist.set_track(-1);
             });
     }
 

@@ -142,6 +142,9 @@ namespace DPlayer {
                             }
 
                             icon_image = new Image.from_pixbuf(icon_pixbuf);
+                            {
+                                icon_image.get_style_context().add_class(StyleClass.FINDER_ICON);
+                            }
                             
                             var item_label = new Label(file_name);
                             {

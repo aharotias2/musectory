@@ -18,14 +18,14 @@
  */
 
 namespace DPlayer {
-	public delegate void MusicStartFunc(int track_number, string file_path);
-	public delegate void MusicEndFunc(int track_number, string file_path);
-
 	class Music : Object {
 		public bool playing {get; set;}
 		public bool paused {get; set;}
 		public string? current_track_file {get; private set;}
-
+        public signal void on_start(int track_number, string file_path);
+        public signal void on_end(int track_number, string file_path);
+        public signal void on_quit(Pid pid, int status);
+        
 		private int current_track_number;
 		public int get_current_track_number() { return current_track_number; }
 
@@ -62,26 +62,6 @@ namespace DPlayer {
 		}
 
 		//--------------------------------------------------------------------------------
-		// Delegates
-		//--------------------------------------------------------------------------------
-
-		private ChildWatchFunc on_quit_func;
-		private MusicStartFunc on_start_func;
-		private MusicEndFunc on_end_func;
-
-		public void set_on_quit_func(ChildWatchFunc func) {
-			on_quit_func = func;
-		}
-
-		public void set_on_start_func(MusicStartFunc func) {
-			on_start_func = func;
-		}
-
-		public void set_on_end_func(MusicEndFunc func) {
-			on_end_func = func;
-		}
-
-		//--------------------------------------------------------------------------------
 		// Private Methods
 		//--------------------------------------------------------------------------------
 
@@ -111,7 +91,7 @@ namespace DPlayer {
 											   null);
 
                 debug("10");
-				id_childwatch = ChildWatch.add(child_pid, on_quit);
+				id_childwatch = ChildWatch.add(child_pid, _on_quit);
 				pipe_in = new IOChannel.unix_new(fd_stdin);
 				pipe_out = new IOChannel.unix_new(fd_stdout);
 				pipe_out.set_encoding(null);
@@ -179,7 +159,6 @@ namespace DPlayer {
 						if (!playing) {
 							debug("*music restart from %d, ao_type: %s", start_pos, this.ao_type);
 							start(ref file_list, this.ao_type);
-							pause();
 							if (start_pos > 0) {
 								play_next(start_pos);
 							}
@@ -229,7 +208,7 @@ namespace DPlayer {
 			}
 		}
 
-		private void on_quit(Pid pid, int status) {
+		private void _on_quit(Pid pid, int status) {
 			Process.close_pid(pid);
 			Source.remove(id_childwatch);
 			try {
@@ -248,7 +227,7 @@ namespace DPlayer {
 			current_track_file = "";
 			playing = false;
 			paused = false;
-			on_quit_func(pid, status);
+			on_quit(pid, status);
 
 			debug("music on quit func ended.");
 		}
@@ -279,9 +258,7 @@ namespace DPlayer {
 				debug("new track start");
 				current_track_file = MPlayer.get_track_name_from_output(mplayer_response).dup();
 				set_current_track_number();
-				if (on_start_func != null) {
-					on_start_func(current_track_number, current_track_file);
-				}
+                on_start(current_track_number, current_track_file);
 				debug("start playing %s. childwatch id = %u. stdin fd = %d, stdout fd = %d",
 					  current_track_file, id_childwatch, fd_stdin, fd_stdout);
 			}
@@ -289,9 +266,7 @@ namespace DPlayer {
 			//if (playing && current_track_number >= 0 && MPlayer.when_current_track_ended(mplayer_response)) {
             if (MPlayer.when_current_track_ended(mplayer_response)) {
 				debug("current track ended");
-				if (on_end_func != null) {
-                    on_end_func(current_track_number, current_track_file);
-                }
+                on_end(current_track_number, current_track_file);
 				if (playlist_changed) {
 					restart_playlist(current_track_number + 1, this.ao_type);
 					playlist_changed = false;

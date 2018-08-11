@@ -60,6 +60,20 @@ namespace MyUtils {
 
             return hours * 360 + minutes * 60 + seconds;
         }
+
+        public static int compare(Time a, Time b) {
+            if (a.year == b.year && a.month == b.month
+                && a.day == b.day && a.hour == b.hour
+                && a.minute == b.minute && a.second == b.second) {
+                return 0;
+            } else if (a.year < b.year || a.month < b.month
+                       || a.day < b.day || a.hour < b.hour
+                       || a.minute < b.minute || a.second < b.second) {
+                return -1;
+            } else {
+                return 1;
+            }
+        }
     }
 
     class RGBAUtils {
@@ -125,6 +139,24 @@ namespace MyUtils {
 
         public static string remove_extension(string file_path) {
             return file_path.slice(0, file_path.last_index_of("."));
+        }
+    }
+
+    public class FileUtils {
+        public static int compare_mtime(string file1_path, string file2_path) {
+            return MyUtils.TimeUtils.compare(get_file_mtime(file1_path), get_file_mtime(file2_path));
+        }
+
+        public static Time get_file_mtime(string file_path) {
+            Posix.Stat file_status;
+            Posix.stat(file_path, out file_status);
+            return Time.local(file_status.st_mtime);
+        }
+
+        public static bool is_empty(string file_path) {
+            Posix.Stat file_status;
+            Posix.stat(file_path, out file_status);
+            return ((uint) file_status.st_size) == 0;
         }
     }
 }

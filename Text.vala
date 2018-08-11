@@ -8,6 +8,7 @@ namespace DPlayer {
         public const string TIME_LABEL_REST = "time_label_rest";
         public const string ARTWORK_BACKGROUND = "artwork_background";
         public const string VIEW = "view";
+        public const string FINDER_ICON = "finder_icon";
     }
 
     namespace IconName {
@@ -134,6 +135,9 @@ namespace DPlayer {
             ".tooltip.background {\n"+
             "    box-shadow: inset 0px 1px rgba(0, 0, 0, 0.5);\n"+
             "    background-color: rgba(9, 9, 9, 0.5);\n"+
+            "}\n"+
+            ".finder_icon {\n"+
+            "    box-shadow: 10px 10px 10px 10px rgba(0, 0, 0, 0.4);\n"+
             "}\n"+
             "\n";
         public const string MARKUP_BOLD_ITALIC = "<b><i>%s</i></b>";
