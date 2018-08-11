@@ -173,14 +173,16 @@ namespace DPlayer {
 			string tmp_dir_path = tmpbase_name + "/tmp/" + filename;
 			string ext = "";
 
-			if (FileUtils.test(pic_file_path + ".jpg", FileTest.EXISTS)) {
+			if (FileUtils.test(pic_file_path + ".jpg", FileTest.EXISTS)
+                && MyUtils.FileUtils.compare_mtime(pic_file_path + ".jpg", file_path) >= 0) {
 				pic_file_path += ".jpg";
-			} else if (FileUtils.test(pic_file_path + ".png", FileTest.EXISTS)) {
+			} else if (FileUtils.test(pic_file_path + ".png", FileTest.EXISTS)
+                && MyUtils.FileUtils.compare_mtime(pic_file_path + ".png", file_path) >= 0) {
 				pic_file_path += ".png";
-			} else if (FileUtils.test(pic_file_path + ".jpeg", FileTest.EXISTS)) {
+			} else if (FileUtils.test(pic_file_path + ".jpeg", FileTest.EXISTS)
+                && MyUtils.FileUtils.compare_mtime(pic_file_path + ".jpeg", file_path) >= 0) {
 				pic_file_path += ".jpeg";
 			} else {
-				debug(">>>");
 				if (!FileUtils.test(tmp_dir_path, FileTest.EXISTS)) {
 					debug("created a directory: %s", tmp_dir_path);
 					File dir = File.new_for_path(tmp_dir_path);
@@ -209,10 +211,14 @@ namespace DPlayer {
 						ext = ".png";
 						tmp_file_path2 = tmp_file_path + ext;
 						if (!FileUtils.test(tmp_file_path2, FileTest.EXISTS)) {
-							stderr.printf("MPlayer.create_artwork_file: command has done but a new file is not created. file name : %s\n",
-										  file_path);
-							stderr.printf("MPlayer.create_artwork_file: stderr: %s\n", cli.stderr);
-							return null;
+							//stderr.printf("MPlayer.create_artwork_file: command has done but a new file is not created. file name : %s\n",
+							//			  file_path);
+							//stderr.printf("MPlayer.create_artwork_file: stderr: %s\n", cli.stderr);
+							//return null;
+                            tmp_file_path2 = tmp_file_path + ext;
+                            File f = File.new_for_path(tmp_file_path2);
+                            var stream = f.create(FileCreateFlags.NONE);
+                            stream.close();
 						}
 					}
 				}
@@ -275,6 +281,9 @@ namespace DPlayer {
 		*/
 		
 		public static Gdk.Pixbuf? get_music_artwork(string pic_file_path, int? size=-1) {
+            if (MyUtils.FileUtils.is_empty(pic_file_path)) {
+                return null;
+            }
 			try {
 				if (size < 0) {
 					return new Gdk.Pixbuf.from_file(pic_file_path);
