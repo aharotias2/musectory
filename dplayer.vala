@@ -842,6 +842,7 @@ int main(string[] args) {
                             });
                     }
 
+                    header_menu.halign = Align.END;
                     header_menu.add(menu_item_config);
                     header_menu.add(menu_item_about);
                     header_menu.add(new SeparatorMenuItem());
@@ -852,7 +853,6 @@ int main(string[] args) {
                 header_menu_button.image = new Image.from_icon_name(IconName.Symbolic.OPEN_MENU, IconSize.BUTTON);
                 header_menu_button.get_style_context().add_class(StyleClass.TITLEBUTTON);
                 header_menu_button.direction = ArrowType.DOWN;
-                header_menu.halign = Align.END;
                 header_menu_button.popup = header_menu;
                 header_menu_button.use_popover = false;
             }
@@ -931,6 +931,7 @@ int main(string[] args) {
                             music_view_artwork.pixbuf = MyUtils.PixbufUtils.scale_limited(current_playing_artwork, size);
                             music_view_artwork.visible = true;
                             header_switch_button.sensitive = false;
+                            header_add_button.sensitive = false;
                             return Source.REMOVE;
                         });
                 });
@@ -1318,7 +1319,8 @@ int main(string[] args) {
 
                                     if (column.get_title() != "del") {
                                         finder.change_dir((string) dir_path);
-                    
+                                        header_add_button.sensitive = true;
+                                        
                                         if (options.use_csd) {
                                             win_header.set_title(program_name + ": " + current_dir);
                                         }
@@ -1347,14 +1349,25 @@ int main(string[] args) {
                                     string playlist_path = (string) val2;
 
                                     if (column.get_title() != "del") {
-                                        playlist.load_list_from_file(playlist_path);
-                                        stack.show_playlist();
-                                        var file_path_list = playlist.get_file_path_list();
-                                        music.start(ref file_path_list, options.ao_type);
-                                        if (!header_switch_button.sensitive) {
-                                            header_switch_button.sensitive = true;
+                                        if (music.playing) {
+                                            music.quit();
                                         }
-                                        playlist.name = playlist_name;
+                                        Timeout.add(100, () => {
+                                                if (music.playing) {
+                                                    return Source.CONTINUE;
+                                                } else {
+                                                    playlist.load_list_from_file(playlist_path);
+                                                    stack.show_playlist();
+                                                    header_add_button.sensitive = true;
+                                                    var file_path_list = playlist.get_file_path_list();
+                                                    music.start(ref file_path_list, options.ao_type);
+                                                    if (!header_switch_button.sensitive) {
+                                                        header_switch_button.sensitive = true;
+                                                    }
+                                                    playlist.name = playlist_name;
+                                                    return Source.REMOVE;
+                                                }
+                                            });
                                     } else {
                                         if (confirm(Text.CONFIRM_REMOVE_PLAYLIST)) {
                                             ((TreeStore)bookmark_tree.model).remove(ref bm_iter);
@@ -1371,6 +1384,7 @@ int main(string[] args) {
                                         string selected_path = file_chooser.get_filename();
                                         debug("selected file path: %s", selected_path);
                                         finder.change_dir(selected_path);
+                                        header_add_button.sensitive = true;
                                     }
                                     file_chooser.destroy ();
                                     break;
@@ -1412,58 +1426,49 @@ int main(string[] args) {
         {
             finder = new DPlayer.Finder();
             {
-                finder.bookmark_button_clicked_func = (file_path) => {
-                    add_bookmark(file_path);
-                };
+                finder.bookmark_button_clicked.connect((file_path) => {
+                        add_bookmark(file_path);
+                    });
 
-                finder.play_button_clicked_func = (file_path) => {
+                finder.play_button_clicked.connect((file_path) => {
 
-                    finder.change_cursor(Gdk.CursorType.WATCH);
+                        finder.change_cursor(Gdk.CursorType.WATCH);
                     
-                    if (music.playing) {
-                        music.quit();
-                    }
+                        if (music.playing) {
+                            music.quit();
+                        }
                     
-                    Timeout.add(10, () => {
-                            if (music.playing) {
-                                return Source.CONTINUE;
-                            } else {
-                                debug("file_path: %s", file_path);
-                                playlist.new_list_from_path(file_path);
-                                var file_path_list = playlist.get_file_path_list();
-                                if (FileUtils.test(file_path, FileTest.IS_REGULAR)) {
-                                    music.start(ref file_path_list, options.ao_type);
-                                    int index = playlist.get_index_from_path(file_path);
-                                    if (index > 0) {
-                                        music.play_next(index);
-                                    }
+                        Timeout.add(10, () => {
+                                if (music.playing) {
+                                    return Source.CONTINUE;
                                 } else {
-                                    music.start(ref file_path_list, options.ao_type);
+                                    debug("file_path: %s", file_path);
+                                    playlist.new_list_from_path(file_path);
+                                    var file_path_list = playlist.get_file_path_list();
+                                    if (FileUtils.test(file_path, FileTest.IS_REGULAR)) {
+                                        music.start(ref file_path_list, options.ao_type);
+                                        int index = playlist.get_index_from_path(file_path);
+                                        if (index > 0) {
+                                            music.play_next(index);
+                                        }
+                                    } else {
+                                        music.start(ref file_path_list, options.ao_type);
+                                    }
+                                    ((Gtk.Image)play_pause_button.icon_widget).icon_name = IconName.Symbolic.MEDIA_PLAYBACK_PAUSE;
+                                    header_switch_button.image = view_grid_image;
+                                    header_switch_button.sensitive = true;
+                                    stack.show_playlist();
+                                    finder.change_cursor(Gdk.CursorType.LEFT_PTR);
+                                    return Source.REMOVE;
                                 }
-                                ((Gtk.Image)play_pause_button.icon_widget).icon_name = IconName.Symbolic.MEDIA_PLAYBACK_PAUSE;
-                                header_switch_button.image = view_grid_image;
-                                header_switch_button.sensitive = true;
-                                stack.show_playlist();
-                                finder.change_cursor(Gdk.CursorType.LEFT_PTR);
-                                return Source.REMOVE;
-                            }
-                        });
-                };
+                            });
+                    });
 
-                finder.add_button_clicked_func = (file_path) => {
-                    playlist.append_list_from_path(file_path);
-                    List<string> file_list = playlist.get_file_path_list();
-                    if (music.playing) {
-                        music.set_file_list(ref file_list);
-                    } else {
-                        music.start(ref file_list, options.ao_type);
-                        ((Gtk.Image)play_pause_button.icon_widget).icon_name = IconName.Symbolic.MEDIA_PLAYBACK_PAUSE;
-                        header_switch_button.image = view_grid_image;
-                        header_switch_button.sensitive = true;
-                        stack.show_playlist();
-                    }
-                    next_track_button.sensitive = true;
-                };
+                finder.add_button_clicked.connect((file_path) => {
+                        playlist.append_list_from_path(file_path);
+                        List<string> file_list = playlist.get_file_path_list();
+                        playlist.changed(file_list);
+                    });
 
                 finder.use_popover = false;
             }
@@ -1561,6 +1566,22 @@ int main(string[] args) {
 
                         return;
                     });
+                
+                playlist.changed.connect((file_path_list) => {
+                        List<string> list = file_path_list.copy_deep((src) => {
+                                return src.dup();
+                            });
+                        if (music.playing) {
+                            music.set_file_list(ref list);
+                        } else {
+                            music.start(ref list, options.ao_type);
+                            ((Gtk.Image)play_pause_button.icon_widget).icon_name = IconName.Symbolic.MEDIA_PLAYBACK_PAUSE;
+                            header_switch_button.image = view_grid_image;
+                            header_switch_button.sensitive = true;
+                            stack.show_playlist();
+                        }
+                        next_track_button.sensitive = true;
+                    });
             }
             playlist_view_container.add(playlist);
         }
@@ -1585,6 +1606,7 @@ int main(string[] args) {
                     artwork_button.visible = true;
                     music_view_overlay.visible = false;
                     header_switch_button.sensitive = true;
+                    header_add_button.sensitive = true;
                 });
             p_music_view_close_button = music_view_close_button;
         }
@@ -1790,6 +1812,7 @@ int main(string[] args) {
     finder.hide_while_label();
     header_switch_button.image = view_list_image;
     header_switch_button.sensitive = false;
+    header_add_button.sensitive = false;
     stack.show_finder();
 
     Gtk.main();

@@ -26,10 +26,6 @@ namespace DPlayer {
     Gdk.Pixbuf file_pixbuf;
     Gdk.Pixbuf cd_pixbuf;
     
-    delegate void FinderItemBookmarkButtonClickedFunc(string file_path);
-    delegate void FinderItemAddButtonClickedFunc(string file_path);
-    delegate void FinderItemPlayButtonClickedFunc(string file_path);
-
     public class ImageLoaderThreadData {
         private string file_path;
         private int icon_size;
@@ -71,27 +67,9 @@ namespace DPlayer {
         private Thread<void *>? thread;
         private ImageLoaderThreadData? thdata;
         
-        public FinderItemBookmarkButtonClickedFunc bookmark_button_clicked_func {
-            set {
-                bookmark_button.clicked.connect(() => {
-                        value(file_path);
-                    });
-            }
-        }
-        public FinderItemAddButtonClickedFunc add_button_clicked_func {
-            set {
-                add_button.clicked.connect(() => {
-                        value(file_path);
-                    });
-            }
-        }
-        public FinderItemPlayButtonClickedFunc play_button_clicked_func {
-            set {
-                play_button.clicked.connect(() => {
-                        value(file_path);
-                    });
-            }
-        }
+        public signal void bookmark_button_clicked(string file_path);
+        public signal void add_button_clicked(string file_path);
+        public signal void play_button_clicked(string file_path);
 
         /* Contructor */
         public FinderItem(ref DFileInfo file_info, int icon_size = 128, bool use_popover = true) {
@@ -231,6 +209,9 @@ namespace DPlayer {
                             bookmark_button.valign = Align.CENTER;
                             bookmark_button.visible = false;
                             bookmark_button.get_style_context().add_class("finder-button");
+                            bookmark_button.clicked.connect(() => {
+                                    bookmark_button_clicked(file_path);
+                                });
                         }
 
                         add_button = new Button.from_icon_name("list-add-symbolic", IconSize.SMALL_TOOLBAR);
@@ -238,6 +219,9 @@ namespace DPlayer {
                             add_button.valign = Align.CENTER;
                             add_button.visible = false;
                             add_button.get_style_context().add_class("finder-button");
+                            add_button.clicked.connect(() => {
+                                    add_button_clicked(file_path);
+                                });
                         }
 
                         play_button = new Button.from_icon_name("media-playback-start-symbolic", IconSize.LARGE_TOOLBAR);
@@ -245,6 +229,9 @@ namespace DPlayer {
                             play_button.valign = Align.CENTER;
                             play_button.visible = false;
                             play_button.get_style_context().add_class("finder-button");
+                            play_button.clicked.connect(() => {
+                                    play_button_clicked(file_path);
+                                });
                         }
 
                         button_box.halign = Align.CENTER;
@@ -343,9 +330,9 @@ namespace DPlayer {
         public string dir_path { get; set; }
         public bool activate_on_single_click { get; set; }
 
-        public FinderItemBookmarkButtonClickedFunc bookmark_button_clicked_func { get; set; }
-        public FinderItemAddButtonClickedFunc add_button_clicked_func { get; set; }
-        public FinderItemPlayButtonClickedFunc play_button_clicked_func { get; set; }
+        public signal void bookmark_button_clicked(string file_path);
+        public signal void add_button_clicked(string file_path);
+        public signal void play_button_clicked(string file_path);
 
         /* Constructor */
         public Finder() {
@@ -480,7 +467,9 @@ namespace DPlayer {
                                         item_widget.icon_button.clicked.connect(() => {
                                                 change_dir(file_info.path);
                                             });
-                                        item_widget.bookmark_button_clicked_func = this.bookmark_button_clicked_func;
+                                        item_widget.bookmark_button_clicked.connect((file_path) => {
+                                                bookmark_button_clicked(file_path);
+                                            });
                                         break;
                                       case DFileType.PARENT:
                                         item_widget.icon_button.clicked.connect(() => {
@@ -489,13 +478,17 @@ namespace DPlayer {
                                         break;
                                       case DFileType.FILE:
                                         item_widget.icon_button.clicked.connect(() => {
-                                                play_button_clicked_func(file_info.path);
+                                                play_button_clicked(file_info.path);
                                             });
                                         break;
                                     }
                                 }
-                                item_widget.add_button_clicked_func = this.add_button_clicked_func;
-                                item_widget.play_button_clicked_func = this.play_button_clicked_func;
+                                item_widget.add_button_clicked.connect((file_path) => {
+                                        add_button_clicked(file_path);
+                                    });
+                                item_widget.play_button_clicked.connect((file_path) => {
+                                        play_button_clicked(file_path);
+                                    });
 
                                 finder.add(item_widget);
 

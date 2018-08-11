@@ -30,8 +30,12 @@ namespace DPlayer {
             public string track_title { get; private set; }
             private string tooltip_text;
             private Gdk.Pixbuf tooltip_image;
+            private MenuButton button;
+            public DFileInfo file_info;
+            public signal void menu_activated(MenuType type, uint index);
             
             public PlaylistItem(DFileInfo file, int image_size) {
+                file_info = file;
                 playing = false;
                 debug("PlaylistItem.image_size = %d", image_size);
                 this.image_size = image_size;
@@ -123,10 +127,61 @@ namespace DPlayer {
                         }
             
                         Label time = new Label(file.time_length);
-            
+
+                        button = new Gtk.MenuButton();
+                        {
+                            var image = new Image.from_icon_name(IconName.Symbolic.VIEW_MORE, IconSize.BUTTON);
+                            var menu = new Gtk.Menu();
+                            {
+                                var menu_item_remove = new Gtk.ImageMenuItem.with_label(Text.MENU_REMOVE_ITEM);
+                                {
+                                    menu_item_remove.always_show_image = true;
+                                    menu_item_remove.image = new Image.from_icon_name(
+                                        IconName.Symbolic.LIST_REMOVE,IconSize.SMALL_TOOLBAR);
+                                    menu_item_remove.activate.connect(() => {
+                                            menu_activated(MenuType.REMOVE, get_index());
+                                        });
+                                }
+
+                                var menu_item_go_up = new Gtk.ImageMenuItem.with_label(Text.MENU_MOVE_UP);
+                                {
+                                    menu_item_go_up.always_show_image = true;
+                                    menu_item_go_up.image = new Image.from_icon_name(
+                                        IconName.Symbolic.GO_UP,IconSize.SMALL_TOOLBAR);
+                                    menu_item_go_up.activate.connect(() => {
+                                            menu_activated(MenuType.MOVE_UP, get_index());
+                                        });
+                                }
+
+                                var menu_item_go_down = new Gtk.ImageMenuItem.with_label(Text.MENU_MOVE_DOWN);
+                                {
+                                    menu_item_go_down.always_show_image = true;
+                                    menu_item_go_down.image = new Image.from_icon_name(
+                                        IconName.Symbolic.GO_DOWN,IconSize.SMALL_TOOLBAR);
+                                    menu_item_go_down.activate.connect(() => {
+                                            menu_activated(MenuType.MOVE_DOWN, get_index());
+                                        });
+                                }
+
+                                menu.halign = Align.END;
+                                menu.add(menu_item_go_up);
+                                menu.add(menu_item_go_down);
+                                menu.add(menu_item_remove);
+                                menu.show_all();
+                            }
+                            button.add(image);
+                            button.get_style_context().add_class(StyleClass.FLAT);
+                            button.direction = ArrowType.DOWN;
+                            button.halign = Align.CENTER;
+                            button.valign = Align.CENTER;
+                            button.popup = menu;
+                            button.use_popover = false;
+                        }
+
                         grid.attach(image_overlay, 0, 0, 1, 1);
                         grid.attach(grid2, 1, 0, 7, 1);
                         grid.attach(time, 8, 0, 1, 1);
+                        grid.attach(button, 9, 0, 1, 1);
                         grid.row_homogeneous = false;
                         grid.column_homogeneous = true;
                     }
@@ -211,6 +266,7 @@ namespace DPlayer {
         public ListBox? list_box { get; set; }
         public int image_size { get; set; }
         public string? name { get; set; }
+        public signal void changed(List<string> file_path_list);
         
         public PlaylistBox() {
             name = null;
@@ -299,16 +355,6 @@ namespace DPlayer {
             }
             
             return list;
-        }
-
-        private int get_image_size_local() {
-            return image_size;
-        }
-        
-        private Widget create_list_item(Object object) {
-            PlaylistItem list_item = new PlaylistItem((DFileInfo) object, get_image_size_local());
-            list_item.set_index(get_list_size());
-            return list_item;
         }
 
         public void append_list_from_path(string file_path) {
@@ -488,6 +534,36 @@ namespace DPlayer {
                         Path.build_path(Path.DIR_SEPARATOR_S, dir, sub_dir), ref playlist, recursive);
                 }
             }
+        }
+
+        private int get_image_size_local() {
+            return image_size;
+        }
+        
+        private Widget create_list_item(Object object) {
+            PlaylistItem list_item = new PlaylistItem((DFileInfo) object, get_image_size_local());
+            list_item.set_index(get_list_size());
+            list_item.menu_activated.connect((type, index) => {
+                    DFileInfo file_info = get_item((int) index).file_info;
+                    uint size = get_list_size();
+                    if (type == MenuType.REMOVE) {
+                        store.remove(index);
+                        changed(get_file_path_list());
+                    } else if (type == MenuType.MOVE_UP) {
+                        if (index > 0) {
+                            store.insert(index - 1, file_info);
+                            store.remove(index + 1);
+                            changed(get_file_path_list());
+                        }
+                    } else if (type == MenuType.MOVE_DOWN) {
+                        if (index < size - 1) {
+                            store.insert(index + 2, file_info);
+                            store.remove(index);
+                            changed(get_file_path_list());
+                        }
+                    }
+                });
+            return list_item;
         }
 
         private uint get_list_size() {

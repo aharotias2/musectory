@@ -17,6 +17,7 @@ namespace DPlayer {
             public const string AUDIO_FILE = "audio-x-generic-symbolic";
             public const string VIEW_LIST = "view-list-symbolic";
             public const string VIEW_GRID = "view-grid-symbolic";
+            public const string VIEW_MORE = "view-more-symbolic";
             public const string BOOKMARK_NEW = "bookmark-new-symbolic";
             public const string HELP_FAQ = "help-faq-symbolic";
             public const string EXIT = "application-exit-symbolic";
@@ -78,6 +79,9 @@ namespace DPlayer {
         public const string MENU_BOOKMARK = "Bookmark";
         public const string MENU_PLAYLIST = "Playlist";
         public const string MENU_CHOOSE_DIR = "Choose directory...";
+        public const string MENU_REMOVE_ITEM = "Remove this item";
+        public const string MENU_MOVE_UP = "Move this item up";
+        public const string MENU_MOVE_DOWN = "Move this item down";
         public const string DEFAULT_CSS = "/*\n"+
             " * This file is part of dplayer.\n"+
             " * \n"+

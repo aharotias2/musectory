@@ -45,6 +45,9 @@ namespace DPlayer {
         CONFIG,
         ABOUT,
         QUIT,
+        REMOVE,
+        MOVE_UP,
+        MOVE_DOWN,
         SEPARATOR
     }
 
