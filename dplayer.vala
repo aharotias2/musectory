@@ -30,7 +30,7 @@ delegate void TimeLabelSetFunc(double seconds);
 const string program_name = "dplayer";
 
 //--------------------------------------------------------------------------------------
-// ファイル リスト系のグローバル変数
+// global variables for file management
 //--------------------------------------------------------------------------------------
 List<string> dirs;
 CompareFunc<string> string_compare_func;
@@ -38,7 +38,7 @@ CopyFunc<DFileInfo?> file_info_copy_func;
 string current_dir = null;
 
 //--------------------------------------------------------------------------------------
-// 楽曲再生用のグローバル変数
+// global variable for playing music
 //--------------------------------------------------------------------------------------
 Music music;
 
@@ -48,7 +48,7 @@ double music_time_position;
 Gdk.Pixbuf current_playing_artwork;
 
 //--------------------------------------------------------------------------------------
-// 画像系のグローバル変数
+// global variables for images
 //--------------------------------------------------------------------------------------
 Gdk.Pixbuf cd_pixbuf;
 Gdk.Pixbuf folder_pixbuf;
@@ -61,7 +61,7 @@ int max_height;
 int artwork_max_size;
 
 //--------------------------------------------------------------------------------------
-// GUIウィジェット用のグローバル変数
+// global variables for widgets
 //--------------------------------------------------------------------------------------
 Window main_win;
 HeaderBar? win_header;
@@ -107,13 +107,13 @@ const string[] icon_dirs = {"/usr/share/icons/hicolor/48x48/apps/",
                             "~/.icons"};
 
 //--------------------------------------------------------------------------------------
-// その他の設定系のグローバル変数
+// other global variables
 //--------------------------------------------------------------------------------------
 bool print_message_of_send_mplayer_command;
 DPlayerOptions options;
 
 //--------------------------------------------------------------------------------------
-// 小道具関数
+// utility functions
 //--------------------------------------------------------------------------------------
 Gdk.Pixbuf? get_application_icon_at_size(uint width, uint height) {
     try {
@@ -134,7 +134,7 @@ Gdk.Pixbuf? get_application_icon_at_size(uint width, uint height) {
 }
 
 //--------------------------------------------------------------------------------------
-// アプリケーション処理
+// application functions
 //--------------------------------------------------------------------------------------
 
 void application_quit() {
@@ -194,7 +194,6 @@ void show_about_dialog(Window main_win) {
 
 void show_config_dialog(Window main_win) {
     if (config_dialog == null) {
-        // 設定ダイアログ本体
         string _ao_type = options.ao_type;
         bool _use_csd = options.use_csd;
         RadioButton *p_radio_audio_alsa;
@@ -214,7 +213,7 @@ void show_config_dialog(Window main_win) {
         {
             var config_dialog_vbox = new Box(Orientation.VERTICAL, 5);
             {
-                // ALSAかPulseAudioかの選択
+                // Select ALSA or PulseAudio
                 var frame_audio_choice = new Frame(Text.CONFIG_DIALOG_HEADER_AUDIO);
                 {
                     var frame_audio_choice_vbox = new Box(Orientation.VERTICAL, 0);
@@ -249,7 +248,6 @@ void show_config_dialog(Window main_win) {
                     frame_audio_choice.add(frame_audio_choice_vbox);
                 }
 
-                // サムネイルサイズの選択
                 var frame_thumbnail_size = new Frame(Text.CONFIG_DIALOG_HEADER_THUMBS);
                 {
                     var spin_thumbnail_size = new SpinButton.with_range(1, 500, 1);
@@ -263,7 +261,6 @@ void show_config_dialog(Window main_win) {
                     frame_thumbnail_size.add(spin_thumbnail_size);
                 }
 
-                // プレイリスト画像サイズの選択
                 var frame_playlist_image_size = new Frame(Text.CONFIG_DIALOG_HEADER_PLAYLIST_IMAGE);
                 {
                     var spin_playlist_image_size = new SpinButton.with_range(1, 500, 1);
@@ -277,7 +274,6 @@ void show_config_dialog(Window main_win) {
                     frame_playlist_image_size.add(spin_playlist_image_size);
                 }
 
-                // Client Side Decorationを使うかどうかの選択
                 var frame_use_csd = new Frame(Text.CONFIG_DIALOG_HEADER_CSD);
                 {
                     var frame_use_csd_box = new Box(Orientation.HORIZONTAL, 0);
@@ -510,12 +506,9 @@ void playlist_save_action() {
     }
 }
 
-//--------------------------------------------------------------------------------------
-// メイン関数
-//--------------------------------------------------------------------------------------
 int main(string[] args) {
     //----------------------------------------------------------------------------------
-    // mplayerコマンドの存在確認
+    // confirm existence of mplayer command.
     //----------------------------------------------------------------------------------
     if (Posix.system("mplayer") != 0) {
         stderr.printf(Text.ERROR_NO_MPLAYER);
@@ -523,7 +516,7 @@ int main(string[] args) {
     }
 
     //----------------------------------------------------------------------------------
-    // グローバル変数の初期化
+    // initialization of global variables
     //----------------------------------------------------------------------------------
     dirs = new List<string>();
 
@@ -552,7 +545,7 @@ int main(string[] args) {
     print_message_of_send_mplayer_command = true;
 
     //----------------------------------------------------------------------------------
-    // 設定ファイルの読み込み
+    // reading config files
     //----------------------------------------------------------------------------------
     string config_dir_path = Environment.get_home_dir() + "/." + program_name;
     string config_file_path = config_dir_path + "/settings.ini";
@@ -619,7 +612,7 @@ int main(string[] args) {
     }
 
     //----------------------------------------------------------------------------------
-    // コマンドラインオプションの読み込み
+    // Reading command line options
     //----------------------------------------------------------------------------------
     for (int i = 1; i < args.length; i++) {
         switch (args[i]) {
@@ -639,7 +632,7 @@ int main(string[] args) {
     }
 
     //----------------------------------------------------------------------------------
-    // 一時ファイル用のディレクトリを作成
+    // create temporary working directory
     //----------------------------------------------------------------------------------
     File tmp_dir = File.new_for_path("/tmp/" + program_name);
     if (!FileUtils.test("/tmp/" + program_name, FileTest.EXISTS)) {
@@ -652,7 +645,7 @@ int main(string[] args) {
     }
 
     //----------------------------------------------------------------------------------
-    // CSSファイルの場所を設定
+    // Setting place of a CSS file
     //----------------------------------------------------------------------------------
     string css_path = config_dir_path + "/main.css";
     if (!FileUtils.test(css_path, FileTest.EXISTS)) {
@@ -663,7 +656,7 @@ int main(string[] args) {
     Gtk.init(ref args);
 
     //----------------------------------------------------------------------------------
-    // ローカル変数の設定
+    // Initialization of local variables
     //----------------------------------------------------------------------------------
 
     Revealer *p_bookmark_revealer = null;
@@ -688,7 +681,7 @@ int main(string[] args) {
     artwork_max_size = int.min(max_width, max_height);
 
     //----------------------------------------------------------------------------------
-    // アイコン画像の読み込み
+    // Loading icon images
     //----------------------------------------------------------------------------------
 
     IconTheme icon_theme = Gtk.IconTheme.get_default();
@@ -708,7 +701,7 @@ int main(string[] args) {
     }
 
     //----------------------------------------------------------------------------------
-    // ウィンドウヘッダの作成
+    // Creating window header
     //----------------------------------------------------------------------------------
 
     win_header = null;
@@ -909,7 +902,7 @@ int main(string[] args) {
     }
 
     //----------------------------------------------------------------------------------
-    // 操作パネルの作成
+    // Creating control bar
     //----------------------------------------------------------------------------------
     controller = new Box(Orientation.HORIZONTAL, 2);
     {
@@ -1138,6 +1131,7 @@ int main(string[] args) {
             controller_third_box.pack_start(toggle_repeat_button, false, false);
         }
 
+	controller.margin = 4;
         controller.pack_start(artwork_button, false, false);
         controller.pack_start(controller_second_box, false, false);
         controller.pack_start(time_bar_box, true, true);
@@ -1145,12 +1139,12 @@ int main(string[] args) {
     }
 
     //------------------------------------------------------------------------------
-    // ブックマーク + ファインダーのボックス
+    // Creating finder view and sidebar
     //------------------------------------------------------------------------------
     var finder_hbox = new Box(Orientation.HORIZONTAL, 1);
     {
         //------------------------------------------------------------------------------
-        // ブックマークの作成
+        // Creating bookmark tree
         //------------------------------------------------------------------------------
         var bookmark_revealer = new Revealer();
         {
@@ -1429,7 +1423,7 @@ int main(string[] args) {
         }
 
         //------------------------------------------------------------------------------
-        // ファインダーの作成
+        // Creating finder (a file chooser)
         //------------------------------------------------------------------------------
         var finder_overlay = new Overlay();
         {
@@ -1502,7 +1496,7 @@ int main(string[] args) {
     }
 
     //----------------------------------------------------------------------------------
-    // プレイリスト画面作成
+    // Creating playlist view
     //----------------------------------------------------------------------------------
 
     var playlist_vbox = new Box(Orientation.HORIZONTAL, 0);
@@ -1602,7 +1596,7 @@ int main(string[] args) {
     }
     
     //----------------------------------------------------------------------------------
-    // アートワーク表示画面作成
+    // Creating artwork view (overlay)
     //----------------------------------------------------------------------------------
     music_view_overlay = new Overlay();
     {
@@ -1637,7 +1631,7 @@ int main(string[] args) {
     }
 
     //----------------------------------------------------------------------------------
-    // 音楽再生機能の実装
+    // Creating music player manager (control for MPlayer)
     //----------------------------------------------------------------------------------
     music = new Music();
     {
@@ -1752,7 +1746,7 @@ int main(string[] args) {
     }
 
     //----------------------------------------------------------------------------------
-    // メインウィンドウの作成
+    // Creating the main window
     //----------------------------------------------------------------------------------
     main_win = new Window();
     {
@@ -1799,7 +1793,7 @@ int main(string[] args) {
     }
 
     //----------------------------------------------------------------------------------
-    // スタイルシートの読み込み
+    // Reading a style sheet
     //----------------------------------------------------------------------------------
     if (FileUtils.test(css_path, FileTest.EXISTS)) {
         Gdk.Screen win_screen = main_win.get_screen();
@@ -1814,7 +1808,7 @@ int main(string[] args) {
     }
     
     //----------------------------------------------------------------------------------
-    // プログラムの開始
+    // Starting this program
     //----------------------------------------------------------------------------------
     artwork_button.visible = false;
     music_view_overlay.visible = false;
@@ -1828,7 +1822,7 @@ int main(string[] args) {
     Gtk.main();
 
     //----------------------------------------------------------------------------------
-    // 終了処理
+    // Finishing this program
     //----------------------------------------------------------------------------------
     config_file_contents = "";
 
