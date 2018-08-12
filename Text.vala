@@ -1,4 +1,6 @@
 namespace DPlayer {
+    public const string PROGRAM_NAME = "dplayer";
+    
     namespace StyleClass {
         public const string TITLEBUTTON = "titlebutton";
         public const string FLAT = "flat";
@@ -9,6 +11,9 @@ namespace DPlayer {
         public const string ARTWORK_BACKGROUND = "artwork_background";
         public const string VIEW = "view";
         public const string FINDER_ICON = "finder_icon";
+        public const string FINDER_MINI_ICON = "finder_mini_icon";
+        public const string FINDER_ITEM_LABEL = "finder_item_label";
+        public const string FINDER_BUTTON = "finder_button";
     }
 
     namespace IconName {
@@ -39,6 +44,7 @@ namespace DPlayer {
             public const string MEDIA_OPTICAL = "media-optical-symbolic";
             public const string PREFERENCES_SYSTEM = "preferences-system-symbolic";
             public const string LIST_REMOVE = "list-remove-symbolic";
+            public const string LIST_ADD = "list-add-symbolic";
             public const string WINDOW_CLOSE = "window-close-symbolic";
             public const string DOCUMENT_SAVE = "document-save-symbolic";
         }
@@ -139,6 +145,15 @@ namespace DPlayer {
             ".finder_icon {\n"+
             "    box-shadow: 10px 10px 10px 10px rgba(0, 0, 0, 0.4);\n"+
             "}\n"+
+            ".finder_item_label {\n"+
+            "    background-color: rgba(10, 10, 10, 0.5);\n"+
+            "    color: rgba(228, 228, 228, 1.0);\n"+
+            "}\n"+
+            ".finder_mini_icon {\n"+
+            "    background-color: rgba(128, 128, 128, 0.5);\n"+
+            "}\n"+
+            ".finder_button {\n"+
+            "}\n"+
             "\n";
         public const string MARKUP_BOLD_ITALIC = "<b><i>%s</i></b>";
         public const string FINDER_LOAD_FILES = "Loading data from disk...";
@@ -153,7 +168,7 @@ namespace DPlayer {
         public const string ERROR_FAIL_TMP_DIR = "making a tmp directory was failed.\n";
         public const string ERROR_LOAD_ICON = "icon file can not load.\n";
         public const string ERROR_OPEN_PLAYLIST_FILE = "FileError at menu_bookmark_reset\n";
-        public const string ERROR_CREATE_WINDOW = "ERROR: failed to create a window";
-        public const string ERROR_OPEN_FILE = "FileError catched with file_info.path '%s' which is cannot open";
+        public const string ERROR_CREATE_WINDOW = "ERROR: failed to create a window\n";
+        public const string ERROR_OPEN_FILE = "FileError catched with file_info.path '%s' which is cannot open\n";
     }
 }

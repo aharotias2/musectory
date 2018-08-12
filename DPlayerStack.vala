@@ -21,7 +21,6 @@ using Gtk, DPlayer;
 
 class DPlayerStack : Bin {
     private Stack stack;
-    private Button save_button;
     private bool use_csd;
     public DPlayerStack(Widget finder, Widget playlist, bool use_csd) {
         this.stack = new Stack();
@@ -35,15 +34,15 @@ class DPlayerStack : Bin {
         add(this.stack);
     }
     
-    public bool is_visible() {
+    public new bool is_visible() {
         return this.stack.visible;
     }
 
-    public void show() {
+    public new void show() {
         this.stack.visible = true;
     }
 
-    public void hide() {
+    public new void hide() {
         this.stack.visible = false;
     }
 

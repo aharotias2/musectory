@@ -100,18 +100,23 @@ namespace DPlayer {
                                     bool thread_started = false;
                                     thdata = new ImageLoaderThreadData(this.file_path, this.icon_size);
                                     Timeout.add(80, () => {
-                                            if (!thread_started) {
-                                                thread = new Thread<void*>.try(this.file_path, thdata.run);
-                                                thread_started = true;
-                                            } else if (thdata.pixbuf_loaded) {
-                                                debug("tmp_icon_pixbuf has been loaded");
-                                                thread.join();
-                                                if (thdata.icon_pixbuf != null) {
-                                                    icon_image.set_from_pixbuf(thdata.icon_pixbuf);
+                                            try {
+                                                if (!thread_started) {
+                                                    thread = new Thread<void*>.try(this.file_path, thdata.run);
+                                                    thread_started = true;
+                                                } else if (thdata.pixbuf_loaded) {
+                                                    debug("tmp_icon_pixbuf has been loaded");
+                                                    thread.join();
+                                                    if (thdata.icon_pixbuf != null) {
+                                                        icon_image.set_from_pixbuf(thdata.icon_pixbuf);
+                                                    }
+                                                    return Source.REMOVE;
                                                 }
+                                                return Source.CONTINUE;
+                                            } catch (Error e) {
+                                                stderr.printf("ERROR: Starting to read finder artworks was failed");
                                                 return Source.REMOVE;
                                             }
-                                            return Source.CONTINUE;
                                         }, Priority.DEFAULT);
                                     if (icon_pixbuf == null) {
                                         icon_pixbuf = cd_pixbuf;
@@ -156,10 +161,7 @@ namespace DPlayer {
                                 item_label.wrap = true;
                                 item_label.wrap_mode = Pango.WrapMode.WORD_CHAR;
                                 item_label.valign = Align.END;
-                                Gdk.RGBA item_label_bg_color = {0.1, 0.1, 0.1, 0.5};
-                                item_label.override_background_color(Gtk.StateFlags.NORMAL, item_label_bg_color);
-                                Gdk.RGBA item_label_color = {1.0, 1.0, 1.0, 1.0};
-                                item_label.override_color(Gtk.StateFlags.NORMAL, item_label_color);
+                                item_label.get_style_context().add_class(StyleClass.FINDER_ITEM_LABEL);
                             }
 
                             Button? mini_icon_button = null;
@@ -167,9 +169,9 @@ namespace DPlayer {
                                 Image mini_icon = null;
                                 {
                                     if (file_type == DFileType.FILE && icon_pixbuf != file_pixbuf) {
-                                        mini_icon = new Image.from_icon_name("audio-x-generic-symbolic", IconSize.LARGE_TOOLBAR);
+                                        mini_icon = new Image.from_icon_name(IconName.Symbolic.AUDIO_FILE, IconSize.LARGE_TOOLBAR);
                                     } else if (file_type == DFileType.DISC && icon_pixbuf != cd_pixbuf) {
-                                        mini_icon = new Image.from_icon_name("folder-symbolic", IconSize.LARGE_TOOLBAR);
+                                        mini_icon = new Image.from_icon_name(IconName.Symbolic.FOLDER, IconSize.LARGE_TOOLBAR);
                                     }
                                 
                                     if (mini_icon != null) {
@@ -182,8 +184,7 @@ namespace DPlayer {
                                     mini_icon_button = new Button();
                                     mini_icon_button.halign = Align.START;
                                     mini_icon_button.valign = Align.START;
-                                    Gdk.RGBA mini_icon_bgcolor = {0.5, 0.5, 0.5, 0.5};
-                                    mini_icon_button.override_background_color(Gtk.StateFlags.NORMAL, mini_icon_bgcolor);
+                                    mini_icon_button.get_style_context().add_class(StyleClass.FINDER_MINI_ICON);
                                     mini_icon_button.add(mini_icon);
                                 }
                             }
@@ -201,37 +202,37 @@ namespace DPlayer {
                         icon_button.hexpand = false;
                         icon_button.vexpand = false;
                         icon_button.border_width = 0;
-                        icon_button.get_style_context().add_class("flat");
+                        icon_button.get_style_context().add_class(StyleClass.FLAT);
                         icon_button.add(widget_overlay1);
                     }
 
                     var button_box = new Box(Orientation.HORIZONTAL, 5);
                     {
-                        bookmark_button = new Button.from_icon_name("user-bookmarks-symbolic", IconSize.SMALL_TOOLBAR);
+                        bookmark_button = new Button.from_icon_name(IconName.Symbolic.USER_BOOKMARKS, IconSize.SMALL_TOOLBAR);
                         {
                             bookmark_button.valign = Align.CENTER;
                             bookmark_button.visible = false;
-                            bookmark_button.get_style_context().add_class("finder-button");
+                            bookmark_button.get_style_context().add_class(StyleClass.FINDER_BUTTON);
                             bookmark_button.clicked.connect(() => {
                                     bookmark_button_clicked(file_path);
                                 });
                         }
 
-                        add_button = new Button.from_icon_name("list-add-symbolic", IconSize.SMALL_TOOLBAR);
+                        add_button = new Button.from_icon_name(IconName.Symbolic.LIST_ADD, IconSize.SMALL_TOOLBAR);
                         {
                             add_button.valign = Align.CENTER;
                             add_button.visible = false;
-                            add_button.get_style_context().add_class("finder-button");
+                            add_button.get_style_context().add_class(StyleClass.FINDER_BUTTON);
                             add_button.clicked.connect(() => {
                                     add_button_clicked(file_path);
                                 });
                         }
 
-                        play_button = new Button.from_icon_name("media-playback-start-symbolic", IconSize.LARGE_TOOLBAR);
+                        play_button = new Button.from_icon_name(IconName.Symbolic.MEDIA_PLAYBACK_START, IconSize.LARGE_TOOLBAR);
                         {
                             play_button.valign = Align.CENTER;
                             play_button.visible = false;
-                            play_button.get_style_context().add_class("finder-button");
+                            play_button.get_style_context().add_class(StyleClass.FINDER_BUTTON);
                             play_button.clicked.connect(() => {
                                     play_button_clicked(file_path);
                                 });

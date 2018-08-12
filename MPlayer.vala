@@ -94,7 +94,7 @@ namespace DPlayer {
 		requires (file_name_list.length() > 0) {
 			var info_list = new List<DFileInfo?>();
 			if (default_outdir == null) {
-				default_outdir = "/tmp/" + program_name + "/tmp";
+				default_outdir = get_default_out_dir();
 			}
 			Cli cli = new Cli("mplayer", "-ao", "null", "-demuxer", "lavf", "-vo", get_outdir(default_outdir),
 							  "-ss", "00:00:00", "-endpos", "0", "-frames", "1", "-identify");
@@ -127,10 +127,6 @@ namespace DPlayer {
 			return info_list;
 		}
 
-
-        //--------------------------------------------------------------------------------------
-		// 楽曲情報取得
-		//--------------------------------------------------------------------------------------
 		public static bool get_file_info(string file_path, ref DFileInfo info) {
 			Cli cli = new Cli("mplayer", "-vo", "null", "-ao", "null", "-identify", "-frames", "0", file_path);
 			cli.execute();
@@ -147,138 +143,48 @@ namespace DPlayer {
 			return set_file_info_from_mplayer_output(metadata, ref info);
 		}
 
-		/**
-		 * 楽曲ファイルかどうかを判断するだけ。
-		 */
 		public static bool is_music_file(string file_path) {
 			Cli cli = new Cli("mplayer", "-vo", "null", "-ao", "null", "-identify", "-frames", "0", file_path);
 			cli.execute();
 			return cli.status == 0 && cli.stdout.index_of("ID_AUDIO_ID=") >= 0;
 		}
 
-		/**
-		 * ディレクトリに楽曲ファイルが含まれているかどうかを判別する。
-		 */
 		public static bool contains_music(string dir_path) {
 			return false;
-//			var dir_list = new List<
 		}
 
 		public static string? create_artwork_file(string file_path) {
-			string basename = Path.get_basename(file_path);
-			string dirname = Path.get_basename(Path.get_dirname(file_path));
-			string filename = dirname + "_" + basename;
-			string tmpbase_name = "/tmp/" + program_name;
-			string pic_file_path = tmpbase_name + "/" + filename;
-			string tmp_dir_path = tmpbase_name + "/tmp/" + filename;
-			string ext = "";
+            DPath path = new DPath(file_path);
 
-			if (FileUtils.test(pic_file_path + ".jpg", FileTest.EXISTS)
-                && MyUtils.FileUtils.compare_mtime(pic_file_path + ".jpg", file_path) >= 0) {
-				pic_file_path += ".jpg";
-			} else if (FileUtils.test(pic_file_path + ".png", FileTest.EXISTS)
-                && MyUtils.FileUtils.compare_mtime(pic_file_path + ".png", file_path) >= 0) {
-				pic_file_path += ".png";
-			} else if (FileUtils.test(pic_file_path + ".jpeg", FileTest.EXISTS)
-                && MyUtils.FileUtils.compare_mtime(pic_file_path + ".jpeg", file_path) >= 0) {
-				pic_file_path += ".jpeg";
-			} else {
-				if (!FileUtils.test(tmp_dir_path, FileTest.EXISTS)) {
-					debug("created a directory: %s", tmp_dir_path);
-					File dir = File.new_for_path(tmp_dir_path);
-					dir.make_directory_with_parents();
-				}
-				Cli cli;
-				cli = new Cli("mplayer", "-ao", "null", "-demuxer", "lavf", "-vo", get_outdir(tmp_dir_path),
-							  "-ss", "00:00:00", "-endpos", "00:00:00", "-frames", "1", file_path);
-				cli.execute();
-				if (cli.status != 0) {
-					stderr.printf("MPlayer.create_artwork_file: %s: mplayer command abnormally ended\n", file_path);
-					stderr.printf("MPlayer.create_artwork_file: pic_file: %s\n", pic_file_path);
-					debug("stderr: %s", cli.stderr);
-					return null;
-				} else {
-					debug("mplayer command has been executed");
-				}
+            try {
+                if (!path.pic_exists) {
+                    if (!FileUtils.test(path.tmp_dir, FileTest.EXISTS)) {
+                        debug("created a directory: %s", path.tmp_dir);
+                        File dir = File.new_for_path(path.tmp_dir);
+                        dir.make_directory_with_parents();
+                    }
+                    Cli cli;
+                    cli = new Cli("mplayer", "-ao", "null", "-demuxer", "lavf", "-vo", get_outdir(path.tmp_dir),
+                                  "-ss", "00:00:00", "-endpos", "00:00:00", "-frames", "1", file_path);
+                    cli.execute();
+                    if (cli.status != 0) {
+                        stderr.printf("MPlayer.create_artwork_file: %s: mplayer command abnormally ended\n", file_path);
+                        stderr.printf("MPlayer.create_artwork_file: pic_file: %s\n", path.pic_file);
+                        debug("stderr: %s", cli.stderr);
+                        return null;
+                    } else {
+                        debug("mplayer command has been executed");
+                    }
 
-				string tmp_file_path = tmp_dir_path + "/00000001";
-				ext = ".jpg";
-				string tmp_file_path2 = tmp_file_path + ext;
-				if (!FileUtils.test(tmp_file_path2, FileTest.EXISTS)) {
-					ext = ".jpeg";
-					tmp_file_path2 = tmp_file_path + ext;
-					if (!FileUtils.test(tmp_file_path2, FileTest.EXISTS)) {
-						ext = ".png";
-						tmp_file_path2 = tmp_file_path + ext;
-						if (!FileUtils.test(tmp_file_path2, FileTest.EXISTS)) {
-							//stderr.printf("MPlayer.create_artwork_file: command has done but a new file is not created. file name : %s\n",
-							//			  file_path);
-							//stderr.printf("MPlayer.create_artwork_file: stderr: %s\n", cli.stderr);
-							//return null;
-                            tmp_file_path2 = tmp_file_path + ext;
-                            File f = File.new_for_path(tmp_file_path2);
-                            var stream = f.create(FileCreateFlags.NONE);
-                            stream.close();
-						}
-					}
-				}
-				pic_file_path = pic_file_path + ext;
-				debug("MPlayer.create_artwork_file: tmp_file_path2 = %s, pic_file_path = %s\n", tmp_file_path2, pic_file_path);
-				FileUtils.rename(tmp_file_path2, pic_file_path);
-				debug("<<<");
-			}
+                    path.put_pic_file();
+                }
 
-			return pic_file_path;
+                return path.pic_file;
+            } catch (Error e) {
+                stderr.printf("ERROR: creating directory was failed: (path: %s)\n", path.tmp_dir);
+                return null;
+            }
 		}
-
-		/*
-		public static string? create_artwork_file(string file_path) {
-			string[] tmp = file_path.reverse().split("/", 3);
-			string pic_file_path = "/tmp/" + program_name + "/" + tmp[1].reverse() + "_" + tmp[0].reverse();
-			string ext = "";
-
-			if (FileUtils.test(pic_file_path + ".jpg", FileTest.EXISTS)) {
-				pic_file_path += ".jpg";
-			} else if (FileUtils.test(pic_file_path + ".png", FileTest.EXISTS)) {
-				pic_file_path += ".png";
-			} else if (FileUtils.test(pic_file_path + ".jpeg", FileTest.EXISTS)) {
-				pic_file_path += ".jpeg";
-			} else {
-				Cli cli;
-				cli = new Cli("mplayer", "-ao", "null", "-demuxer", "lavf", "-vo", get_outdir(),
-							  "-ss", "00:00:00", "-endpos", "00:00:00", "-frames", "1", file_path);
-				cli.execute();
-				if (cli.status != 0) {
-					stderr.printf("MPlayer.create_artwork_file: %s: ffmpeg command abnormally ended\n", file_path);
-					stderr.printf("MPlayer.create_artwork_file: pic_file: %s\n", pic_file_path);
-					return null;
-				}
-
-				string temp_file_path = "/tmp/" + program_name + "/tmp/00000001";
-				ext = ".jpg";
-				string temp_file_path2 = temp_file_path + ext;
-				if (!FileUtils.test(temp_file_path2, FileTest.EXISTS)) {
-					ext = ".jpeg";
-					temp_file_path2 = temp_file_path + ext;
-					if (!FileUtils.test(temp_file_path2, FileTest.EXISTS)) {
-						ext = ".png";
-						temp_file_path2 = temp_file_path + ext;
-						if (!FileUtils.test(temp_file_path2, FileTest.EXISTS)) {
-							stderr.printf("MPlayer.get_music_artwork: ffmpeg command has done but a new file is not created. file name : %s\n",
-										  file_path);
-							stderr.printf("MPlayer.get_music_artwork: stderr: %s\n", cli.stderr);
-							return null;
-						}
-					}
-				}
-				pic_file_path = pic_file_path + ext;
-				debug("load_music_artwork: temp_file_path2 = %s, pic_file_path = %s\n", temp_file_path2, pic_file_path);
-				FileUtils.rename(temp_file_path2, pic_file_path);
-			}
-
-			return pic_file_path;
-		}
-		*/
 		
 		public static Gdk.Pixbuf? get_music_artwork(string pic_file_path, int? size=-1) {
             if (MyUtils.FileUtils.is_empty(pic_file_path)) {
@@ -298,42 +204,30 @@ namespace DPlayer {
 		}
 
 		public static Gdk.Pixbuf? get_music_artwork_from_mplayer_output(string file_path, int index, int? size=-1) {
-			string[] tmp = file_path.reverse().split("/", 3);
-			string pic_file_path = Path.build_filename("/tmp", program_name, tmp[1].reverse() + "_" + tmp[0].reverse());
-
-			if (FileUtils.test(pic_file_path + ".jpg", FileTest.EXISTS)) {
-				pic_file_path += ".jpg";
-			} else if (FileUtils.test(pic_file_path + ".png", FileTest.EXISTS)) {
-				pic_file_path += ".png";
-			} else if (FileUtils.test(pic_file_path + ".jpeg", FileTest.EXISTS)) {
-				pic_file_path += ".jpeg";
-			} else {
-				string temp_file_path = Path.build_filename("/tmp", program_name, "tmp", "%08d".printf(index));
-				string ext;
-				if (FileUtils.test(temp_file_path + ".jpg", FileTest.EXISTS)) {
-					ext = ".jpg";
-				} else if (FileUtils.test(temp_file_path + ".png", FileTest.EXISTS)) {
-					ext = ".png";
-				} else if (FileUtils.test(temp_file_path + ".jpeg", FileTest.EXISTS)) {
-					ext = ".png";
-				} else {
-					debug("get_music_artwork_from_mplayer_output: not found : " + file_path);
-					return null;
-				}
-				pic_file_path = pic_file_path + ext;
-				debug("get_music_artwork_from_mplayer_output: temp_file_path2 = %s%s, pic_file_path = %s\n", temp_file_path, ext, pic_file_path);
-				FileUtils.rename(temp_file_path + ext, pic_file_path);
+            DPath path = new DPath.with_index(file_path, index);
+            if (!path.pic_exists) {
+                path.put_pic_file(index);
+                DPath path2 = new DPath(Path.get_dirname(file_path));
+                if (MyUtils.FileUtils.is_empty(path2.pic_file)) {
+                    File f1 = File.new_for_path(path.pic_file);
+                    File f2 = File.new_for_path(path2.pic_file);
+                    try {
+                        f1.copy(f2, FileCopyFlags.OVERWRITE);
+                    } catch (Error e) {
+                        stderr.printf("ERROR: It was failed to copy %s to %s", path.pic_file, path2.pic_file);
+                    }
+                }
 			}
 
 			try {
 				if (size < 0) {
-					return new Gdk.Pixbuf.from_file(pic_file_path);
+					return new Gdk.Pixbuf.from_file(path.pic_file);
 				} else {
-					return new Gdk.Pixbuf.from_file_at_size(pic_file_path, size, size);
+					return new Gdk.Pixbuf.from_file_at_size(path.pic_file, size, size);
 				}
 			} catch (Error e) {
-				FileUtils.remove(pic_file_path);
-				debug("get_music_artwork_from_mplayer_output: load %s is failed", pic_file_path);
+				FileUtils.remove(path.pic_file);
+				debug("get_music_artwork_from_mplayer_output: load %s is failed", path.pic_file);
 				return null;
 			}
 		}
@@ -342,6 +236,93 @@ namespace DPlayer {
 		// プライベートメソッド - MPlayerのメタデータ出力を解析し、DFileInfo型のオブジェクトに
 		// セットする。
 		//--------------------------------------------------------------------------------------
+        public const string TMP_BASE = "/tmp/" + PROGRAM_NAME;
+        public const string OUT_DIR = TMP_BASE + "/tmp";
+        
+        private class DPath {
+            public string tmp_dir { get { return v_tmp_dir; } }
+            public string pic_file { get { return v_pic_file; } }
+            public bool pic_exists {
+                get {
+                    return v_pic_exists;
+                }
+            }
+            public DPath(string file_path) {
+                string basename = Path.get_basename(file_path);
+                string dirname = Path.get_basename(Path.get_dirname(file_path));
+                string filename = dirname + "_" + basename;
+                v_pic_file = TMP_BASE + "/" + filename;
+                v_tmp_dir = TMP_BASE + "/tmp/" + filename;
+                set_pic_exists(file_path);
+            }
+            public DPath.with_index(string file_path, int index) {
+                string basename = Path.get_basename(file_path);
+                string dirname = Path.get_basename(Path.get_dirname(file_path));
+                string filename = dirname + "_" + basename;
+                v_pic_file = TMP_BASE + "/" + filename;
+                v_tmp_dir = TMP_BASE + "/tmp/";
+                set_pic_exists(file_path);
+            }
+            public void set_pic_ext(string extension) {
+                if (!v_pic_exists) {
+                    v_pic_file = v_pic_file + "." + extension;
+                }
+            }
+            private void set_pic_exists(string file_path) {
+                v_pic_exists = true;
+                if (FileUtils.test(v_pic_file + ".jpg", FileTest.EXISTS)
+                    && MyUtils.FileUtils.compare_mtime(v_pic_file + ".jpg", file_path) >= 0) {
+                    v_pic_file += ".jpg";
+                } else if (FileUtils.test(v_pic_file + ".png", FileTest.EXISTS)
+                           && MyUtils.FileUtils.compare_mtime(v_pic_file + ".png", file_path) >= 0) {
+                    v_pic_file += ".png";
+                } else if (FileUtils.test(v_pic_file + ".jpeg", FileTest.EXISTS)
+                           && MyUtils.FileUtils.compare_mtime(v_pic_file + ".jpeg", file_path) >= 0) {
+                    v_pic_file += ".jpeg";
+                } else {
+                    v_pic_exists = false;
+                }
+            }                
+            private string get_tmp_pic_path(int index = 1) {
+                try {
+                    string tmp_file_path = "%s/%08d".printf(v_tmp_dir, index);
+                    string ext = ".jpg";
+                    string tmp_file_path2 = tmp_file_path + ext;
+                    if (!FileUtils.test(tmp_file_path2, FileTest.EXISTS)) {
+                        ext = ".jpeg";
+                        tmp_file_path2 = tmp_file_path + ext;
+                        if (!FileUtils.test(tmp_file_path2, FileTest.EXISTS)) {
+                            ext = ".png";
+                            tmp_file_path2 = tmp_file_path + ext;
+                            if (!FileUtils.test(tmp_file_path2, FileTest.EXISTS)) {
+                                MyUtils.FileUtils.create_empty_file(tmp_file_path2);
+                            }
+                        }
+                    }
+                    debug("DPath.get_tmp_pic_path found: %s", tmp_file_path2);
+                    return tmp_file_path2;
+                } catch (Error e) {
+                    return null;
+                } catch (IOError e) {
+                    return null;
+                }
+            }
+            public void put_pic_file(int index = 1) {
+				string temp_file_path = get_tmp_pic_path(index);
+                string ext = MyUtils.FilePathUtils.extension_of(temp_file_path);
+                set_pic_ext(ext);
+				debug("get_music_artwork_from_mplayer_output: temp_file_path2 = %s, pic_file_path = %s\n", temp_file_path, v_pic_file);
+				FileUtils.rename(temp_file_path, v_pic_file);
+            }
+            private bool v_pic_exists;
+            private string v_tmp_dir;
+            private string v_pic_file;
+        }
+        
+        private static string get_default_out_dir() {
+            return "/tmp/" + PROGRAM_NAME + "/tmp";
+        }
+        
 		private static bool set_file_info_from_mplayer_output(string metadata, ref DFileInfo info) {
 			if (metadata != null && metadata != "" && metadata.index_of("ID_AUDIO_ID") > 0) {
 				string[] lines = metadata.split("\n", 1000);

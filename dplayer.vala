@@ -27,7 +27,6 @@ delegate void TimeLabelSetFunc(double seconds);
 //--------------------------------------------------------------------------------------
 // Constants
 //--------------------------------------------------------------------------------------
-const string program_name = "dplayer";
 
 //--------------------------------------------------------------------------------------
 // global variables for file management
@@ -121,7 +120,7 @@ Gdk.Pixbuf? get_application_icon_at_size(uint width, uint height) {
             if (dir.index_of_char('~') == 0) {
                 dir = dir.replace("~", Environment.get_home_dir());
             }
-            string icon_name = dir + "/" + program_name + ".png";
+            string icon_name = dir + "/" + PROGRAM_NAME + ".png";
             debug("icon path : " + icon_name);
             if (FileUtils.test(icon_name, FileTest.EXISTS)) {
                 return new Gdk.Pixbuf.from_file_at_size(icon_name, 64, 64);
@@ -161,7 +160,7 @@ bool confirm(string message) {
 
 void show_about_dialog(Window main_win) {
     if (help_dialog == null) {
-        help_dialog = new Dialog.with_buttons(program_name + " info",
+        help_dialog = new Dialog.with_buttons(PROGRAM_NAME + " info",
                                               main_win,
                                               DialogFlags.MODAL | DialogFlags.DESTROY_WITH_PARENT,
                                               "_OK",
@@ -169,7 +168,7 @@ void show_about_dialog(Window main_win) {
         {
             var help_dialog_vbox = new Box(Orientation.VERTICAL, 0);
             {
-                var help_dialog_label_text = new Label("<span size=\"24000\"><b>" + program_name + "</b></span>");
+                var help_dialog_label_text = new Label("<span size=\"24000\"><b>" + PROGRAM_NAME + "</b></span>");
                 help_dialog_label_text.use_markup = true;
                 help_dialog_label_text.margin = 10;
 
@@ -203,7 +202,7 @@ void show_config_dialog(Window main_win) {
         SpinButton *p_spin_thumbnail_size;
         SpinButton *p_spin_playlist_image_size;
 
-        config_dialog = new Dialog.with_buttons(program_name + Text.SETTINGS,
+        config_dialog = new Dialog.with_buttons(PROGRAM_NAME + Text.SETTINGS,
                                                 main_win,
                                                 DialogFlags.MODAL | DialogFlags.DESTROY_WITH_PARENT,
                                                 Text.DIALOG_OK,
@@ -404,7 +403,7 @@ void save_playlist(List<string> file_path_list) {
         List<string> copy_of_list = file_path_list.copy_deep((src) => {
                 return ((string)src).dup();
             });
-        save_playlist_dialog = new Dialog.with_buttons(program_name + ": save playlist",
+        save_playlist_dialog = new Dialog.with_buttons(PROGRAM_NAME + ": save playlist",
                                                 main_win,
                                                 DialogFlags.MODAL | DialogFlags.DESTROY_WITH_PARENT,
                                                 Text.DIALOG_OK,
@@ -487,7 +486,7 @@ void load_playlist_from_file(string name) {
 }
 
 string get_playlist_path_from_name(string name) {
-    return Environment.get_home_dir() + "/." + program_name + "/" + name + ".m3u";
+    return Environment.get_home_dir() + "/." + PROGRAM_NAME + "/" + name + ".m3u";
 }
 
 void playlist_save_action() {
@@ -547,7 +546,7 @@ int main(string[] args) {
     //----------------------------------------------------------------------------------
     // reading config files
     //----------------------------------------------------------------------------------
-    string config_dir_path = Environment.get_home_dir() + "/." + program_name;
+    string config_dir_path = Environment.get_home_dir() + "/." + PROGRAM_NAME;
     string config_file_path = config_dir_path + "/settings.ini";
     string config_file_contents;
 
@@ -626,7 +625,7 @@ int main(string[] args) {
             break;
 
         default:
-            stderr.printf(Text.ERROR_UNKOWN_OPTION, program_name, args[i]);
+            stderr.printf(Text.ERROR_UNKOWN_OPTION, PROGRAM_NAME, args[i]);
             Process.exit(1);
         }
     }
@@ -634,8 +633,8 @@ int main(string[] args) {
     //----------------------------------------------------------------------------------
     // create temporary working directory
     //----------------------------------------------------------------------------------
-    File tmp_dir = File.new_for_path("/tmp/" + program_name);
-    if (!FileUtils.test("/tmp/" + program_name, FileTest.EXISTS)) {
+    File tmp_dir = File.new_for_path("/tmp/" + PROGRAM_NAME);
+    if (!FileUtils.test("/tmp/" + PROGRAM_NAME, FileTest.EXISTS)) {
         try {
             tmp_dir.make_directory();
         } catch(Error e) {
@@ -660,7 +659,6 @@ int main(string[] args) {
     //----------------------------------------------------------------------------------
 
     Revealer *p_bookmark_revealer = null;
-    Revealer *p_back_button_revealer = null;
     Button *p_music_view_close_button = null;
     
     TreeViewColumn *p_bookmark_title_col = null;
@@ -893,7 +891,7 @@ int main(string[] args) {
             }
 
             win_header.show_close_button = false;
-            win_header.title = program_name;
+            win_header.title = PROGRAM_NAME;
             win_header.has_subtitle = false;
             win_header.pack_start(header_box);
             win_header.pack_end(header_menu_button);
@@ -1325,7 +1323,7 @@ int main(string[] args) {
                                         header_add_button.sensitive = true;
                                         
                                         if (options.use_csd) {
-                                            win_header.set_title(program_name + ": " + current_dir);
+                                            win_header.set_title(PROGRAM_NAME + ": " + current_dir);
                                         }
                                     } else {
                                         if (dirs.length() > 1) {
@@ -1670,7 +1668,6 @@ int main(string[] args) {
                         double rest_hours = Math.floor(rest_time_total / 360);
                         double rest_minutes = Math.floor(rest_time_total / 60);
                         double rest_seconds = Math.floor(rest_time_total % 60);
-                        double rest_milliseconds = Math.floor(current_time * 10 % 10);
                         time_label_rest.label = "%02.0f:%02.0f:%02.0f".printf(rest_hours,
                                                                               rest_minutes,
                                                                               rest_seconds);
@@ -1801,6 +1798,7 @@ int main(string[] args) {
         try {
             css_provider.load_from_path(css_path);
         } catch (Error e) {
+            debug("ERROR: css_path: %s", css_path);
             stderr.printf(Text.ERROR_CREATE_WINDOW);
             return 1;
         }

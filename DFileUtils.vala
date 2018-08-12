@@ -200,7 +200,7 @@ namespace DPlayer {
         public string create_dir_artwork_path(string extension) {
             string dirname = Path.get_basename(Path.get_dirname(dir_path));
             string basename = Path.get_basename(dir_path);
-            return "/tmp/" + program_name + "/" + dirname + "_" + basename + (extension != "" ? "." + extension : "");
+            return "/tmp/" + PROGRAM_NAME + "/" + dirname + "_" + basename + (extension != "" ? "." + extension : "");
         }
         
         public bool contains_music(int max_depth = 0, int depth = 0) throws FileError {

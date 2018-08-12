@@ -254,10 +254,6 @@ namespace DPlayer {
                     set_as_playing();
                 }
             }
-
-            public bool get_playing() {
-                return playing;
-            }
         }
 
         private GLib.ListStore? store;
@@ -358,9 +354,6 @@ namespace DPlayer {
         }
 
         public void append_list_from_path(string file_path) {
-
-            int index = 0;
-            
             var new_playlist = new List<DFileInfo?>();
 
             var file_util = new DFileUtils(file_path);

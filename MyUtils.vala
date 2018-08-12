@@ -28,7 +28,7 @@ namespace MyUtils {
                     unichar c = hex.get_char(i);
                     if (c.isdigit()) {
                         result *= 16;
-                        result += c.to_string().to_int();
+                        result += int.parse(c.to_string());
                     } else if (c.isalpha()) {
                         result *= 16;
                         if (c == 'a' || c == 'A') {
@@ -157,6 +157,14 @@ namespace MyUtils {
             Posix.Stat file_status;
             Posix.stat(file_path, out file_status);
             return ((uint) file_status.st_size) == 0;
+        }
+
+        public static void create_empty_file(string file_path) throws Error, IOError {
+            if (!GLib.FileUtils.test(file_path, FileTest.EXISTS)) {
+                File f = File.new_for_path(file_path);
+                var stream = f.create(FileCreateFlags.NONE);
+                stream.close();
+            }
         }
     }
 }
