@@ -477,12 +477,14 @@ void overwrite_playlist_file(string playlist_name, List<string> file_path_list) 
     }
 }
 
-void load_playlist_from_file(string name) {
+void load_playlist_from_file(string playlist_name, string playlist_path) {
     header_switch_button.sensitive = true;
-    playlist.name = name;
-    playlist.load_list_from_file(get_playlist_path_from_name(name));
+    header_add_button.sensitive = true;
+    playlist.name = playlist_name;
+    playlist.load_list_from_file(playlist_path);
     var file_path_list = playlist.get_file_path_list();
     music.start(ref file_path_list, options.ao_type);
+    stack.show_playlist();
 }
 
 string get_playlist_path_from_name(string name) {
@@ -1357,15 +1359,7 @@ int main(string[] args) {
                                                 if (music.playing) {
                                                     return Source.CONTINUE;
                                                 } else {
-                                                    playlist.load_list_from_file(playlist_path);
-                                                    stack.show_playlist();
-                                                    header_add_button.sensitive = true;
-                                                    var file_path_list = playlist.get_file_path_list();
-                                                    music.start(ref file_path_list, options.ao_type);
-                                                    if (!header_switch_button.sensitive) {
-                                                        header_switch_button.sensitive = true;
-                                                    }
-                                                    playlist.name = playlist_name;
+                                                    load_playlist_from_file(playlist_name, playlist_path);
                                                     return Source.REMOVE;
                                                 }
                                             });
