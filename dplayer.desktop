@@ -1,0 +1,14 @@
+[Desktop Entry]
+Version=1.0
+Name=dplayer
+GenericName=Audio Player
+Comment=Audio Player mimic MFPlayer of Windows
+MimeType=
+TryExec=/home/ta/.local/bin/dplayer
+Exec=/home/ta/.local/bin/dplayer
+Icon=dplayer
+Type=Application
+Terminal=false
+Categories=AudioPlayer;MusicPlayer
+StartupWMClass=dplayer
+Keywords=Music;Audio;Player;Media
