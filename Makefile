@@ -12,6 +12,6 @@ test-music: test-music.vala enums.vala Cli.vala DFileInfo.vala MPlayer.vala DFil
 	valac $(VALAC_OPTS) -o $@ $^
 
 install: $(TARGET)
-	[ ! -d ~/.local/bin ] && mkdir ~/.local/bin; cp ./dplayer ~/.local/bin; [ ! -d ~/.icons ] && mkdir ~/.icons; cp dplayer.png ~/.icons; [ ! -d ~/.local/share/applications ] && mkdir -p ~/.local/share/applications; cp dplayer.desktop ~/.local/share/applications
+	[ ! -d ~/.local/bin ] && mkdir ~/.local/bin; cp ./dplayer ~/.local/bin; [ ! -d ~/.local/share/icons ] && mkdir ~/.local/share/icons; cp dplayer.png ~/.icons; [ ! -d ~/.local/share/applications ] && mkdir -p ~/.local/share/applications; cp dplayer.desktop ~/.local/share/applications
 
 
