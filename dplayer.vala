@@ -1141,277 +1141,269 @@ int main(string[] args) {
     //------------------------------------------------------------------------------
     // Creating finder view and sidebar
     //------------------------------------------------------------------------------
-    var finder_hbox = new Box(Orientation.HORIZONTAL, 1);
+    var finder_paned = new Paned(Orientation.HORIZONTAL);
     {
         //------------------------------------------------------------------------------
         // Creating bookmark tree
         //------------------------------------------------------------------------------
-        var bookmark_revealer = new Revealer();
+        var bookmark_frame = new Frame(null);
         {
-            var bookmark_frame = new Frame(null);
+            var bookmark_scrolled = new ScrolledWindow(null, null);
             {
-                var bookmark_scrolled = new ScrolledWindow(null, null);
+                bookmark_tree = new TreeView();
                 {
-                    bookmark_tree = new TreeView();
+                    var bookmark_title_col = new TreeViewColumn();
                     {
-                        var bookmark_title_col = new TreeViewColumn();
+                        var bookmark_icon_cell = new CellRendererPixbuf();
+                        var bookmark_label_cell = new CellRendererText();
                         {
-                            var bookmark_icon_cell = new CellRendererPixbuf();
-                            var bookmark_label_cell = new CellRendererText();
-                            {
-                                bookmark_label_cell.family = Text.FONT_FAMILY;
-                                bookmark_label_cell.language = Environ.get_variable(Environ.get(), "LANG");
-                            }
-
-                            bookmark_title_col.pack_start(bookmark_icon_cell, false);
-                            bookmark_title_col.pack_start(bookmark_label_cell, true);
-                            bookmark_title_col.add_attribute(bookmark_icon_cell, "icon-name", 0);
-                            bookmark_title_col.add_attribute(bookmark_label_cell, "text", 1);
-                            bookmark_title_col.set_title("label");
-                            bookmark_title_col.sizing = TreeViewColumnSizing.AUTOSIZE;
-                            bookmark_title_col.max_width = window_default_width / 4;
-                            p_bookmark_title_col = bookmark_title_col;
+                            bookmark_label_cell.family = Text.FONT_FAMILY;
+                            bookmark_label_cell.language = Environ.get_variable(Environ.get(), "LANG");
                         }
 
-                        var bookmark_del_col = new TreeViewColumn();
-                        {
-                            var bookmark_del_cell = new CellRendererPixbuf();
-
-                            bookmark_del_col.pack_start(bookmark_del_cell, false);
-                            bookmark_del_col.add_attribute(bookmark_del_cell, "icon-name", 4);
-                            bookmark_del_col.set_title("del");
-                        }
-
-                        var bookmark_store = new TreeStore(5, typeof(string), typeof(string), typeof(string),
-                                                           typeof(MenuType), typeof(string));
-                        {
-                            bookmark_store.append(out bookmark_root, null);
-                            bookmark_store.set(bookmark_root,
-                                               0, IconName.Symbolic.USER_BOOKMARKS, 1, Text.MENU_BOOKMARK,
-                                               2, "", 3, MenuType.BOOKMARK, 4, "");
-
-                            TreeIter bm_iter;
-                            bookmark_store.append(out playlist_root, null);
-                            bookmark_store.set(playlist_root,
-                                               0, IconName.Symbolic.MEDIA_OPTICAL, 1, Text.MENU_PLAYLIST,
-                                               2, "", 3, MenuType.PLAYLIST_HEADER, 4, "");
-                            bookmark_store.append(out bm_iter, null);
-                            bookmark_store.set(bm_iter, 0, null, 1, null, 2, null,
-                                               3, MenuType.SEPARATOR, 4, "");
-                            bookmark_store.append(out bm_iter, null);
-                            bookmark_store.set(bm_iter, 0, IconName.Symbolic.FOLDER_OPEN, 1, Text.MENU_CHOOSE_DIR,
-                                               2, null, 3, MenuType.CHOOSER, 4, "");
-                            if (!options.use_csd) {
-                                bookmark_store.append(out bm_iter, null);
-                                bookmark_store.set(bm_iter,
-                                                   0, IconName.Symbolic.PREFERENCES_SYSTEM, 1, Text.MENU_CONFIG,
-                                                   2, null, 3, MenuType.CONFIG, 4, "");
-                                bookmark_store.append(out bm_iter, null);
-                                bookmark_store.set(bm_iter,
-                                                   0, IconName.Symbolic.HELP_FAQ, 1, Text.MENU_ABOUT,
-                                                   2, null, 3, MenuType.ABOUT, 4, "");
-                                bookmark_store.append(out bm_iter, null);
-                                bookmark_store.set(bm_iter,
-                                                   0, IconName.Symbolic.EXIT, 1, Text.MENU_QUIT,
-                                                   2, null, 3, MenuType.QUIT, 4, "");
-                            }
-                        }
-
-                        Gtk.Callback menu_bookmark_reset = (bm) => {
-                            TreeIter bm_iter;
-                            bookmark_store.iter_children(out bm_iter, bookmark_root);
-
-                            while (bookmark_store.iter_is_valid(bm_iter)) {
-                                bookmark_store.remove(ref bm_iter);
-                            }
-
-                            foreach (string dir in dirs) {
-                                string dir_basename = dir.slice(dir.last_index_of_char('/') + 1, dir.length);
-                                bookmark_store.append(out bm_iter, bookmark_root);
-                                bookmark_store.set(bm_iter, 0, IconName.Symbolic.FOLDER, 1, dir_basename, 2, dir,
-                                                   3, MenuType.FOLDER, 4, "");
-                            }
-
-                            bookmark_store.iter_children(out bm_iter, playlist_root);
-
-                            while (bookmark_store.iter_is_valid(bm_iter)) {
-                                bookmark_store.remove(ref bm_iter);
-                            }
-
-                            Dir dir;
-                            try {
-                                dir = Dir.open(config_dir_path, 0);
-                            } catch (Error e) {
-                                stderr.printf(Text.ERROR_OPEN_PLAYLIST_FILE);
-                                Process.exit(1);
-                            }
-
-                            string file_name;
-                            while ((file_name = dir.read_name()) != null) {
-                                if (MyUtils.FilePathUtils.extension_of(file_name) == "m3u") {
-                                    string playlist_name = MyUtils.FilePathUtils.remove_extension(file_name);
-                                    bookmark_store.append(out bm_iter, playlist_root);
-                                    bookmark_store.set(bm_iter, 0, IconName.Symbolic.AUDIO_FILE,
-                                                       1, playlist_name,
-                                                       2, get_playlist_path_from_name(playlist_name),
-                                                       3, MenuType.PLAYLIST_NAME, 4, "");
-                                }
-                            }
-                        };
-
-                        bookmark_tree.activate_on_single_click = true;
-                        bookmark_tree.headers_visible = false;
-                        bookmark_tree.hover_selection = true;
-                        bookmark_tree.reorderable = false;
-                        bookmark_tree.show_expanders = true;
-                        bookmark_tree.enable_tree_lines = false;
-                        bookmark_tree.level_indentation = 0;
-
-                        bookmark_tree.set_model(bookmark_store);
-                        bookmark_tree.insert_column(bookmark_del_col, 1);
-                        bookmark_tree.insert_column(bookmark_title_col, 0);
-
-                        menu_bookmark_reset(bookmark_tree);
-
-                        bookmark_tree.set_row_separator_func((model, iter) => {
-                                Value menu_type;
-                                model.get_value(iter, 3, out menu_type);
-                                return ((MenuType) menu_type == MenuType.SEPARATOR);
-                            });
-
-                        bookmark_tree.get_selection().changed.connect(() => {
-                                TreeSelection bookmark_selection = bookmark_tree.get_selection();
-                                TreeStore? temp_store = (TreeStore) bookmark_tree.model;
-
-                                temp_store.foreach((model, path, iter) => {
-                                        Value type;
-                                        temp_store.get_value(iter, 3, out type);
-                                        if ((MenuType) type == MenuType.FOLDER || (MenuType) type == MenuType.PLAYLIST_NAME) {
-                                            string icon_name = "";
-                                            if (dirs.length() > 0 && bookmark_selection.iter_is_selected(iter)) {
-                                                icon_name = IconName.Symbolic.LIST_REMOVE;
-                                            } else {
-                                                icon_name = "";
-                                            }
-                                            temp_store.set_value(iter, 4, icon_name);
-                                        }
-                                        return false;
-                                    });
-                            });
-
-                        bookmark_tree.row_activated.connect((path, column) => {
-                                Value dir_path;
-                                Value bookmark_name;
-                                TreeIter bm_iter;
-
-                                debug("bookmark_tree_row_activated.");
-                                bookmark_tree.model.get_iter(out bm_iter, path);
-                                bookmark_tree.model.get_value(bm_iter, 3, out bookmark_name);
-
-                                switch ((MenuType) bookmark_name) {
-                                case MenuType.BOOKMARK:
-                                    if (bookmark_tree.is_row_expanded(path)) {
-                                        bookmark_tree.collapse_row(path);
-                                    } else {
-                                        bookmark_tree.expand_row(path, false);
-                                    }
-                                    break;
-                                
-                                case MenuType.FOLDER:
-                                    bookmark_tree.model.get_value(bm_iter, 2, out dir_path);
-
-                                    if (column.get_title() != "del") {
-                                        finder.change_dir((string) dir_path);
-                                        header_add_button.sensitive = true;
-                                        
-                                        if (options.use_csd) {
-                                            win_header.set_title(PROGRAM_NAME + ": " + current_dir);
-                                        }
-                                    } else {
-                                        if (dirs.length() > 1) {
-                                            if (confirm(Text.CONFIRM_REMOVE_BOOKMARK)) {
-                                                dirs.remove_link(dirs.nth(path.get_indices()[1]));
-                                                ((TreeStore)bookmark_tree.model).remove(ref bm_iter);
-                                            }
-                                        }
-                                    }
-                                    break;
-                                case MenuType.PLAYLIST_HEADER:
-                                    if (bookmark_tree.is_row_expanded(path)) {
-                                        bookmark_tree.collapse_row(path);
-                                    } else {
-                                        bookmark_tree.expand_row(path, false);
-                                    }
-                                    break;
-                                case MenuType.PLAYLIST_NAME:
-                                    Value val1;
-                                    Value val2;
-                                    bookmark_tree.model.get_value(bm_iter, 1, out val1);
-                                    bookmark_tree.model.get_value(bm_iter, 2, out val2);
-                                    string playlist_name = (string) val1;
-                                    string playlist_path = (string) val2;
-
-                                    if (column.get_title() != "del") {
-                                        if (music.playing) {
-                                            music.quit();
-                                        }
-                                        Timeout.add(100, () => {
-                                                if (music.playing) {
-                                                    return Source.CONTINUE;
-                                                } else {
-                                                    load_playlist_from_file(playlist_name, playlist_path);
-                                                    return Source.REMOVE;
-                                                }
-                                            });
-                                    } else {
-                                        if (confirm(Text.CONFIRM_REMOVE_PLAYLIST)) {
-                                            ((TreeStore)bookmark_tree.model).remove(ref bm_iter);
-                                            FileUtils.remove(playlist_path);
-                                        }
-                                    }
-                                    break;
-                                case MenuType.CHOOSER:
-                                    var file_chooser = new FileChooserDialog (Text.DIALOG_OPEN_FILE, main_win,
-                                                                              FileChooserAction.SELECT_FOLDER,
-                                                                              Text.DIALOG_CANCEL, ResponseType.CANCEL,
-                                                                              Text.DIALOG_OPEN, ResponseType.ACCEPT);
-                                    if (file_chooser.run () == ResponseType.ACCEPT) {
-                                        string selected_path = file_chooser.get_filename();
-                                        debug("selected file path: %s", selected_path);
-                                        finder.change_dir(selected_path);
-                                        header_add_button.sensitive = true;
-                                    }
-                                    file_chooser.destroy ();
-                                    break;
-                                case MenuType.CONFIG:
-                                    show_config_dialog(main_win);
-                                    break;
-                                case MenuType.ABOUT:
-                                    show_about_dialog(main_win);
-                                    break;
-                                case MenuType.QUIT:
-                                    application_quit();
-                                    break;
-                                }
-                            });
-
-                        bookmark_tree.expand_all();
+                        bookmark_title_col.pack_start(bookmark_icon_cell, false);
+                        bookmark_title_col.pack_start(bookmark_label_cell, true);
+                        bookmark_title_col.add_attribute(bookmark_icon_cell, "icon-name", 0);
+                        bookmark_title_col.add_attribute(bookmark_label_cell, "text", 1);
+                        bookmark_title_col.set_title("label");
+                        bookmark_title_col.sizing = TreeViewColumnSizing.AUTOSIZE;
+                        bookmark_title_col.max_width = window_default_width / 4;
+                        p_bookmark_title_col = bookmark_title_col;
                     }
 
-                    bookmark_scrolled.shadow_type = ShadowType.NONE;
-                    bookmark_scrolled.hscrollbar_policy = PolicyType.NEVER;
-                    bookmark_scrolled.add(bookmark_tree);
+                    var bookmark_del_col = new TreeViewColumn();
+                    {
+                        var bookmark_del_cell = new CellRendererPixbuf();
+
+                        bookmark_del_col.pack_start(bookmark_del_cell, false);
+                        bookmark_del_col.add_attribute(bookmark_del_cell, "icon-name", 4);
+                        bookmark_del_col.set_title("del");
+                    }
+
+                    var bookmark_store = new TreeStore(5, typeof(string), typeof(string), typeof(string),
+                                                       typeof(MenuType), typeof(string));
+                    {
+                        bookmark_store.append(out bookmark_root, null);
+                        bookmark_store.set(bookmark_root,
+                                           0, IconName.Symbolic.USER_BOOKMARKS, 1, Text.MENU_BOOKMARK,
+                                           2, "", 3, MenuType.BOOKMARK, 4, "");
+
+                        TreeIter bm_iter;
+                        bookmark_store.append(out playlist_root, null);
+                        bookmark_store.set(playlist_root,
+                                           0, IconName.Symbolic.MEDIA_OPTICAL, 1, Text.MENU_PLAYLIST,
+                                           2, "", 3, MenuType.PLAYLIST_HEADER, 4, "");
+                        bookmark_store.append(out bm_iter, null);
+                        bookmark_store.set(bm_iter, 0, null, 1, null, 2, null,
+                                           3, MenuType.SEPARATOR, 4, "");
+                        bookmark_store.append(out bm_iter, null);
+                        bookmark_store.set(bm_iter, 0, IconName.Symbolic.FOLDER_OPEN, 1, Text.MENU_CHOOSE_DIR,
+                                           2, null, 3, MenuType.CHOOSER, 4, "");
+                        if (!options.use_csd) {
+                            bookmark_store.append(out bm_iter, null);
+                            bookmark_store.set(bm_iter,
+                                               0, IconName.Symbolic.PREFERENCES_SYSTEM, 1, Text.MENU_CONFIG,
+                                               2, null, 3, MenuType.CONFIG, 4, "");
+                            bookmark_store.append(out bm_iter, null);
+                            bookmark_store.set(bm_iter,
+                                               0, IconName.Symbolic.HELP_FAQ, 1, Text.MENU_ABOUT,
+                                               2, null, 3, MenuType.ABOUT, 4, "");
+                            bookmark_store.append(out bm_iter, null);
+                            bookmark_store.set(bm_iter,
+                                               0, IconName.Symbolic.EXIT, 1, Text.MENU_QUIT,
+                                               2, null, 3, MenuType.QUIT, 4, "");
+                        }
+                    }
+
+                    Gtk.Callback menu_bookmark_reset = (bm) => {
+                        TreeIter bm_iter;
+                        bookmark_store.iter_children(out bm_iter, bookmark_root);
+
+                        while (bookmark_store.iter_is_valid(bm_iter)) {
+                            bookmark_store.remove(ref bm_iter);
+                        }
+
+                        foreach (string dir in dirs) {
+                            string dir_basename = dir.slice(dir.last_index_of_char('/') + 1, dir.length);
+                            bookmark_store.append(out bm_iter, bookmark_root);
+                            bookmark_store.set(bm_iter, 0, IconName.Symbolic.FOLDER, 1, dir_basename, 2, dir,
+                                               3, MenuType.FOLDER, 4, "");
+                        }
+
+                        bookmark_store.iter_children(out bm_iter, playlist_root);
+
+                        while (bookmark_store.iter_is_valid(bm_iter)) {
+                            bookmark_store.remove(ref bm_iter);
+                        }
+
+                        Dir dir;
+                        try {
+                            dir = Dir.open(config_dir_path, 0);
+                        } catch (Error e) {
+                            stderr.printf(Text.ERROR_OPEN_PLAYLIST_FILE);
+                            Process.exit(1);
+                        }
+
+                        string file_name;
+                        while ((file_name = dir.read_name()) != null) {
+                            if (MyUtils.FilePathUtils.extension_of(file_name) == "m3u") {
+                                string playlist_name = MyUtils.FilePathUtils.remove_extension(file_name);
+                                bookmark_store.append(out bm_iter, playlist_root);
+                                bookmark_store.set(bm_iter, 0, IconName.Symbolic.AUDIO_FILE,
+                                                   1, playlist_name,
+                                                   2, get_playlist_path_from_name(playlist_name),
+                                                   3, MenuType.PLAYLIST_NAME, 4, "");
+                            }
+                        }
+                    };
+
+                    bookmark_tree.activate_on_single_click = true;
+                    bookmark_tree.headers_visible = false;
+                    bookmark_tree.hover_selection = true;
+                    bookmark_tree.reorderable = false;
+                    bookmark_tree.show_expanders = true;
+                    bookmark_tree.enable_tree_lines = false;
+                    bookmark_tree.level_indentation = 0;
+
+                    bookmark_tree.set_model(bookmark_store);
+                    bookmark_tree.insert_column(bookmark_del_col, 1);
+                    bookmark_tree.insert_column(bookmark_title_col, 0);
+
+                    menu_bookmark_reset(bookmark_tree);
+
+                    bookmark_tree.set_row_separator_func((model, iter) => {
+                            Value menu_type;
+                            model.get_value(iter, 3, out menu_type);
+                            return ((MenuType) menu_type == MenuType.SEPARATOR);
+                        });
+
+                    bookmark_tree.get_selection().changed.connect(() => {
+                            TreeSelection bookmark_selection = bookmark_tree.get_selection();
+                            TreeStore? temp_store = (TreeStore) bookmark_tree.model;
+
+                            temp_store.foreach((model, path, iter) => {
+                                    Value type;
+                                    temp_store.get_value(iter, 3, out type);
+                                    if ((MenuType) type == MenuType.FOLDER || (MenuType) type == MenuType.PLAYLIST_NAME) {
+                                        string icon_name = "";
+                                        if (dirs.length() > 0 && bookmark_selection.iter_is_selected(iter)) {
+                                            icon_name = IconName.Symbolic.LIST_REMOVE;
+                                        } else {
+                                            icon_name = "";
+                                        }
+                                        temp_store.set_value(iter, 4, icon_name);
+                                    }
+                                    return false;
+                                });
+                        });
+
+                    bookmark_tree.row_activated.connect((path, column) => {
+                            Value dir_path;
+                            Value bookmark_name;
+                            TreeIter bm_iter;
+
+                            debug("bookmark_tree_row_activated.");
+                            bookmark_tree.model.get_iter(out bm_iter, path);
+                            bookmark_tree.model.get_value(bm_iter, 3, out bookmark_name);
+
+                            switch ((MenuType) bookmark_name) {
+                            case MenuType.BOOKMARK:
+                                if (bookmark_tree.is_row_expanded(path)) {
+                                    bookmark_tree.collapse_row(path);
+                                } else {
+                                    bookmark_tree.expand_row(path, false);
+                                }
+                                break;
+                                
+                            case MenuType.FOLDER:
+                                bookmark_tree.model.get_value(bm_iter, 2, out dir_path);
+
+                                if (column.get_title() != "del") {
+                                    finder.change_dir((string) dir_path);
+                                    header_add_button.sensitive = true;
+                                        
+                                    if (options.use_csd) {
+                                        win_header.set_title(PROGRAM_NAME + ": " + current_dir);
+                                    }
+                                } else {
+                                    if (dirs.length() > 1) {
+                                        if (confirm(Text.CONFIRM_REMOVE_BOOKMARK)) {
+                                            dirs.remove_link(dirs.nth(path.get_indices()[1]));
+                                            ((TreeStore)bookmark_tree.model).remove(ref bm_iter);
+                                        }
+                                    }
+                                }
+                                break;
+                            case MenuType.PLAYLIST_HEADER:
+                                if (bookmark_tree.is_row_expanded(path)) {
+                                    bookmark_tree.collapse_row(path);
+                                } else {
+                                    bookmark_tree.expand_row(path, false);
+                                }
+                                break;
+                            case MenuType.PLAYLIST_NAME:
+                                Value val1;
+                                Value val2;
+                                bookmark_tree.model.get_value(bm_iter, 1, out val1);
+                                bookmark_tree.model.get_value(bm_iter, 2, out val2);
+                                string playlist_name = (string) val1;
+                                string playlist_path = (string) val2;
+
+                                if (column.get_title() != "del") {
+                                    if (music.playing) {
+                                        music.quit();
+                                    }
+                                    Timeout.add(100, () => {
+                                            if (music.playing) {
+                                                return Source.CONTINUE;
+                                            } else {
+                                                load_playlist_from_file(playlist_name, playlist_path);
+                                                return Source.REMOVE;
+                                            }
+                                        });
+                                } else {
+                                    if (confirm(Text.CONFIRM_REMOVE_PLAYLIST)) {
+                                        ((TreeStore)bookmark_tree.model).remove(ref bm_iter);
+                                        FileUtils.remove(playlist_path);
+                                    }
+                                }
+                                break;
+                            case MenuType.CHOOSER:
+                                var file_chooser = new FileChooserDialog (Text.DIALOG_OPEN_FILE, main_win,
+                                                                          FileChooserAction.SELECT_FOLDER,
+                                                                          Text.DIALOG_CANCEL, ResponseType.CANCEL,
+                                                                          Text.DIALOG_OPEN, ResponseType.ACCEPT);
+                                if (file_chooser.run () == ResponseType.ACCEPT) {
+                                    string selected_path = file_chooser.get_filename();
+                                    debug("selected file path: %s", selected_path);
+                                    finder.change_dir(selected_path);
+                                    header_add_button.sensitive = true;
+                                }
+                                file_chooser.destroy ();
+                                break;
+                            case MenuType.CONFIG:
+                                show_config_dialog(main_win);
+                                break;
+                            case MenuType.ABOUT:
+                                show_about_dialog(main_win);
+                                break;
+                            case MenuType.QUIT:
+                                application_quit();
+                                break;
+                            }
+                        });
+
+                    bookmark_tree.expand_all();
                 }
 
-                bookmark_frame.set_shadow_type(ShadowType.NONE);
-                bookmark_frame.get_style_context().add_class(StyleClass.SIDEBAR);
-                bookmark_frame.add(bookmark_scrolled);
+                bookmark_scrolled.shadow_type = ShadowType.NONE;
+                bookmark_scrolled.hscrollbar_policy = PolicyType.NEVER;
+                bookmark_scrolled.add(bookmark_tree);
             }
 
-            bookmark_revealer.transition_type = RevealerTransitionType.SLIDE_LEFT;
-            bookmark_revealer.reveal_child = true;
-            bookmark_revealer.add(bookmark_frame);
-            p_bookmark_revealer = bookmark_revealer;
+            bookmark_frame.set_shadow_type(ShadowType.NONE);
+            bookmark_frame.get_style_context().add_class(StyleClass.SIDEBAR);
+            bookmark_frame.add(bookmark_scrolled);
         }
 
         //------------------------------------------------------------------------------
@@ -1483,8 +1475,8 @@ int main(string[] args) {
             }
         }
         
-        finder_hbox.pack_start(bookmark_revealer, false, false);
-        finder_hbox.pack_start(finder_overlay, true, true);
+        finder_paned.pack1(bookmark_frame, false, true);
+        finder_paned.pack2(finder_overlay, true, true);
     }
 
     //----------------------------------------------------------------------------------
@@ -1745,9 +1737,10 @@ int main(string[] args) {
         {
             var main_overlay = new Overlay();
             {
-                stack = new DPlayerStack(finder_hbox,
-                                         playlist_vbox,
-                                         options.use_csd);
+                stack = new DPlayerStack(//finder_hbox,
+                    finder_paned,
+                    playlist_vbox,
+                    options.use_csd);
                 
                 main_overlay.add(stack);
                 main_overlay.add_overlay(music_view_overlay);
