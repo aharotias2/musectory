@@ -14,6 +14,7 @@ namespace DPlayer {
         public const string FINDER_MINI_ICON = "finder_mini_icon";
         public const string FINDER_ITEM_LABEL = "finder_item_label";
         public const string FINDER_BUTTON = "finder_button";
+        public const string WHILE_LABEL = "while_label";
     }
 
     namespace IconName {
@@ -47,6 +48,8 @@ namespace DPlayer {
             public const string LIST_ADD = "list-add-symbolic";
             public const string WINDOW_CLOSE = "window-close-symbolic";
             public const string DOCUMENT_SAVE = "document-save-symbolic";
+            public const string ZOOM_IN = "zoom-in-symbolic";
+            public const string ZOOM_OUT = "zoom-out-symbolic";
         }
         public const string AUDIO_FILE = "audio-x-generic";
         public const string MEDIA_OPTICAL = "media-optical";
@@ -153,6 +156,10 @@ namespace DPlayer {
             "    background-color: rgba(128, 128, 128, 0.5);\n"+
             "}\n"+
             ".finder_button {\n"+
+            "}\n"+
+            ".while_label {\n"+
+            "    background-color: rgba(16, 16, 16, 0.5);\n"+
+            "    color: rgba(228, 228, 228, 1.0);\n"+
             "}\n"+
             "\n";
         public const string MARKUP_BOLD_ITALIC = "<b><i>%s</i></b>";

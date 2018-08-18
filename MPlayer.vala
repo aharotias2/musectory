@@ -239,86 +239,6 @@ namespace DPlayer {
         public const string TMP_BASE = "/tmp/" + PROGRAM_NAME;
         public const string OUT_DIR = TMP_BASE + "/tmp";
         
-        private class DPath {
-            public string tmp_dir { get { return v_tmp_dir; } }
-            public string pic_file { get { return v_pic_file; } }
-            public bool pic_exists {
-                get {
-                    return v_pic_exists;
-                }
-            }
-            public DPath(string file_path) {
-                string basename = Path.get_basename(file_path);
-                string dirname = Path.get_basename(Path.get_dirname(file_path));
-                string filename = dirname + "_" + basename;
-                v_pic_file = TMP_BASE + "/" + filename;
-                v_tmp_dir = TMP_BASE + "/tmp/" + filename;
-                set_pic_exists(file_path);
-            }
-            public DPath.with_index(string file_path, int index) {
-                string basename = Path.get_basename(file_path);
-                string dirname = Path.get_basename(Path.get_dirname(file_path));
-                string filename = dirname + "_" + basename;
-                v_pic_file = TMP_BASE + "/" + filename;
-                v_tmp_dir = TMP_BASE + "/tmp/";
-                set_pic_exists(file_path);
-            }
-            public void set_pic_ext(string extension) {
-                if (!v_pic_exists) {
-                    v_pic_file = v_pic_file + "." + extension;
-                }
-            }
-            private void set_pic_exists(string file_path) {
-                v_pic_exists = true;
-                if (FileUtils.test(v_pic_file + ".jpg", FileTest.EXISTS)
-                    && MyUtils.FileUtils.compare_mtime(v_pic_file + ".jpg", file_path) >= 0) {
-                    v_pic_file += ".jpg";
-                } else if (FileUtils.test(v_pic_file + ".png", FileTest.EXISTS)
-                           && MyUtils.FileUtils.compare_mtime(v_pic_file + ".png", file_path) >= 0) {
-                    v_pic_file += ".png";
-                } else if (FileUtils.test(v_pic_file + ".jpeg", FileTest.EXISTS)
-                           && MyUtils.FileUtils.compare_mtime(v_pic_file + ".jpeg", file_path) >= 0) {
-                    v_pic_file += ".jpeg";
-                } else {
-                    v_pic_exists = false;
-                }
-            }                
-            private string get_tmp_pic_path(int index = 1) {
-                try {
-                    string tmp_file_path = "%s/%08d".printf(v_tmp_dir, index);
-                    string ext = ".jpg";
-                    string tmp_file_path2 = tmp_file_path + ext;
-                    if (!FileUtils.test(tmp_file_path2, FileTest.EXISTS)) {
-                        ext = ".jpeg";
-                        tmp_file_path2 = tmp_file_path + ext;
-                        if (!FileUtils.test(tmp_file_path2, FileTest.EXISTS)) {
-                            ext = ".png";
-                            tmp_file_path2 = tmp_file_path + ext;
-                            if (!FileUtils.test(tmp_file_path2, FileTest.EXISTS)) {
-                                MyUtils.FileUtils.create_empty_file(tmp_file_path2);
-                            }
-                        }
-                    }
-                    debug("DPath.get_tmp_pic_path found: %s", tmp_file_path2);
-                    return tmp_file_path2;
-                } catch (Error e) {
-                    return null;
-                } catch (IOError e) {
-                    return null;
-                }
-            }
-            public void put_pic_file(int index = 1) {
-				string temp_file_path = get_tmp_pic_path(index);
-                string ext = MyUtils.FilePathUtils.extension_of(temp_file_path);
-                set_pic_ext(ext);
-				debug("get_music_artwork_from_mplayer_output: temp_file_path2 = %s, pic_file_path = %s\n", temp_file_path, v_pic_file);
-				FileUtils.rename(temp_file_path, v_pic_file);
-            }
-            private bool v_pic_exists;
-            private string v_tmp_dir;
-            private string v_pic_file;
-        }
-        
         private static string get_default_out_dir() {
             return "/tmp/" + PROGRAM_NAME + "/tmp";
         }
@@ -392,6 +312,96 @@ namespace DPlayer {
 			}
 		}
 
-	}
+        private class DPath {
 
+            public string tmp_dir { get { return v_tmp_dir; } }
+            public string pic_file { get { return v_pic_file; } }
+            public bool pic_exists {
+                get {
+                    return v_pic_exists;
+                }
+            }
+
+            public DPath(string file_path) {
+                string basename = Path.get_basename(file_path);
+                string dirname = Path.get_basename(Path.get_dirname(file_path));
+                string filename = dirname + "_" + basename;
+                v_pic_file = TMP_BASE + "/" + filename;
+                v_tmp_dir = TMP_BASE + "/tmp/" + filename;
+                set_pic_exists(file_path);
+            }
+            
+            public DPath.with_index(string file_path, int index) {
+                string basename = Path.get_basename(file_path);
+                string dirname = Path.get_basename(Path.get_dirname(file_path));
+                string filename = dirname + "_" + basename;
+                v_pic_file = TMP_BASE + "/" + filename;
+                v_tmp_dir = TMP_BASE + "/tmp/";
+                set_pic_exists(file_path);
+            }
+            
+            public void set_pic_ext(string extension) {
+                if (!v_pic_exists) {
+                    v_pic_file = v_pic_file + "." + extension;
+                }
+            }
+            
+            private void set_pic_exists(string file_path) {
+                v_pic_exists = true;
+                if (FileUtils.test(v_pic_file + ".jpg", FileTest.EXISTS)
+                    && MyUtils.FileUtils.compare_mtime(v_pic_file + ".jpg", file_path) >= 0) {
+                    v_pic_file += ".jpg";
+                } else if (FileUtils.test(v_pic_file + ".png", FileTest.EXISTS)
+                           && MyUtils.FileUtils.compare_mtime(v_pic_file + ".png", file_path) >= 0) {
+                    v_pic_file += ".png";
+                } else if (FileUtils.test(v_pic_file + ".jpeg", FileTest.EXISTS)
+                           && MyUtils.FileUtils.compare_mtime(v_pic_file + ".jpeg", file_path) >= 0) {
+                    v_pic_file += ".jpeg";
+                } else {
+                    v_pic_exists = false;
+                }
+            }
+            
+            private string? get_tmp_pic_path(int index = 1) {
+                try {
+                    string tmp_file_path = "%s/%08d".printf(v_tmp_dir, index);
+                    string ext = ".jpg";
+                    string tmp_file_path2 = tmp_file_path + ext;
+                    if (!FileUtils.test(tmp_file_path2, FileTest.EXISTS)) {
+                        ext = ".jpeg";
+                        tmp_file_path2 = tmp_file_path + ext;
+                        if (!FileUtils.test(tmp_file_path2, FileTest.EXISTS)) {
+                            ext = ".png";
+                            tmp_file_path2 = tmp_file_path + ext;
+                            if (!FileUtils.test(tmp_file_path2, FileTest.EXISTS)) {
+                                MyUtils.FileUtils.create_empty_file(tmp_file_path2);
+                            }
+                        }
+                    }
+                    debug("DPath.get_tmp_pic_path found: %s", tmp_file_path2);
+                    return tmp_file_path2;
+                } catch (Error e) {
+                    return null;
+                } catch (IOError e) {
+                    return null;
+                }
+            }
+            
+            public void put_pic_file(int index = 1) {
+				string? temp_file_path = get_tmp_pic_path(index);
+                if (temp_file_path != null) {
+                    string ext = MyUtils.FilePathUtils.extension_of(temp_file_path);
+                    set_pic_ext(ext);
+                    debug("get_music_artwork_from_mplayer_output: temp_file_path2 = %s, pic_file_path = %s\n", temp_file_path, v_pic_file);
+                    FileUtils.rename(temp_file_path, v_pic_file);
+                } else {
+                    stderr.printf("temp file is not found.\n");
+                }
+            }
+            
+            private bool v_pic_exists;
+            private string v_tmp_dir;
+            private string v_pic_file;
+        }
+	}
 }

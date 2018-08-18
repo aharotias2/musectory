@@ -146,6 +146,9 @@ namespace DPlayer {
             double blue = foreground_color.blue;
             double alpha = foreground_color.alpha;
             int width = (int) (size * 0.1);
+            if (size < 40) {
+                width = (int) (size * 0.15);
+            }
             int height = (int) (size * pause_height_percentage);
             int space = (int) (size * 0.05);
             int half_size = size / 2;
@@ -155,6 +158,9 @@ namespace DPlayer {
             int y1 = half_size - half_height;
             int x3 = half_size + half_space;
             int y3 = y1;
+            if (x1 + width >= x3) {
+                width = x3 - x1 - 1;
+            }
             ctx.set_line_width(0);
             ctx.set_source_rgba(red, green, blue, alpha);
             ctx.rectangle(x1, y1, width, height);

@@ -33,6 +33,7 @@ namespace DPlayer {
             private MenuButton button;
             public DFileInfo file_info;
             public signal void menu_activated(MenuType type, uint index);
+            private Image? image_artwork;
             
             public PlaylistItem(DFileInfo file, int image_size) {
                 file_info = file;
@@ -46,7 +47,7 @@ namespace DPlayer {
                         Overlay image_overlay = new Overlay();
                         {
                             Gdk.InterpType bilinear = Gdk.InterpType.BILINEAR;
-                            Image? image_artwork = null;
+                            image_artwork = null;
                             if (file.artwork != null) {
                                 Gdk.Pixbuf scaled_artwork = file.artwork.scale_simple(image_size,
                                                                                       image_size,
@@ -252,6 +253,15 @@ namespace DPlayer {
                     set_as_paused();
                 } else {
                     set_as_playing();
+                }
+            }
+
+            public void resize_image(int size) {
+                if (image_size != size) {
+                    image_artwork.pixbuf = file_info.artwork.scale_simple(
+                        size, size, Gdk.InterpType.BILINEAR);
+                    icon_area.set_area_size(size);
+                    image_size = size;
                 }
             }
         }
@@ -485,6 +495,19 @@ namespace DPlayer {
             tracker.reset(0, 0);
         }
 
+        public void resize_artworks(int size) {
+            PlaylistItem? item = null;
+            int i = 0;
+            do {
+                item = get_item(i);
+                if (item != null) {
+                    item.resize_image(size);
+                }
+                i++;
+            } while (item != null);
+            image_size = size;
+        }
+        
         public void new_list_from_path(string path) {
             store.remove_all();
             tracker.reset(0, 0);

@@ -144,6 +144,9 @@ void application_quit() {
     Timeout.add(1, () => {
             if (!music.playing) {
                 Gtk.main_quit();
+                if (playlist.name != null) {
+                    options.last_playlist_name = playlist.name;
+                }
                 return Source.REMOVE;
             } else {
                 return Source.CONTINUE;
@@ -262,7 +265,7 @@ void show_config_dialog(Window main_win) {
 
                 var frame_playlist_image_size = new Frame(Text.CONFIG_DIALOG_HEADER_PLAYLIST_IMAGE);
                 {
-                    var spin_playlist_image_size = new SpinButton.with_range(1, 500, 1);
+                    var spin_playlist_image_size = new SpinButton.with_range(16, 256, 1);
                     {
                         spin_playlist_image_size.margin = 5;
                         spin_playlist_image_size.numeric = false;
@@ -324,7 +327,7 @@ void show_config_dialog(Window main_win) {
                             artwork.pixbuf = MyUtils.PixbufUtils.scale_limited(current_playing_artwork,
                                                                                options.thumbnail_size);
                         }
-
+                        playlist.resize_artworks(options.playlist_image_size);
                         debug("_use_csd: " + (_use_csd ? "true" : "false"));
                         debug("options.use_csd: " + (options.use_csd ? "true" : "false"));
                         if (options.use_csd != _use_csd) {
@@ -557,6 +560,8 @@ int main(string[] args) {
     options.thumbnail_size = 80;
     options.show_thumbs_at = ShowThumbsAt.ALBUMS;
     options.playlist_image_size = 64;
+    options.icon_size = 48;
+    options.last_playlist_name = "";
     
     current_dir = null;
 
@@ -600,6 +605,14 @@ int main(string[] args) {
 
                 case "playlist_image_size":
                     options.playlist_image_size = int.parse(pair[1]);
+                    break;
+
+                case "icon_size":
+                    options.icon_size = int.parse(pair[1]);
+                    break;
+
+                case "last_playlist_name":
+                    options.last_playlist_name = pair[1];
                     break;
                 }
             }
@@ -1321,7 +1334,8 @@ int main(string[] args) {
                                 if (column.get_title() != "del") {
                                     finder.change_dir((string) dir_path);
                                     header_add_button.sensitive = true;
-                                        
+                                    current_dir = (string) dir_path;
+                                    
                                     if (options.use_csd) {
                                         win_header.set_title(PROGRAM_NAME + ": " + current_dir);
                                     }
@@ -1374,9 +1388,10 @@ int main(string[] args) {
                                                                           Text.DIALOG_CANCEL, ResponseType.CANCEL,
                                                                           Text.DIALOG_OPEN, ResponseType.ACCEPT);
                                 if (file_chooser.run () == ResponseType.ACCEPT) {
-                                    string selected_path = file_chooser.get_filename();
-                                    debug("selected file path: %s", selected_path);
-                                    finder.change_dir(selected_path);
+                                    current_dir = file_chooser.get_filename();
+                                    debug("selected file path: %s", current_dir);
+                                    finder.change_dir(current_dir);
+                                    win_header.set_title(current_dir);
                                     header_add_button.sensitive = true;
                                 }
                                 file_chooser.destroy ();
@@ -1413,6 +1428,8 @@ int main(string[] args) {
         {
             finder = new DPlayer.Finder();
             {
+                finder.icon_size = options.icon_size;
+                
                 finder.bookmark_button_clicked.connect((file_path) => {
                         add_bookmark(file_path);
                     });
@@ -1455,6 +1472,17 @@ int main(string[] args) {
                         playlist.append_list_from_path(file_path);
                         List<string> file_list = playlist.get_file_path_list();
                         playlist.changed(file_list);
+                    });
+
+                finder.icon_image_resized.connect((icon_size) => {
+                        options.icon_size = icon_size;
+                    });
+
+                finder.button_clicked.connect((file_path) => {
+                        if (FileUtils.test(file_path, FileTest.IS_DIR)) {
+                            current_dir = file_path;
+                            win_header.set_title(current_dir);
+                        }
                     });
 
                 finder.use_popover = false;
@@ -1803,6 +1831,10 @@ int main(string[] args) {
     header_switch_button.sensitive = false;
     header_add_button.sensitive = false;
     stack.show_finder();
+    if (options.last_playlist_name != "") {
+        load_playlist_from_file(options.last_playlist_name,
+                                get_playlist_path_from_name(options.last_playlist_name));
+    }
 
     Gtk.main();
 
@@ -1811,20 +1843,28 @@ int main(string[] args) {
     //----------------------------------------------------------------------------------
     config_file_contents = "";
 
+    config_file_contents =
+        "ao_type=%s\n"+
+        "thumbnail_size=%d\n"+
+        "use_csd=%s\n"+
+        "cwd=%s\n"+
+        "playlist_image_size=%d\n"+
+        "icon_size=%d\n"+
+        "playlist_name=%s\n";
+    config_file_contents = config_file_contents.printf(
+            options.ao_type,
+            options.thumbnail_size,
+            (options.use_csd ? "true" : "false"),
+            current_dir,
+            options.playlist_image_size,
+            options.icon_size,
+            (options.last_playlist_name != null ? options.last_playlist_name : "")
+            );
     foreach (string dir in dirs) {
         config_file_contents += "dir=" + dir + "\n";
     }
 
-    config_file_contents += "ao_type=" + options.ao_type + "\n";
 
-    config_file_contents += "thumbnail_size=" + options.thumbnail_size.to_string() + "\n";
-
-    config_file_contents += "use_csd=" + (options.use_csd ? "true\n" : "false\n");
-
-    config_file_contents += "cwd=" + current_dir + "\n";
-
-    config_file_contents += "playlist_image_size=%d\n".printf(options.playlist_image_size);
-    
     try {
         FileUtils.set_contents(config_file_path, config_file_contents);
     } catch (Error e) {

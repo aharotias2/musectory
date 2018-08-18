@@ -25,6 +25,7 @@ namespace DPlayer {
     Gdk.Pixbuf folder_pixbuf;
     Gdk.Pixbuf file_pixbuf;
     Gdk.Pixbuf cd_pixbuf;
+    const int max_icon_size = 256;
     
     public class ImageLoaderThreadData {
         private string file_path;
@@ -40,7 +41,7 @@ namespace DPlayer {
         public void* run() {
             debug("thread starts");
             try {
-                icon_pixbuf = new DFileUtils(file_path).load_first_artwork(icon_size);
+                icon_pixbuf = new DFileUtils(file_path).load_first_artwork(max_icon_size);
             } catch (FileError e) {
                 Process.exit(1);
             }
@@ -66,13 +67,14 @@ namespace DPlayer {
         
         private Thread<void *>? thread;
         private ImageLoaderThreadData? thdata;
-        
+        private Gdk.Pixbuf? icon_pixbuf;
+
         public signal void bookmark_button_clicked(string file_path);
         public signal void add_button_clicked(string file_path);
         public signal void play_button_clicked(string file_path);
 
         /* Contructor */
-        public FinderItem(ref DFileInfo file_info, int icon_size = 128, bool use_popover = true) {
+        public FinderItem(ref DFileInfo file_info, int icon_size, bool use_popover = true) {
             this.file_path = file_info.path;
             this.file_name = file_info.name;
             this.dir_path = file_info.dir;
@@ -89,7 +91,7 @@ namespace DPlayer {
                     {
                         var widget_overlay1 = new Overlay();
                         {
-                            Gdk.Pixbuf? icon_pixbuf = null;
+                            icon_pixbuf = null;
                             {
                                 this.file_path = Path.build_path(Path.DIR_SEPARATOR_S, dir_path, file_name);
                                 debug("file_path: " + file_path);
@@ -108,7 +110,11 @@ namespace DPlayer {
                                                     debug("tmp_icon_pixbuf has been loaded");
                                                     thread.join();
                                                     if (thdata.icon_pixbuf != null) {
-                                                        icon_image.set_from_pixbuf(thdata.icon_pixbuf);
+                                                        icon_pixbuf = thdata.icon_pixbuf;
+                                                        icon_image.set_from_pixbuf(icon_pixbuf.scale_simple(
+                                                                                       this.icon_size,
+                                                                                       this.icon_size,
+                                                                                       Gdk.InterpType.BILINEAR));
                                                     }
                                                     return Source.REMOVE;
                                                 }
@@ -119,27 +125,32 @@ namespace DPlayer {
                                             }
                                         }, Priority.DEFAULT);
                                     if (icon_pixbuf == null) {
-                                        icon_pixbuf = cd_pixbuf;
+                                        icon_pixbuf = cd_pixbuf.scale_simple(this.icon_size, this.icon_size,
+                                                                             Gdk.InterpType.BILINEAR);
                                     }
                                     break;
 
                                 case DFileType.DIRECTORY:
                                     debug("file_type: directory");
-                                    icon_pixbuf = folder_pixbuf;
+                                    icon_pixbuf = folder_pixbuf.scale_simple(this.icon_size, this.icon_size,
+                                                                             Gdk.InterpType.BILINEAR);
                                     break;
 
                                 case DFileType.PARENT:
                                     debug("file_type: parent");
-                                    icon_pixbuf = parent_pixbuf.scale_simple(icon_size, icon_size, Gdk.InterpType.BILINEAR);
+                                    icon_pixbuf = parent_pixbuf.scale_simple(this.icon_size,
+                                                                             this.icon_size,
+                                                                             Gdk.InterpType.BILINEAR);
                                     break;
 
                                 case DFileType.FILE:
                                 default:
                                     debug("file_type: file");
                                     if (file_info.artwork != null) {
-                                        icon_pixbuf = file_info.artwork.scale_simple(icon_size, icon_size, Gdk.InterpType.BILINEAR);
+                                        icon_pixbuf = file_info.artwork.scale_simple(this.icon_size, this.icon_size, Gdk.InterpType.BILINEAR);
                                     } else {
-                                        icon_pixbuf = file_pixbuf;
+                                        icon_pixbuf = file_pixbuf.scale_simple(this.icon_size, this.icon_size,
+                                                                             Gdk.InterpType.BILINEAR);
                                     }
                                     break;
 
@@ -287,6 +298,10 @@ namespace DPlayer {
             add_button.visible = bookmark_button.visible = play_button.visible = true;
         }
 
+        public void set_image_size(int size) {
+            icon_image.pixbuf = icon_pixbuf.scale_simple(size, size, Gdk.InterpType.BILINEAR);
+        }
+
         /* Private methods */
         private EventBox add_popover_to_button(Button button, string pop_text) {
             var pop = new Popover(button);
@@ -316,20 +331,29 @@ namespace DPlayer {
     class Finder : Bin {
         private int count;
         private IconTheme icon_theme;
-
+        private int zoom_level;
+        private int icon_size_;
         /* Private fields */
         private ScrolledWindow finder_container;
         private FlowBox finder;
         private ProgressBar progress;
         private Revealer progress_revealer;
         private Label while_label;
-        
+        private Button zoomin_button;
+        private Button zoomout_button;
+
         private List<DFileInfo?> file_info_list;
 
         private CompareFunc<string> string_compare_func;
 
         /* Properties */
-        public int icon_size { get; set; }
+        public int icon_size {
+            get { return icon_size_; }
+            set {
+                zoom_level = get_size_zoom(value);
+                icon_size_ = get_level_size();
+            }
+        }
         public bool use_popover { get; set; }
         public string dir_path { get; set; }
         public bool activate_on_single_click { get; set; }
@@ -337,9 +361,12 @@ namespace DPlayer {
         public signal void bookmark_button_clicked(string file_path);
         public signal void add_button_clicked(string file_path);
         public signal void play_button_clicked(string file_path);
-
+        public signal void icon_image_resized(int icon_size);
+        public signal void button_clicked(string file_path);
+        
         /* Constructor */
         public Finder() {
+            zoom_level = 8;
             string_compare_func = (a, b) => {
                 return a.collate(b);
             };
@@ -348,16 +375,15 @@ namespace DPlayer {
             debug("creating finder start");
             activate_on_single_click = true;
             icon_theme = Gtk.IconTheme.get_default();
-            icon_size = 128;
 
             try {
-                file_pixbuf = icon_theme.load_icon(IconName.AUDIO_FILE, icon_size, 0);
-                cd_pixbuf = icon_theme.load_icon(IconName.MEDIA_OPTICAL, icon_size, 0);
-                folder_pixbuf = icon_theme.load_icon(IconName.FOLDER_MUSIC, icon_size, 0);
+                file_pixbuf = icon_theme.load_icon(IconName.AUDIO_FILE, max_icon_size, 0);
+                cd_pixbuf = icon_theme.load_icon(IconName.MEDIA_OPTICAL, max_icon_size, 0);
+                folder_pixbuf = icon_theme.load_icon(IconName.FOLDER_MUSIC, max_icon_size, 0);
                 if (folder_pixbuf == null) {
-                    folder_pixbuf = icon_theme.load_icon(IconName.FOLDER, icon_size, 0);
+                    folder_pixbuf = icon_theme.load_icon(IconName.FOLDER, max_icon_size, 0);
                 }
-                parent_pixbuf = icon_theme.load_icon(IconName.GO_UP, icon_size, 0);
+                parent_pixbuf = icon_theme.load_icon(IconName.GO_UP, max_icon_size, 0);
             } catch (Error e) {
                 stderr.printf(Text.ERROR_LOAD_ICON);
                 Process.exit(1);
@@ -367,11 +393,45 @@ namespace DPlayer {
             {
                 var finder_box = new Box(Orientation.VERTICAL, 1);
                 {
-                    finder_container = new ScrolledWindow(null, null);
+                    var zoom_overlay = new Overlay();
                     {
-                        finder_container.get_style_context().add_class(StyleClass.VIEW);
+                        finder_container = new ScrolledWindow(null, null);
+                        {
+                            finder_container.get_style_context().add_class(StyleClass.VIEW);
+                        }
+
+                        var zoom_box = new Box(Orientation.HORIZONTAL, 0);
+                        {
+                            zoomin_button = new Button();
+                            {
+                                zoomin_button.sensitive = false;
+                                zoomin_button.add(new Image.from_icon_name(IconName.Symbolic.ZOOM_IN,
+                                                                           IconSize.SMALL_TOOLBAR));
+                                zoomin_button.clicked.connect(() => {
+                                        zoom_in();
+                                    });
+                            }
+
+                            zoomout_button = new Button();
+                            {
+                                zoomout_button.sensitive = false;
+                                zoomout_button.add(new Image.from_icon_name(IconName.Symbolic.ZOOM_OUT,
+                                                                           IconSize.SMALL_TOOLBAR));
+                                zoomout_button.clicked.connect(() => {
+                                        zoom_out();
+                                    });
+                            }
+
+                            zoom_box.pack_start(zoomin_button, false, false);
+                            zoom_box.pack_start(zoomout_button, false, false);
+                            zoom_box.halign = Align.START;
+                            zoom_box.valign = Align.START;
+                        }
+
+                        zoom_overlay.add(finder_container);
+                        zoom_overlay.add_overlay(zoom_box);
                     }
-                
+                    
                     progress_revealer = new Revealer();
                     {
                         progress = new ProgressBar();
@@ -386,7 +446,7 @@ namespace DPlayer {
                     }
             
                     finder_box.pack_start(progress_revealer, false, false);
-                    finder_box.pack_start(finder_container, true, true);
+                    finder_box.pack_start(zoom_overlay, true, true);
                 }
             
                 var while_label_box = new Box(Orientation.VERTICAL, 4);
@@ -396,16 +456,12 @@ namespace DPlayer {
                         while_label.margin = 4;
                     }
 
-                    Gdk.RGBA while_label_bg_color = {0.1, 0.1, 0.1, 0.5};
-                    Gdk.RGBA while_label_fg_color = {0.9, 0.9, 0.9, 1.0};
-
-                    while_label_box.override_background_color(Gtk.StateFlags.NORMAL, while_label_bg_color);
-                    while_label_box.override_color(Gtk.StateFlags.NORMAL, while_label_fg_color);
                     while_label_box.pack_start(while_label);
                     while_label_box.hexpand = false;
                     while_label_box.vexpand = false;
                     while_label_box.halign = Align.CENTER;
                     while_label_box.valign = Align.CENTER;
+                    while_label_box.get_style_context().add_class(StyleClass.WHILE_LABEL);
                 }
             
                 overlay_while_label.add(finder_box);
@@ -423,9 +479,11 @@ namespace DPlayer {
             debug("start change_dir (" + dir_path + ")");
             this.dir_path = dir_path;
             change_cursor(Gdk.CursorType.WATCH);
-
+            zoomin_button.sensitive = true;
+            zoomout_button.sensitive = true;
             while_label.visible = true;
             while_label.label = Text.FINDER_LOAD_FILES;
+            int size = get_level_size();
 
             Timeout.add(10, () => {
 
@@ -447,7 +505,7 @@ namespace DPlayer {
                     finder.valign = Align.START;
                     uint i = 0;
                     finder_container.add(finder);
-
+                    
                     Timeout.add(40, () => {
                             if (i < this.file_info_list.length()) {
                                 DFileInfo file_info = this.file_info_list.nth_data(i);
@@ -463,13 +521,14 @@ namespace DPlayer {
                                     }
                                 }
 
-                                var item_widget = new FinderItem(ref file_info, icon_size, use_popover);
+                                var item_widget = new FinderItem(ref file_info, size, use_popover);
                                 if (item_widget != null) {
                                     switch (file_info.file_type) {
                                       case DFileType.DIRECTORY:
                                       case DFileType.DISC:
                                         item_widget.icon_button.clicked.connect(() => {
                                                 change_dir(file_info.path);
+                                                button_clicked(file_info.path);
                                             });
                                         item_widget.bookmark_button_clicked.connect((file_path) => {
                                                 bookmark_button_clicked(file_path);
@@ -478,6 +537,7 @@ namespace DPlayer {
                                       case DFileType.PARENT:
                                         item_widget.icon_button.clicked.connect(() => {
                                                 change_dir(file_info.path);
+                                                button_clicked(file_info.path);
                                             });
                                         break;
                                       case DFileType.FILE:
@@ -529,6 +589,84 @@ namespace DPlayer {
 
         public void hide_while_label() {
             while_label.visible = false;
+        }
+
+        public void zoom_out() {
+            if (zoom_level > 1) {
+                zoom_level--;
+                int size = get_level_size();
+                int i = 0;
+                FinderItem? item = null;
+                do {
+                    item = (FinderItem)finder.get_child_at_index(i);
+                    if (item != null) {
+                        item.set_image_size(size);
+                        i++;
+                    }
+                } while (item != null);
+                icon_image_resized(size);
+            }
+        }
+
+        public void zoom_in() {
+            if (zoom_level < 10) {
+                zoom_level++;
+                int size = get_level_size();
+                int i = 0;
+                FinderItem? item = null;
+                do {
+                    item = (FinderItem)finder.get_child_at_index(i);
+                    if (item != null) {
+                        item.set_image_size(size);
+                        i++;
+                    }
+                } while (item != null);
+                icon_image_resized(size);
+            }
+        }
+
+        private int get_level_size() {
+            switch (zoom_level) {
+            case 1: return 32;
+            case 2: return 36;
+            case 3: return 42;
+            case 4: return 48;
+            case 5: return 52;
+            case 6: return 64;
+            case 7: return 72;
+            case 8: return 96;
+            case 9: return 128;
+            case 10: return 256;
+            default: return 128;
+            }
+        }
+
+        private int get_size_zoom(int size) {
+            if (size >= 0) {
+                if (size < 36) {
+                    return 1;
+                } else if (size < 42) {
+                    return 2;
+                } else if (size < 48) {
+                    return 3;
+                } else if (size < 52) {
+                    return 4;
+                } else if (size < 64) {
+                    return 5;
+                } else if (size < 72) {
+                    return 6;
+                } else if (size < 96) {
+                    return 7;
+                } else if (size < 128) {
+                    return 8;
+                } else if (size < 256) {
+                    return 9;
+                } else {
+                    return 10;
+                }
+            } else {
+                return 8;
+            }
         }
     }
 }
