@@ -125,39 +125,37 @@ namespace DPlayer {
                                             }
                                         }, Priority.DEFAULT);
                                     if (icon_pixbuf == null) {
-                                        icon_pixbuf = cd_pixbuf.scale_simple(this.icon_size, this.icon_size,
-                                                                             Gdk.InterpType.BILINEAR);
+                                        icon_pixbuf = cd_pixbuf;
                                     }
                                     break;
 
                                 case DFileType.DIRECTORY:
                                     debug("file_type: directory");
-                                    icon_pixbuf = folder_pixbuf.scale_simple(this.icon_size, this.icon_size,
-                                                                             Gdk.InterpType.BILINEAR);
+                                    icon_pixbuf = folder_pixbuf;
                                     break;
 
                                 case DFileType.PARENT:
                                     debug("file_type: parent");
-                                    icon_pixbuf = parent_pixbuf.scale_simple(this.icon_size,
-                                                                             this.icon_size,
-                                                                             Gdk.InterpType.BILINEAR);
+                                    icon_pixbuf = parent_pixbuf;
                                     break;
 
                                 case DFileType.FILE:
                                 default:
                                     debug("file_type: file");
                                     if (file_info.artwork != null) {
-                                        icon_pixbuf = file_info.artwork.scale_simple(this.icon_size, this.icon_size, Gdk.InterpType.BILINEAR);
+                                        icon_pixbuf = file_info.artwork;
                                     } else {
-                                        icon_pixbuf = file_pixbuf.scale_simple(this.icon_size, this.icon_size,
-                                                                             Gdk.InterpType.BILINEAR);
+                                        icon_pixbuf = file_pixbuf;
                                     }
                                     break;
 
                                 }
                             }
 
-                            icon_image = new Image.from_pixbuf(icon_pixbuf);
+                            icon_image = new Image.from_pixbuf(icon_pixbuf.scale_simple(
+                                                                   this.icon_size,
+                                                                   this.icon_size,
+                                                                   Gdk.InterpType.BILINEAR));
                             {
                                 icon_image.get_style_context().add_class(StyleClass.FINDER_ICON);
                             }
@@ -329,11 +327,10 @@ namespace DPlayer {
     }
 
     class Finder : Bin {
+        /* Private fields */
         private int count;
         private IconTheme icon_theme;
         private int zoom_level;
-        private int icon_size_;
-        /* Private fields */
         private ScrolledWindow finder_container;
         private FlowBox finder;
         private ProgressBar progress;
@@ -347,13 +344,6 @@ namespace DPlayer {
         private CompareFunc<string> string_compare_func;
 
         /* Properties */
-        public int icon_size {
-            get { return icon_size_; }
-            set {
-                zoom_level = get_size_zoom(value);
-                icon_size_ = get_level_size();
-            }
-        }
         public bool use_popover { get; set; }
         public string dir_path { get; set; }
         public bool activate_on_single_click { get; set; }
@@ -362,7 +352,7 @@ namespace DPlayer {
         public signal void add_button_clicked(string file_path);
         public signal void play_button_clicked(string file_path);
         public signal void icon_image_resized(int icon_size);
-        public signal void button_clicked(string file_path);
+        public signal void file_button_clicked(string file_path);
         
         /* Constructor */
         public Finder() {
@@ -422,6 +412,7 @@ namespace DPlayer {
                                     });
                             }
 
+                            zoom_box.get_style_context().add_class(StyleClass.LINKED);
                             zoom_box.pack_start(zoomin_button, false, false);
                             zoom_box.pack_start(zoomout_button, false, false);
                             zoom_box.halign = Align.START;
@@ -528,7 +519,7 @@ namespace DPlayer {
                                       case DFileType.DISC:
                                         item_widget.icon_button.clicked.connect(() => {
                                                 change_dir(file_info.path);
-                                                button_clicked(file_info.path);
+                                                file_button_clicked(file_info.path);
                                             });
                                         item_widget.bookmark_button_clicked.connect((file_path) => {
                                                 bookmark_button_clicked(file_path);
@@ -537,7 +528,7 @@ namespace DPlayer {
                                       case DFileType.PARENT:
                                         item_widget.icon_button.clicked.connect(() => {
                                                 change_dir(file_info.path);
-                                                button_clicked(file_info.path);
+                                                file_button_clicked(file_info.path);
                                             });
                                         break;
                                       case DFileType.FILE:
@@ -583,6 +574,10 @@ namespace DPlayer {
                 }, Priority.HIGH);
         }
 
+        public void set_default_icon_size(int icon_size) {
+            zoom_level = get_size_level(icon_size);
+        }
+        
         public void change_cursor(Gdk.CursorType cursor_type) {
             finder_container.get_parent_window().set_cursor(new Gdk.Cursor.for_display(Gdk.Screen.get_default().get_display(), cursor_type));
         }
@@ -641,7 +636,7 @@ namespace DPlayer {
             }
         }
 
-        private int get_size_zoom(int size) {
+        private int get_size_level(int size) {
             if (size >= 0) {
                 if (size < 36) {
                     return 1;

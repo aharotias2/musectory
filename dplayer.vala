@@ -1428,7 +1428,7 @@ int main(string[] args) {
         {
             finder = new DPlayer.Finder();
             {
-                finder.icon_size = options.icon_size;
+                finder.set_default_icon_size(options.icon_size);
                 
                 finder.bookmark_button_clicked.connect((file_path) => {
                         add_bookmark(file_path);
@@ -1478,7 +1478,7 @@ int main(string[] args) {
                         options.icon_size = icon_size;
                     });
 
-                finder.button_clicked.connect((file_path) => {
+                finder.file_button_clicked.connect((file_path) => {
                         if (FileUtils.test(file_path, FileTest.IS_DIR)) {
                             current_dir = file_path;
                             win_header.set_title(current_dir);
