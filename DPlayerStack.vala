@@ -22,9 +22,8 @@ using Gtk, DPlayer;
 class DPlayerStack : Bin {
     private Stack stack;
     private bool use_csd;
-    public signal void finder_selected();
-    public signal void playlist_selected();
-    
+    public signal void finder_is_selected();
+    public signal void playlist_is_selected();
     public DPlayerStack(Widget finder, Widget playlist, bool use_csd) {
         this.stack = new Stack();
         {
@@ -64,7 +63,7 @@ class DPlayerStack : Bin {
             this.stack.transition_type = StackTransitionType.SLIDE_RIGHT;
         }
         this.stack.visible_child_name = "finder";
-        finder_selected();
+        finder_is_selected();
     }
 
     public void show_playlist() {
@@ -74,6 +73,6 @@ class DPlayerStack : Bin {
             this.stack.transition_type = StackTransitionType.SLIDE_LEFT;
         }
         this.stack.visible_child_name = "playlist";
-        playlist_selected();
+        playlist_is_selected();
     }
 }

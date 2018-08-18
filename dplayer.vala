@@ -729,15 +729,7 @@ int main(string[] args) {
                 header_switch_button = new Button.from_icon_name(IconName.Symbolic.VIEW_LIST, IconSize.BUTTON);
                 {
                     header_switch_button.get_style_context().add_class(StyleClass.TITLEBUTTON);
-                    header_switch_button.has_tooltip = true;
-                    header_switch_button.query_tooltip.connect((x, y, keyboard_tooltip, tooltip) => {
-                            if (stack.finder_is_visible()) {
-                                tooltip.set_text(Text.TOOLTIP_SHOW_PLAYLIST);
-                            } else if (stack.playlist_is_visible()) {
-                                tooltip.set_text(Text.TOOLTIP_SHOW_FINDER);
-                            }
-                            return true;
-                        });
+                    header_switch_button.add(new Image.from_icon_name(IconName.Symbolic.VIEW_LIST, IconSize.BUTTON));
                     header_switch_button.clicked.connect(() => {
                             if (stack.finder_is_visible()) {
                                 //hoge
@@ -781,15 +773,7 @@ int main(string[] args) {
                 header_add_button = new Button.from_icon_name(IconName.Symbolic.BOOKMARK_NEW, IconSize.BUTTON);
                 {
                     header_add_button.get_style_context().add_class(StyleClass.TITLEBUTTON);
-                    header_add_button.has_tooltip = true;
-                    header_add_button.query_tooltip.connect((x, y, keyboard_tooltip, tooltip) => {
-                            if (stack.finder_is_visible()) {
-                                tooltip.set_text(Text.TOOLTIP_SAVE_FINDER);
-                            } else if (stack.playlist_is_visible()) {
-                                tooltip.set_text(Text.TOOLTIP_SAVE_PLAYLIST);
-                            }
-                            return true;
-                        });
+                    header_add_button.add(new Image.from_icon_name(IconName.Symbolic.BOOKMARK_NEW, IconSize.BUTTON));
                     header_add_button.clicked.connect(() => {
                             playlist_save_action();
                         });
@@ -1547,11 +1531,7 @@ int main(string[] args) {
             {
                 back_button.halign = Align.CENTER;
                 back_button.valign = Align.START;
-                back_button.has_tooltip = true;
-                back_button.query_tooltip.connect((x, y, keyboard_tooltip, tooltip) => {
-                        tooltip.set_text(Text.TOOLTIP_SHOW_FINDER);
-                        return true;
-                    });
+                back_button.tooltip_text = Text.TOOLTIP_SHOW_FINDER;
                 back_button.clicked.connect(() => {
                         stack.show_finder();
                     });
@@ -1563,11 +1543,7 @@ int main(string[] args) {
             {
                 save_button.halign = Align.CENTER;
                 save_button.valign = Align.START;
-                save_button.has_tooltip = true;
-                save_button.query_tooltip.connect((x, y, keyboard_tooltip, tooltip) => {
-                        tooltip.set_text(Text.TOOLTIP_SAVE_PLAYLIST);
-                        return true;
-                    });
+                save_button.tooltip_text = Text.TOOLTIP_SAVE_PLAYLIST;
                 save_button.clicked.connect(() => {
                         playlist_save_action();
                     });
@@ -1612,6 +1588,9 @@ int main(string[] args) {
                         List<string> list = file_path_list.copy_deep((src) => {
                                 return src.dup();
                             });
+                        if (list.length() > 0) {
+                            header_add_button.sensitive = true;
+                        }
                         if (music.playing) {
                             music.set_file_list(ref list);
                         } else {
@@ -1796,13 +1775,17 @@ int main(string[] args) {
                     playlist_vbox,
                     options.use_csd);
                 {
-                    stack.finder_selected.connect(() => {
+                    stack.finder_is_selected.connect(() => {
                             header_zoomin_button.sensitive = true;
                             header_zoomout_button.sensitive = true;
+                            header_switch_button.tooltip_text = Text.TOOLTIP_SHOW_FINDER;
+                            header_add_button.tooltip_text = Text.TOOLTIP_SAVE_FINDER;
                         });
-                    stack.playlist_selected.connect(() => {
+                    stack.playlist_is_selected.connect(() => {
                             header_zoomin_button.sensitive = false;
                             header_zoomout_button.sensitive = false;
+                            header_switch_button.tooltip_text = Text.TOOLTIP_SHOW_PLAYLIST;
+                            header_add_button.tooltip_text = Text.TOOLTIP_SAVE_PLAYLIST;
                         });
                 }
                 
