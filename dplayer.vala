@@ -71,6 +71,8 @@ Box controller;
 Overlay music_view_overlay;
 Button header_switch_button;
 Button header_add_button;
+Button header_zoomin_button;
+Button header_zoomout_button;
 Image music_view_artwork;
 Label music_title;
 ProgressBar time_bar;
@@ -495,9 +497,9 @@ string get_playlist_path_from_name(string name) {
 }
 
 void playlist_save_action() {
-    if (stack.is_finder_visible()) {
+    if (stack.finder_is_visible()) {
         add_bookmark(finder.dir_path);
-    } else if (stack.is_playlist_visible()) {
+    } else if (stack.playlist_is_visible()) {
         if (playlist.name == null) {
             save_playlist(playlist.get_file_path_list());
         } else if (playlist_exists(playlist.name)) {
@@ -724,21 +726,20 @@ int main(string[] args) {
         {
             var header_box = new Box(Orientation.HORIZONTAL, 0);
             {
-                header_switch_button = new Button();
+                header_switch_button = new Button.from_icon_name(IconName.Symbolic.VIEW_LIST, IconSize.BUTTON);
                 {
                     header_switch_button.get_style_context().add_class(StyleClass.TITLEBUTTON);
-                    header_switch_button.add(new Image.from_icon_name(IconName.Symbolic.VIEW_LIST, IconSize.BUTTON));
                     header_switch_button.has_tooltip = true;
                     header_switch_button.query_tooltip.connect((x, y, keyboard_tooltip, tooltip) => {
-                            if (stack.is_finder_visible()) {
+                            if (stack.finder_is_visible()) {
                                 tooltip.set_text(Text.TOOLTIP_SHOW_PLAYLIST);
-                            } else if (stack.is_playlist_visible()) {
+                            } else if (stack.playlist_is_visible()) {
                                 tooltip.set_text(Text.TOOLTIP_SHOW_FINDER);
                             }
                             return true;
                         });
                     header_switch_button.clicked.connect(() => {
-                            if (stack.is_finder_visible()) {
+                            if (stack.finder_is_visible()) {
                                 //hoge
                                 DFileInfo file_info = playlist.track_data();
 
@@ -761,7 +762,7 @@ int main(string[] args) {
                                 music_view_artwork.visible = false;
                                 stack.show_playlist();
                                 header_switch_button.image = view_grid_image;
-                            } else if (stack.is_playlist_visible()) {
+                            } else if (stack.playlist_is_visible()) {
                                 if (options.use_csd) {
                                     win_header.set_title(finder.dir_path);
                                 } else {
@@ -777,15 +778,14 @@ int main(string[] args) {
                         });
                 }
 
-                header_add_button = new Button();
+                header_add_button = new Button.from_icon_name(IconName.Symbolic.BOOKMARK_NEW, IconSize.BUTTON);
                 {
                     header_add_button.get_style_context().add_class(StyleClass.TITLEBUTTON);
-                    header_add_button.add(new Image.from_icon_name(IconName.Symbolic.BOOKMARK_NEW, IconSize.BUTTON));
                     header_add_button.has_tooltip = true;
                     header_add_button.query_tooltip.connect((x, y, keyboard_tooltip, tooltip) => {
-                            if (stack.is_finder_visible()) {
+                            if (stack.finder_is_visible()) {
                                 tooltip.set_text(Text.TOOLTIP_SAVE_FINDER);
-                            } else if (stack.is_playlist_visible()) {
+                            } else if (stack.playlist_is_visible()) {
                                 tooltip.set_text(Text.TOOLTIP_SAVE_PLAYLIST);
                             }
                             return true;
@@ -795,6 +795,32 @@ int main(string[] args) {
                         });
                 }
 
+
+                var header_zoom_box = new Box(Orientation.HORIZONTAL, 0);
+                {
+                    header_zoomin_button = new Button.from_icon_name(IconName.Symbolic.ZOOM_IN,
+                                                                     IconSize.BUTTON);
+                    {
+                        header_zoomin_button.get_style_context().add_class(StyleClass.TITLEBUTTON);
+                        header_zoomin_button.clicked.connect(() => {
+                                finder.zoom_in();
+                            });
+                    }
+
+                    header_zoomout_button = new Button.from_icon_name(IconName.Symbolic.ZOOM_OUT,
+                                                                      IconSize.BUTTON);
+                    {
+                        header_zoomout_button.get_style_context().add_class(StyleClass.TITLEBUTTON);
+                        header_zoomout_button.clicked.connect(() => {
+                                finder.zoom_out();
+                            });
+                    }
+
+                    header_zoom_box.pack_start(header_zoomin_button, false, false);
+                    header_zoom_box.pack_start(header_zoomout_button, false, false);
+                    header_zoom_box.get_style_context().add_class(Gtk.STYLE_CLASS_INLINE_TOOLBAR);
+                }
+                
 #if PREPROCESSOR_DEBUG
                 var debug_print_music_button = new Button.with_label("d1");
                 {
@@ -804,9 +830,9 @@ int main(string[] args) {
                         });
                 }
 #endif
-
                 header_box.add(header_switch_button);
                 header_box.add(header_add_button);
+                header_box.add(header_zoom_box);
                 
 #if PREPROCESSOR_DEBUG
                 // debug
@@ -878,12 +904,12 @@ int main(string[] args) {
                 header_fold_button.add(new Image.from_icon_name(IconName.Symbolic.GO_UP, IconSize.BUTTON));
                 header_fold_button.sensitive = true;
                 header_fold_button.clicked.connect(() => {
-                        if (stack.is_visible()) {
+                        if (stack.stack_is_visible()) {
                             saved_main_win_width = main_win.get_allocated_width();
                             saved_main_win_height = main_win.get_allocated_height();
                             main_win.resize(saved_main_win_width, 1);
                             header_fold_button.image = new Image.from_icon_name(IconName.Symbolic.GO_DOWN, IconSize.BUTTON);
-                            stack.hide();
+                            stack.hide_stack();
                             prev_track_button.visible = false;
                             next_track_button.visible = false;
                             toggle_repeat_button.visible = false;
@@ -893,7 +919,7 @@ int main(string[] args) {
                         } else {
                             main_win.resize(main_win.get_allocated_width(), saved_main_win_height);
                             header_fold_button.image = new Image.from_icon_name(IconName.Symbolic.GO_UP, IconSize.BUTTON);
-                            stack.show();
+                            stack.show_stack();
                             prev_track_button.visible = true;
                             next_track_button.visible = true;
                             toggle_repeat_button.visible = true;
@@ -972,7 +998,7 @@ int main(string[] args) {
                             finder.change_cursor(Gdk.CursorType.WATCH);
                             Timeout.add(1, () => {
                                     debug("play-pause button was clicked. music is not playing. start it.");
-                                    if (stack.is_finder_visible()) {
+                                    if (stack.finder_is_visible()) {
                                         playlist.new_list_from_path(finder.dir_path);
                                     }
                                     stack.show_playlist();
@@ -1769,6 +1795,16 @@ int main(string[] args) {
                     finder_paned,
                     playlist_vbox,
                     options.use_csd);
+                {
+                    stack.finder_selected.connect(() => {
+                            header_zoomin_button.sensitive = true;
+                            header_zoomout_button.sensitive = true;
+                        });
+                    stack.playlist_selected.connect(() => {
+                            header_zoomin_button.sensitive = false;
+                            header_zoomout_button.sensitive = false;
+                        });
+                }
                 
                 main_overlay.add(stack);
                 main_overlay.add_overlay(music_view_overlay);
@@ -1830,7 +1866,10 @@ int main(string[] args) {
     header_switch_button.image = view_list_image;
     header_switch_button.sensitive = false;
     header_add_button.sensitive = false;
+    header_zoomout_button.sensitive = false;
+    header_zoomin_button.sensitive = false;
     stack.show_finder();
+    finder.change_dir(current_dir);
     if (options.last_playlist_name != "") {
         load_playlist_from_file(options.last_playlist_name,
                                 get_playlist_path_from_name(options.last_playlist_name));

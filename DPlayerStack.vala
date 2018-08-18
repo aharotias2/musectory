@@ -22,6 +22,9 @@ using Gtk, DPlayer;
 class DPlayerStack : Bin {
     private Stack stack;
     private bool use_csd;
+    public signal void finder_selected();
+    public signal void playlist_selected();
+    
     public DPlayerStack(Widget finder, Widget playlist, bool use_csd) {
         this.stack = new Stack();
         {
@@ -34,23 +37,23 @@ class DPlayerStack : Bin {
         add(this.stack);
     }
     
-    public new bool is_visible() {
+    public bool stack_is_visible() {
         return this.stack.visible;
     }
 
-    public new void show() {
+    public void show_stack() {
         this.stack.visible = true;
     }
 
-    public new void hide() {
+    public void hide_stack() {
         this.stack.visible = false;
     }
 
-    public bool is_finder_visible() {
+    public bool finder_is_visible() {
         return this.stack.visible_child_name == "finder";
     }
 
-    public bool is_playlist_visible() {
+    public bool playlist_is_visible() {
         return this.stack.visible_child_name == "playlist";
     }
 
@@ -61,6 +64,7 @@ class DPlayerStack : Bin {
             this.stack.transition_type = StackTransitionType.SLIDE_RIGHT;
         }
         this.stack.visible_child_name = "finder";
+        finder_selected();
     }
 
     public void show_playlist() {
@@ -70,5 +74,6 @@ class DPlayerStack : Bin {
             this.stack.transition_type = StackTransitionType.SLIDE_LEFT;
         }
         this.stack.visible_child_name = "playlist";
+        playlist_selected();
     }
 }

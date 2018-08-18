@@ -336,8 +336,6 @@ namespace DPlayer {
         private ProgressBar progress;
         private Revealer progress_revealer;
         private Label while_label;
-        private Button zoomin_button;
-        private Button zoomout_button;
 
         private List<DFileInfo?> file_info_list;
 
@@ -383,46 +381,11 @@ namespace DPlayer {
             {
                 var finder_box = new Box(Orientation.VERTICAL, 1);
                 {
-                    var zoom_overlay = new Overlay();
+                    finder_container = new ScrolledWindow(null, null);
                     {
-                        finder_container = new ScrolledWindow(null, null);
-                        {
-                            finder_container.get_style_context().add_class(StyleClass.VIEW);
-                        }
-
-                        var zoom_box = new Box(Orientation.HORIZONTAL, 0);
-                        {
-                            zoomin_button = new Button();
-                            {
-                                zoomin_button.sensitive = false;
-                                zoomin_button.add(new Image.from_icon_name(IconName.Symbolic.ZOOM_IN,
-                                                                           IconSize.SMALL_TOOLBAR));
-                                zoomin_button.clicked.connect(() => {
-                                        zoom_in();
-                                    });
-                            }
-
-                            zoomout_button = new Button();
-                            {
-                                zoomout_button.sensitive = false;
-                                zoomout_button.add(new Image.from_icon_name(IconName.Symbolic.ZOOM_OUT,
-                                                                           IconSize.SMALL_TOOLBAR));
-                                zoomout_button.clicked.connect(() => {
-                                        zoom_out();
-                                    });
-                            }
-
-                            zoom_box.get_style_context().add_class(StyleClass.LINKED);
-                            zoom_box.pack_start(zoomin_button, false, false);
-                            zoom_box.pack_start(zoomout_button, false, false);
-                            zoom_box.halign = Align.START;
-                            zoom_box.valign = Align.START;
-                        }
-
-                        zoom_overlay.add(finder_container);
-                        zoom_overlay.add_overlay(zoom_box);
+                        finder_container.get_style_context().add_class(StyleClass.VIEW);
                     }
-                    
+
                     progress_revealer = new Revealer();
                     {
                         progress = new ProgressBar();
@@ -437,7 +400,7 @@ namespace DPlayer {
                     }
             
                     finder_box.pack_start(progress_revealer, false, false);
-                    finder_box.pack_start(zoom_overlay, true, true);
+                    finder_box.pack_start(finder_container, true, true);
                 }
             
                 var while_label_box = new Box(Orientation.VERTICAL, 4);
@@ -470,8 +433,6 @@ namespace DPlayer {
             debug("start change_dir (" + dir_path + ")");
             this.dir_path = dir_path;
             change_cursor(Gdk.CursorType.WATCH);
-            zoomin_button.sensitive = true;
-            zoomout_button.sensitive = true;
             while_label.visible = true;
             while_label.label = Text.FINDER_LOAD_FILES;
             int size = get_level_size();
@@ -631,7 +592,7 @@ namespace DPlayer {
             case 7: return 72;
             case 8: return 96;
             case 9: return 128;
-            case 10: return 256;
+            case 10: return 196;
             default: return 128;
             }
         }
@@ -654,7 +615,7 @@ namespace DPlayer {
                     return 7;
                 } else if (size < 128) {
                     return 8;
-                } else if (size < 256) {
+                } else if (size < 196) {
                     return 9;
                 } else {
                     return 10;
