@@ -316,7 +316,7 @@ namespace DPlayer {
                 store.append(file_info);
             }
         }
-
+        
         public int get_index_from_path(string file_path) {
             DFileInfo? file = null;
             int i = 0;

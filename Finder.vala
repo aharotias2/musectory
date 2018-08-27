@@ -53,6 +53,7 @@ namespace DPlayer {
 
     private class FinderItem : FlowBoxChild {
         /* Properties */
+        public DFileInfo file_info { get; private set; }
         public string file_path { get; private set; }
         public string file_name { get; private set; }
         public DFileType file_type { get; private set; }
@@ -64,25 +65,27 @@ namespace DPlayer {
         public Button bookmark_button { get; private set; }
         public Button play_button { get; private set; }
         public Image icon_image { get; set; }
+        public bool use_popover { get; set; }
         
         private Thread<void *>? thread;
         private ImageLoaderThreadData? thdata;
         private Gdk.Pixbuf? icon_pixbuf;
 
-        public signal void bookmark_button_clicked(string file_path);
-        public signal void add_button_clicked(string file_path);
-        public signal void play_button_clicked(string file_path);
+        public signal void bookmark_button_clicked(DFileInfo file_info);
+        public signal void add_button_clicked(DFileInfo file_info);
+        public signal void play_button_clicked(DFileInfo file_info);
 
         /* Contructor */
-        public FinderItem(ref DFileInfo file_info, int icon_size, bool use_popover = true) {
-            this.file_path = file_info.path;
-            this.file_name = file_info.name;
-            this.dir_path = file_info.dir;
-            this.file_type = file_info.file_type;
+        public FinderItem(DFileInfo file_info, int icon_size, bool use_popover = true) {
+            this.file_info = file_info.copy();
             this.thread = null;
             this.thdata = null;
             this.icon_size = icon_size;
-            
+            this.use_popover = use_popover;
+            build_widgets();
+        }
+
+        private void build_widgets() {
             var ev_box = new EventBox();
             {
                 var widget_overlay2 = new Overlay();
@@ -93,18 +96,18 @@ namespace DPlayer {
                         {
                             icon_pixbuf = null;
                             {
-                                this.file_path = Path.build_path(Path.DIR_SEPARATOR_S, dir_path, file_name);
-                                debug("file_path: " + file_path);
+                                //file_info.path = Path.build_path(Path.DIR_SEPARATOR_S, dir_path, file_info.name);
+                                debug("file_path: " + file_info.path);
 
-                                switch (file_type) {
+                                switch (file_info.file_type) {
                                 case DFileType.DISC:
                                     debug("file_type: disc");
                                     bool thread_started = false;
-                                    thdata = new ImageLoaderThreadData(this.file_path, this.icon_size);
+                                    thdata = new ImageLoaderThreadData(file_info.path, icon_size);
                                     Timeout.add(80, () => {
                                             try {
                                                 if (!thread_started) {
-                                                    thread = new Thread<void*>.try(this.file_path, thdata.run);
+                                                    thread = new Thread<void*>.try(file_info.path, thdata.run);
                                                     thread_started = true;
                                                 } else if (thdata.pixbuf_loaded) {
                                                     debug("tmp_icon_pixbuf has been loaded");
@@ -112,8 +115,8 @@ namespace DPlayer {
                                                     if (thdata.icon_pixbuf != null) {
                                                         icon_pixbuf = thdata.icon_pixbuf;
                                                         icon_image.set_from_pixbuf(icon_pixbuf.scale_simple(
-                                                                                       this.icon_size,
-                                                                                       this.icon_size,
+                                                                                       icon_size,
+                                                                                       icon_size,
                                                                                        Gdk.InterpType.BILINEAR));
                                                     }
                                                     return Source.REMOVE;
@@ -153,14 +156,14 @@ namespace DPlayer {
                             }
 
                             icon_image = new Image.from_pixbuf(icon_pixbuf.scale_simple(
-                                                                   this.icon_size,
-                                                                   this.icon_size,
+                                                                   icon_size,
+                                                                   icon_size,
                                                                    Gdk.InterpType.BILINEAR));
                             {
                                 icon_image.get_style_context().add_class(StyleClass.FINDER_ICON);
                             }
                             
-                            var item_label = new Label(file_name);
+                            var item_label = new Label(file_info.name);
                             {
                                 item_label.ellipsize = Pango.EllipsizeMode.END;
                                 item_label.lines = 5;
@@ -177,9 +180,9 @@ namespace DPlayer {
                             {
                                 Image mini_icon = null;
                                 {
-                                    if (file_type == DFileType.FILE && icon_pixbuf != file_pixbuf) {
+                                    if (file_info.file_type == DFileType.FILE && icon_pixbuf != file_pixbuf) {
                                         mini_icon = new Image.from_icon_name(IconName.Symbolic.AUDIO_FILE, IconSize.LARGE_TOOLBAR);
-                                    } else if (file_type == DFileType.DISC && icon_pixbuf != cd_pixbuf) {
+                                    } else if (file_info.file_type == DFileType.DISC && icon_pixbuf != cd_pixbuf) {
                                         mini_icon = new Image.from_icon_name(IconName.Symbolic.FOLDER, IconSize.LARGE_TOOLBAR);
                                     }
                                 
@@ -223,7 +226,7 @@ namespace DPlayer {
                             bookmark_button.visible = false;
                             bookmark_button.get_style_context().add_class(StyleClass.FINDER_BUTTON);
                             bookmark_button.clicked.connect(() => {
-                                    bookmark_button_clicked(file_path);
+                                    bookmark_button_clicked(file_info);
                                 });
                         }
 
@@ -233,7 +236,7 @@ namespace DPlayer {
                             add_button.visible = false;
                             add_button.get_style_context().add_class(StyleClass.FINDER_BUTTON);
                             add_button.clicked.connect(() => {
-                                    add_button_clicked(file_path);
+                                    add_button_clicked(file_info);
                                 });
                         }
 
@@ -243,21 +246,21 @@ namespace DPlayer {
                             play_button.visible = false;
                             play_button.get_style_context().add_class(StyleClass.FINDER_BUTTON);
                             play_button.clicked.connect(() => {
-                                    play_button_clicked(file_path);
+                                    play_button_clicked(file_info);
                                 });
                         }
 
                         button_box.halign = Align.CENTER;
                         button_box.valign = Align.CENTER;
-                        if (file_type != DFileType.PARENT) {
+                        if (file_info.file_type != DFileType.PARENT) {
                             if (use_popover) {
-                                if (file_type == DFileType.DIRECTORY || file_type == DFileType.DISC) {
+                                if (file_info.file_type == DFileType.DIRECTORY || file_info.file_type == DFileType.DISC) {
                                     button_box.pack_start(add_popover_to_button(bookmark_button, "Add to bookmark list"), false, false);
                                 }
                                 button_box.pack_start(add_popover_to_button(play_button, "Play it"), false, false);
                                 button_box.pack_start(add_popover_to_button(add_button, "Add to playlist"), false, false);
                             } else {
-                                if (file_type == DFileType.DIRECTORY || file_type == DFileType.DISC) {
+                                if (file_info.file_type == DFileType.DIRECTORY || file_info.file_type == DFileType.DISC) {
                                     button_box.pack_start(bookmark_button, false, false);
                                 }
                                 button_box.pack_start(play_button, false, false);
@@ -346,11 +349,11 @@ namespace DPlayer {
         public string dir_path { get; set; }
         public bool activate_on_single_click { get; set; }
 
-        public signal void bookmark_button_clicked(string file_path);
-        public signal void add_button_clicked(string file_path);
-        public signal void play_button_clicked(string file_path);
+        public signal void bookmark_button_clicked(DFileInfo file_info);
+        public signal void add_button_clicked(DFileInfo file_info);
+        public signal void play_button_clicked(DFileInfo file_info);
         public signal void icon_image_resized(int icon_size);
-        public signal void file_button_clicked(string file_path);
+        public signal void file_button_clicked(DFileInfo file_info);
         
         /* Constructor */
         public Finder() {
@@ -473,37 +476,37 @@ namespace DPlayer {
                                     }
                                 }
 
-                                var item_widget = new FinderItem(ref file_info, size, use_popover);
+                                var item_widget = new FinderItem(file_info, size, use_popover);
                                 if (item_widget != null) {
                                     switch (file_info.file_type) {
                                       case DFileType.DIRECTORY:
                                       case DFileType.DISC:
                                         item_widget.icon_button.clicked.connect(() => {
                                                 change_dir(file_info.path);
-                                                file_button_clicked(file_info.path);
+                                                file_button_clicked(file_info);
                                             });
                                         item_widget.bookmark_button_clicked.connect((file_path) => {
-                                                bookmark_button_clicked(file_path);
+                                                bookmark_button_clicked(file_info);
                                             });
                                         break;
                                       case DFileType.PARENT:
                                         item_widget.icon_button.clicked.connect(() => {
                                                 change_dir(file_info.path);
-                                                file_button_clicked(file_info.path);
+                                                file_button_clicked(file_info);
                                             });
                                         break;
                                       case DFileType.FILE:
                                         item_widget.icon_button.clicked.connect(() => {
-                                                play_button_clicked(file_info.path);
+                                                play_button_clicked(file_info);
                                             });
                                         break;
                                     }
                                 }
-                                item_widget.add_button_clicked.connect((file_path) => {
-                                        add_button_clicked(file_path);
+                                item_widget.add_button_clicked.connect((file_path, file_type) => {
+                                        add_button_clicked(file_info);
                                     });
-                                item_widget.play_button_clicked.connect((file_path) => {
-                                        play_button_clicked(file_path);
+                                item_widget.play_button_clicked.connect((file_path, file_type) => {
+                                        play_button_clicked(file_info);
                                     });
 
                                 finder.add(item_widget);

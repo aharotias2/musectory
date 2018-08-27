@@ -116,6 +116,7 @@ namespace DPlayer {
 					info.dir = Path.get_dirname(file_path);
 					info.path = file_path;
 					info.name = Path.get_basename(file_path);
+                    info.file_type = DFileType.FILE;
 					if (metadata[i + 1].index_of("output directory:") > 0) {
 						info.artwork = get_music_artwork_from_mplayer_output(file_path, j);
 						j++;

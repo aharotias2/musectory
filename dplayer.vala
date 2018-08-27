@@ -68,12 +68,11 @@ DPlayerStack stack;
 Button artwork_button;
 Image artwork;
 Box controller;
-Overlay music_view_overlay;
+ArtworkView artwork_view;
 Button header_switch_button;
 Button header_add_button;
 Button header_zoomin_button;
 Button header_zoomout_button;
-Image music_view_artwork;
 Label music_title;
 ProgressBar time_bar;
 Label time_label_current;
@@ -84,11 +83,10 @@ ToolButton prev_track_button;
 ToggleButton toggle_shuffle_button;
 ToggleButton toggle_repeat_button;
 DPlayer.Finder finder;
-TreeView bookmark_tree;
+TreeView sidetree;
 TreeIter bookmark_root;
 TreeIter playlist_root;
 DPlayer.PlaylistBox playlist;
-ScrolledWindow music_view_container;
 Label playlist_view_dir_label;
 TimeLabelSetFunc time_label_set;
 int saved_main_win_width;
@@ -99,9 +97,6 @@ int window_default_height = 750;
 Dialog? help_dialog = null;
 Dialog? config_dialog = null;
 Dialog? save_playlist_dialog = null;
-
-const Gdk.RGBA music_view_bg_color = {0.1, 0.1, 0.1, 1.0};
-const Gdk.RGBA music_view_close_button_bg_color = {0.8, 0.8, 0.8, 0.4};
 
 const string[] icon_dirs = {"/usr/share/icons/hicolor/48x48/apps/",
                             "/usr/local/share/icons/hicolor/48x48/apps/",
@@ -373,7 +368,7 @@ void show_config_dialog(Window main_win) {
 
 void add_bookmark(string file_path) {
     string file_name = file_path.slice(file_path.last_index_of_char('/') + 1, file_path.length);
-    TreeStore temp_store = (TreeStore)bookmark_tree.model;
+    TreeStore temp_store = (TreeStore)sidetree.model;
     dirs.append(file_path);
     TreeIter temp_iter;
     temp_store.append(out temp_iter, bookmark_root);
@@ -386,7 +381,7 @@ void add_bookmark(string file_path) {
 }
 
 bool playlist_exists(string name) {
-    TreeStore store = (TreeStore) bookmark_tree.model;
+    TreeStore store = (TreeStore) sidetree.model;
     if(store.iter_has_child(playlist_root)) {
         TreeIter iter;
         store.iter_children(out iter, playlist_root);
@@ -431,7 +426,7 @@ void save_playlist(List<string> file_path_list) {
                     case ResponseType.ACCEPT:
                         string playlist_name = playlist_name_entry.text;
                         string playlist_path = get_playlist_path_from_name(playlist_name);
-                        TreeStore temp_store = (TreeStore)bookmark_tree.model;
+                        TreeStore temp_store = (TreeStore)sidetree.model;
                         TreeIter temp_iter;
                         temp_store.append(out temp_iter, playlist_root);
                         temp_store.set(temp_iter,
@@ -676,7 +671,6 @@ int main(string[] args) {
     //----------------------------------------------------------------------------------
 
     Revealer *p_bookmark_revealer = null;
-    Button *p_music_view_close_button = null;
     
     TreeViewColumn *p_bookmark_title_col = null;
 
@@ -751,7 +745,6 @@ int main(string[] args) {
                                 if (current_playing_artwork != null) {
                                     artwork_button.visible = true;
                                 }
-                                music_view_artwork.visible = false;
                                 stack.show_playlist();
                                 header_switch_button.image = view_grid_image;
                             } else if (stack.playlist_is_visible()) {
@@ -763,7 +756,6 @@ int main(string[] args) {
                                 if (current_playing_artwork != null) {
                                     artwork_button.visible = true;
                                 }
-                                music_view_artwork.visible = false;
                                 stack.show_finder();
                                 header_switch_button.image = view_list_image;
                             }
@@ -947,18 +939,7 @@ int main(string[] args) {
                         main_win.title = music_title.label;
                     }
                     artwork_button.visible = false;
-                    music_view_overlay.visible = true;
-
-                    Timeout.add(80, () => {
-                            debug("enter timeout artwork_button.clicked");
-                            int size = int.min(music_view_container.get_allocated_width(),
-                                               music_view_container.get_allocated_height());
-                            music_view_artwork.pixbuf = MyUtils.PixbufUtils.scale_limited(current_playing_artwork, size);
-                            music_view_artwork.visible = true;
-                            header_switch_button.sensitive = false;
-                            header_add_button.sensitive = false;
-                            return Source.REMOVE;
-                        });
+                    artwork_view.activate();
                 });
         }
 
@@ -1173,7 +1154,7 @@ int main(string[] args) {
         {
             var bookmark_scrolled = new ScrolledWindow(null, null);
             {
-                bookmark_tree = new TreeView();
+                sidetree = new TreeView();
                 {
                     var bookmark_title_col = new TreeViewColumn();
                     {
@@ -1280,29 +1261,29 @@ int main(string[] args) {
                         }
                     };
 
-                    bookmark_tree.activate_on_single_click = true;
-                    bookmark_tree.headers_visible = false;
-                    bookmark_tree.hover_selection = true;
-                    bookmark_tree.reorderable = false;
-                    bookmark_tree.show_expanders = true;
-                    bookmark_tree.enable_tree_lines = false;
-                    bookmark_tree.level_indentation = 0;
+                    sidetree.activate_on_single_click = true;
+                    sidetree.headers_visible = false;
+                    sidetree.hover_selection = true;
+                    sidetree.reorderable = false;
+                    sidetree.show_expanders = true;
+                    sidetree.enable_tree_lines = false;
+                    sidetree.level_indentation = 0;
 
-                    bookmark_tree.set_model(bookmark_store);
-                    bookmark_tree.insert_column(bookmark_del_col, 1);
-                    bookmark_tree.insert_column(bookmark_title_col, 0);
+                    sidetree.set_model(bookmark_store);
+                    sidetree.insert_column(bookmark_del_col, 1);
+                    sidetree.insert_column(bookmark_title_col, 0);
 
-                    menu_bookmark_reset(bookmark_tree);
+                    menu_bookmark_reset(sidetree);
 
-                    bookmark_tree.set_row_separator_func((model, iter) => {
+                    sidetree.set_row_separator_func((model, iter) => {
                             Value menu_type;
                             model.get_value(iter, 3, out menu_type);
                             return ((MenuType) menu_type == MenuType.SEPARATOR);
                         });
 
-                    bookmark_tree.get_selection().changed.connect(() => {
-                            TreeSelection bookmark_selection = bookmark_tree.get_selection();
-                            TreeStore? temp_store = (TreeStore) bookmark_tree.model;
+                    sidetree.get_selection().changed.connect(() => {
+                            TreeSelection bookmark_selection = sidetree.get_selection();
+                            TreeStore? temp_store = (TreeStore) sidetree.model;
 
                             temp_store.foreach((model, path, iter) => {
                                     Value type;
@@ -1320,26 +1301,26 @@ int main(string[] args) {
                                 });
                         });
 
-                    bookmark_tree.row_activated.connect((path, column) => {
+                    sidetree.row_activated.connect((path, column) => {
                             Value dir_path;
                             Value bookmark_name;
                             TreeIter bm_iter;
 
-                            debug("bookmark_tree_row_activated.");
-                            bookmark_tree.model.get_iter(out bm_iter, path);
-                            bookmark_tree.model.get_value(bm_iter, 3, out bookmark_name);
+                            debug("sidetree_row_activated.");
+                            sidetree.model.get_iter(out bm_iter, path);
+                            sidetree.model.get_value(bm_iter, 3, out bookmark_name);
 
                             switch ((MenuType) bookmark_name) {
                             case MenuType.BOOKMARK:
-                                if (bookmark_tree.is_row_expanded(path)) {
-                                    bookmark_tree.collapse_row(path);
+                                if (sidetree.is_row_expanded(path)) {
+                                    sidetree.collapse_row(path);
                                 } else {
-                                    bookmark_tree.expand_row(path, false);
+                                    sidetree.expand_row(path, false);
                                 }
                                 break;
                                 
                             case MenuType.FOLDER:
-                                bookmark_tree.model.get_value(bm_iter, 2, out dir_path);
+                                sidetree.model.get_value(bm_iter, 2, out dir_path);
 
                                 if (column.get_title() != "del") {
                                     finder.change_dir((string) dir_path);
@@ -1353,23 +1334,23 @@ int main(string[] args) {
                                     if (dirs.length() > 1) {
                                         if (confirm(Text.CONFIRM_REMOVE_BOOKMARK)) {
                                             dirs.remove_link(dirs.nth(path.get_indices()[1]));
-                                            ((TreeStore)bookmark_tree.model).remove(ref bm_iter);
+                                            ((TreeStore)sidetree.model).remove(ref bm_iter);
                                         }
                                     }
                                 }
                                 break;
                             case MenuType.PLAYLIST_HEADER:
-                                if (bookmark_tree.is_row_expanded(path)) {
-                                    bookmark_tree.collapse_row(path);
+                                if (sidetree.is_row_expanded(path)) {
+                                    sidetree.collapse_row(path);
                                 } else {
-                                    bookmark_tree.expand_row(path, false);
+                                    sidetree.expand_row(path, false);
                                 }
                                 break;
                             case MenuType.PLAYLIST_NAME:
                                 Value val1;
                                 Value val2;
-                                bookmark_tree.model.get_value(bm_iter, 1, out val1);
-                                bookmark_tree.model.get_value(bm_iter, 2, out val2);
+                                sidetree.model.get_value(bm_iter, 1, out val1);
+                                sidetree.model.get_value(bm_iter, 2, out val2);
                                 string playlist_name = (string) val1;
                                 string playlist_path = (string) val2;
 
@@ -1387,7 +1368,7 @@ int main(string[] args) {
                                         });
                                 } else {
                                     if (confirm(Text.CONFIRM_REMOVE_PLAYLIST)) {
-                                        ((TreeStore)bookmark_tree.model).remove(ref bm_iter);
+                                        ((TreeStore)sidetree.model).remove(ref bm_iter);
                                         FileUtils.remove(playlist_path);
                                     }
                                 }
@@ -1418,12 +1399,12 @@ int main(string[] args) {
                             }
                         });
 
-                    bookmark_tree.expand_all();
+                    sidetree.expand_all();
                 }
 
                 bookmark_scrolled.shadow_type = ShadowType.NONE;
                 bookmark_scrolled.hscrollbar_policy = PolicyType.NEVER;
-                bookmark_scrolled.add(bookmark_tree);
+                bookmark_scrolled.add(sidetree);
             }
 
             bookmark_frame.set_shadow_type(ShadowType.NONE);
@@ -1440,12 +1421,13 @@ int main(string[] args) {
             {
                 finder.set_default_icon_size(options.icon_size);
                 
-                finder.bookmark_button_clicked.connect((file_path) => {
-                        add_bookmark(file_path);
+                finder.bookmark_button_clicked.connect((file_info) => {
+                        add_bookmark(file_info.path);
                     });
 
-                finder.play_button_clicked.connect((file_path) => {
-
+                finder.play_button_clicked.connect((file_info) => {
+                        string file_path = file_info.path;
+                        DFileType file_type = file_info.file_type;
                         finder.change_cursor(Gdk.CursorType.WATCH);
                     
                         if (music.playing) {
@@ -1459,7 +1441,7 @@ int main(string[] args) {
                                     debug("file_path: %s", file_path);
                                     playlist.new_list_from_path(file_path);
                                     var file_path_list = playlist.get_file_path_list();
-                                    if (FileUtils.test(file_path, FileTest.IS_REGULAR)) {
+                                    if (file_type == DFileType.FILE) {
                                         music.start(ref file_path_list, options.ao_type);
                                         int index = playlist.get_index_from_path(file_path);
                                         if (index > 0) {
@@ -1478,8 +1460,17 @@ int main(string[] args) {
                             });
                     });
 
-                finder.add_button_clicked.connect((file_path) => {
-                        playlist.append_list_from_path(file_path);
+                finder.add_button_clicked.connect((file_info) => {
+                        DFileType type = file_info.file_type;
+                        if (type == DFileType.DIRECTORY || type == DFileType.DISC) {
+                            playlist.append_list_from_path(file_info.path);
+                        } else if (type == DFileType.FILE) {
+                            debug("Add file button was clicked");
+                            playlist.add_item(file_info);
+                        } else {
+                            debug("Add file button was clicked but this file type is not a file");
+                            return;
+                        }
                         List<string> file_list = playlist.get_file_path_list();
                         playlist.changed(file_list);
                     });
@@ -1488,9 +1479,9 @@ int main(string[] args) {
                         options.icon_size = icon_size;
                     });
 
-                finder.file_button_clicked.connect((file_path) => {
-                        if (FileUtils.test(file_path, FileTest.IS_DIR)) {
-                            current_dir = file_path;
+                finder.file_button_clicked.connect((file_info) => {
+                        if (FileUtils.test(file_info.path, FileTest.IS_DIR)) {
+                            current_dir = file_info.path;
                             win_header.set_title(current_dir);
                         }
                     });
@@ -1615,36 +1606,23 @@ int main(string[] args) {
     //----------------------------------------------------------------------------------
     // Creating artwork view (overlay)
     //----------------------------------------------------------------------------------
-    music_view_overlay = new Overlay();
+    artwork_view = new ArtworkView();
     {
-        var music_view_close_button = new Button.from_icon_name(IconName.Symbolic.WINDOW_CLOSE, IconSize.BUTTON);
-        {
-            music_view_close_button.halign = Align.END;
-            music_view_close_button.valign = Align.START;
-            music_view_close_button.margin = 10;
-            music_view_close_button.clicked.connect(() => {
-                    artwork_button.visible = true;
-                    music_view_overlay.visible = false;
-                    header_switch_button.sensitive = true;
-                    header_add_button.sensitive = true;
-                });
-            p_music_view_close_button = music_view_close_button;
-        }
-
-        music_view_container = new ScrolledWindow(null, null);
-        {
-            music_view_container.get_style_context().add_class(StyleClass.ARTWORK_BACKGROUND);
-        }
-
-        music_view_artwork = new Image();
-        {
-            music_view_artwork.margin = 0;
-            music_view_container.add(music_view_artwork);
-        }
-
-        music_view_overlay.add(music_view_container);
-        music_view_overlay.add_overlay(music_view_close_button);
-        music_view_overlay.set_overlay_pass_through(music_view_close_button, true);
+        artwork_view.activate.connect(() => {
+                header_switch_button.sensitive = false;
+                header_add_button.sensitive = false;
+                header_zoomin_button.sensitive = false;
+                header_zoomout_button.sensitive = false;
+            });
+        artwork_view.deactivate.connect(() => {
+                artwork_button.visible = true;
+                header_switch_button.sensitive = true;
+                header_add_button.sensitive = true;
+                if (stack.finder_is_visible()) {
+                    header_zoomin_button.sensitive = true;
+                    header_zoomout_button.sensitive = true;
+                }
+            });
     }
 
     //----------------------------------------------------------------------------------
@@ -1735,22 +1713,11 @@ int main(string[] args) {
                 if (current_playing_artwork != null) {
                     artwork.set_from_pixbuf(MyUtils.PixbufUtils.scale_limited(current_playing_artwork,
                                                                               options.thumbnail_size));
-                    if (!music_view_artwork.visible) {
-                        artwork_button.visible = true;
-                        debug("make artwork button visible");
-                    }
-                    Timeout.add(10, () => {
-                            debug("enter timeout artwork size");
-                            int size = int.min(music_view_container.get_allocated_width(),
-                                               music_view_container.get_allocated_height());
-                            music_view_artwork.pixbuf = MyUtils.PixbufUtils.scale_limited(current_playing_artwork,
-                                                                                         size);
-                            debug("music view artwork size: " + size.to_string());
-                            return Source.REMOVE;
-                        });
+                    artwork_button.visible = !artwork_view.visible;
+                    artwork_view.set_artwork_pixbuf(current_playing_artwork);
                 } else {
                     artwork_button.visible = false;
-                    music_view_artwork.set_from_icon_name(IconName.AUDIO_FILE, IconSize.LARGE_TOOLBAR);
+                    artwork_view.set_artwork_pixbuf(file_pixbuf);
                 }
 
             });
@@ -1790,7 +1757,7 @@ int main(string[] args) {
                 }
                 
                 main_overlay.add(stack);
-                main_overlay.add_overlay(music_view_overlay);
+                main_overlay.add_overlay(artwork_view);
             }
             
             top_box.pack_start(main_overlay, true, true);
@@ -1811,10 +1778,8 @@ int main(string[] args) {
 
         main_win.destroy.connect(application_quit);
         main_win.configure_event.connect((cr) => {
-                if (music_view_overlay.visible && current_playing_artwork != null) {
-                    int size = int.min(music_view_container.get_allocated_width(),
-                                       music_view_container.get_allocated_height());
-                    music_view_artwork.pixbuf = MyUtils.PixbufUtils.scale_limited(current_playing_artwork, size);
+                if (current_playing_artwork != null) {
+                    artwork_view.fit_to_window();
                 }
                 p_bookmark_title_col->max_width = main_win.get_allocated_width() / 4;
                 return false;
@@ -1843,8 +1808,7 @@ int main(string[] args) {
     // Starting this program
     //----------------------------------------------------------------------------------
     artwork_button.visible = false;
-    music_view_overlay.visible = false;
-    music_view_artwork.visible = false;
+    artwork_view.visible = false;
     finder.hide_while_label();
     header_switch_button.image = view_list_image;
     header_switch_button.sensitive = false;

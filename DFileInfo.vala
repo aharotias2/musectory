@@ -33,5 +33,26 @@ namespace DPlayer {
         public string time_length { get; set; }
         public DFileType file_type { get; set; }
         public Gdk.Pixbuf artwork { get; set; }
+
+        public DFileInfo copy() {
+            DFileInfo dest = new DFileInfo();
+            dest.path = path.dup();
+            dest.name = name.dup();
+            dest.dir = dir.dup();
+            dest.album = album.dup();
+            dest.artist = artist.dup();
+            dest.comment = comment.dup();
+            dest.genre = genre.dup();
+            dest.title = title.dup();
+            dest.track = track.dup();
+            dest.disc = disc.dup();
+            dest.date = date.dup();
+            dest.time_length = time_length.dup();
+            dest.file_type = file_type;
+            if (artwork != null) {
+                dest.artwork = artwork.copy();
+            }
+            return (owned) dest;
+        }
     }
 }
