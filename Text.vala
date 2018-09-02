@@ -146,7 +146,6 @@ namespace DPlayer {
             "    background-color: rgba(9, 9, 9, 0.5);\n"+
             "}\n"+
             ".finder_icon {\n"+
-            "    box-shadow: 10px 10px 10px 10px rgba(0, 0, 0, 0.4);\n"+
             "}\n"+
             ".finder_item_label {\n"+
             "    background-color: rgba(10, 10, 10, 0.5);\n"+

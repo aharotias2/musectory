@@ -2,6 +2,10 @@ TARGET = dplayer
 #VALAC_OPTS = -g --save-temps --thread --pkg=posix --pkg=gtk+-3.0 --pkg=json-glib-1.0 -X -lm -D PREPROCESSOR_DEBUG
 VALAC_OPTS = --thread --pkg=posix --pkg=gtk+-3.0 --pkg=json-glib-1.0 -X -lm -X -O3
 SRC =  Cli.vala Tracker.vala enums.vala DFileInfo.vala DPlayerOptions.vala MPlayer.vala Finder.vala DFileUtils.vala PlaylistBox.vala MyUtils.vala PlaylistDrawingArea.vala Music.vala DPlayerStack.vala Text.vala ArtworkView.vala
+PREFIX = /usr
+ICON_INSTALL_DIR = $(PREFIX)/share/icons/hicolor/512x512/apps
+DESKTOP_FILE_DIR = $(PREFIX)/share/applications
+EXE_DIR = $(PREFIX)/bin
 
 all: dplayer
 
@@ -12,6 +16,11 @@ test-music: test-music.vala enums.vala Cli.vala DFileInfo.vala MPlayer.vala DFil
 	valac $(VALAC_OPTS) -o $@ $^
 
 install: $(TARGET)
-	[ ! -d ~/.local/bin ] && mkdir ~/.local/bin; cp ./dplayer ~/.local/bin; [ ! -d ~/.local/share/icons ] && mkdir ~/.local/share/icons; cp dplayer.png ~/.icons; [ ! -d ~/.local/share/applications ] && mkdir -p ~/.local/share/applications; cp dplayer.desktop ~/.local/share/applications
+	cp ./dplayer $(EXE_DIR); \
+	[ ! -d $(ICON_INSTALL_DIR) ] && mkdir -p $(ICON_INSTALL_DIR); \
+	cp dplayer.png $(ICON_INSTALL_DIR); \
+	[ ! -d $(DESKTOP_FILE_DIR) ] && mkdir -p $(DESKTOP_FILE_DIR); \
+	cp dplayer.desktop $(DESKTOP_FILE_DIR)
+
 
 

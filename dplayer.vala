@@ -794,7 +794,6 @@ int main(string[] args) {
 
                     header_zoom_box.pack_start(header_zoomin_button, false, false);
                     header_zoom_box.pack_start(header_zoomout_button, false, false);
-                    header_zoom_box.get_style_context().add_class(Gtk.STYLE_CLASS_INLINE_TOOLBAR);
                 }
                 
 #if PREPROCESSOR_DEBUG
