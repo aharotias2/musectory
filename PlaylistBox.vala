@@ -105,7 +105,7 @@ namespace DPlayer {
                                 album.get_style_context().add_class("album");
                             }
 
-                            Label artist = new Label(file.artist != null ? file.artist : "Unkown Artist");
+                            Label artist = new Label(file.artist != null ? "Artist: " + file.artist : "Unkown Artist");
                             {
                                 artist.ellipsize = EllipsizeMode.END;
                                 artist.set_halign(Align.START);
@@ -120,8 +120,8 @@ namespace DPlayer {
                             }
 
                             grid2.attach(title, 0, 0, 5, 1);
-                            grid2.attach(album, 0, 1, 5, 1);
-                            grid2.attach(artist, 5, 0, 2, 1);
+                            grid2.attach(artist, 0, 1, 5, 1);
+                            grid2.attach(album, 5, 0, 2, 1);
                             grid2.attach(genre, 5, 1, 2, 1);
                             grid2.row_homogeneous = false;
                             grid2.column_homogeneous = true;
@@ -446,6 +446,10 @@ namespace DPlayer {
             move_cursor(index);
         }
 
+        public void reset() {
+            set_track(-1);
+        }
+        
         public void toggle_status() {
             PlaylistItem? item = get_item((int) tracker.current);
             item.on_click();

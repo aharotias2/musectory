@@ -348,6 +348,7 @@ namespace DPlayer {
         public bool use_popover { get; set; }
         public string dir_path { get; set; }
         public bool activate_on_single_click { get; set; }
+        public bool dir_changing { get; private set; }
 
         public signal void bookmark_button_clicked(DFileInfo file_info);
         public signal void add_button_clicked(DFileInfo file_info);
@@ -526,6 +527,7 @@ namespace DPlayer {
 
                                 change_cursor(Gdk.CursorType.LEFT_PTR);
                                 progress_revealer.reveal_child = false;
+                                dir_changing = false;
                                 debug("end timeout routine (change_dir) level 2: %u times",i);
                                 return Source.REMOVE;
                             }
@@ -536,6 +538,8 @@ namespace DPlayer {
                     debug("end timeout routine (change_dir) level 1");
                     return Source.REMOVE;
                 }, Priority.HIGH);
+
+            dir_changing = true;
         }
 
         public void set_default_icon_size(int icon_size) {

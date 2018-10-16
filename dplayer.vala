@@ -731,9 +731,9 @@ int main(string[] args) {
 
                                 if (options.use_csd) {
                                     if (file_info.title != null) {
-                                        win_header.set_title(file_info.title);
+                                        win_header.title = file_info.title;
                                     } else {
-                                        win_header.set_title(file_info.name);
+                                        win_header.title = file_info.name;
                                     }
                                 } else {
                                     if (file_info.title != null) {
@@ -749,7 +749,7 @@ int main(string[] args) {
                                 header_switch_button.image = view_grid_image;
                             } else if (stack.playlist_is_visible()) {
                                 if (options.use_csd) {
-                                    win_header.set_title(finder.dir_path);
+                                    win_header.title = finder.dir_path;
                                 } else {
                                     main_win.title = finder.dir_path;
                                 }
@@ -933,7 +933,7 @@ int main(string[] args) {
             artwork_button.add(artwork);
             artwork_button.clicked.connect(() => {
                     if (options.use_csd) {
-                        win_header.set_title(music_title.label);
+                        win_header.title = music_title.label;
                     } else {
                         main_win.title = music_title.label;
                     }
@@ -1322,13 +1322,23 @@ int main(string[] args) {
                                 sidetree.model.get_value(bm_iter, 2, out dir_path);
 
                                 if (column.get_title() != "del") {
+                                    sidetree.sensitive = false;
                                     finder.change_dir((string) dir_path);
                                     header_add_button.sensitive = true;
                                     current_dir = (string) dir_path;
                                     
                                     if (options.use_csd) {
-                                        win_header.set_title(PROGRAM_NAME + ": " + current_dir);
+                                        win_header.title = PROGRAM_NAME + ": " + current_dir;
                                     }
+
+                                    Timeout.add(100, () => {
+                                            if (finder.dir_changing) {
+                                                return Source.CONTINUE;
+                                            } else {
+                                                sidetree.sensitive = true;
+                                                return Source.REMOVE;
+                                            }
+                                        });
                                 } else {
                                     if (dirs.length() > 1) {
                                         if (confirm(Text.CONFIRM_REMOVE_BOOKMARK)) {
@@ -1361,7 +1371,16 @@ int main(string[] args) {
                                             if (music.playing) {
                                                 return Source.CONTINUE;
                                             } else {
+                                                sidetree.sensitive = false;
                                                 load_playlist_from_file(playlist_name, playlist_path);
+                                                Timeout.add(100, () => {
+                                                        if (stack.playlist_is_visible()) {
+                                                            sidetree.sensitive = true;
+                                                            return Source.REMOVE;
+                                                        } else {
+                                                            return Source.CONTINUE;
+                                                        }
+                                                    });
                                                 return Source.REMOVE;
                                             }
                                         });
@@ -1381,7 +1400,7 @@ int main(string[] args) {
                                     current_dir = file_chooser.get_filename();
                                     debug("selected file path: %s", current_dir);
                                     finder.change_dir(current_dir);
-                                    win_header.set_title(current_dir);
+                                    win_header.title = current_dir;
                                     header_add_button.sensitive = true;
                                 }
                                 file_chooser.destroy ();
@@ -1481,7 +1500,7 @@ int main(string[] args) {
                 finder.file_button_clicked.connect((file_info) => {
                         if (FileUtils.test(file_info.path, FileTest.IS_DIR)) {
                             current_dir = file_info.path;
-                            win_header.set_title(current_dir);
+                            win_header.title = current_dir;
                         }
                     });
 
@@ -1632,7 +1651,7 @@ int main(string[] args) {
         music.on_quit.connect((pid, status) => {
                 time_bar.fraction = 0.0;
                 time_label_set(0);
-
+                playlist.reset();
                 ((Gtk.Image)play_pause_button.icon_widget).icon_name = IconName.Symbolic.MEDIA_PLAYBACK_START;
             });
     
@@ -1642,11 +1661,16 @@ int main(string[] args) {
                 DFileInfo file_info = playlist.nth_track_data(track_number);
 
                 music_title.label = (file_info.title != null) ? file_info.title : file_info.name;
+                if (file_info.artist != null) {
+                    music_title.label += " : " + file_info.artist;
+                }
+                
                 if (options.use_csd) {
-                    win_header.set_title(music_title.label);
+                    win_header.title = music_title.label;
                 } else {
                     main_win.title = music_title.label;
                 }
+                
                 music_total_time = file_info.time_length;
                 music_total_time_seconds = MyUtils.TimeUtils.minutes_to_seconds(music_total_time);
                 music_time_position = 0.0;
