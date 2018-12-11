@@ -154,7 +154,7 @@ void application_quit() {
 bool confirm(string message) {
     Gtk.MessageDialog m = new Gtk.MessageDialog(main_win, DialogFlags.MODAL, MessageType.WARNING, ButtonsType.OK_CANCEL, message);
     Gtk.ResponseType result = (ResponseType)m.run ();
-    m.close ();
+    m.destroy();
     return result == Gtk.ResponseType.OK;
 }
 
@@ -1457,6 +1457,7 @@ int main(string[] args) {
                                     return Source.CONTINUE;
                                 } else {
                                     debug("file_path: %s", file_path);
+                                    playlist.name = null;
                                     playlist.new_list_from_path(file_path);
                                     var file_path_list = playlist.get_file_path_list();
                                     if (file_type == DFileType.FILE) {
@@ -1471,6 +1472,7 @@ int main(string[] args) {
                                     ((Gtk.Image)play_pause_button.icon_widget).icon_name = IconName.Symbolic.MEDIA_PLAYBACK_PAUSE;
                                     header_switch_button.image = view_grid_image;
                                     header_switch_button.sensitive = true;
+                                    header_add_button.sensitive = true;
                                     stack.show_playlist();
                                     finder.change_cursor(Gdk.CursorType.LEFT_PTR);
                                     return Source.REMOVE;

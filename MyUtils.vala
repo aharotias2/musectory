@@ -53,12 +53,18 @@ namespace MyUtils {
 
     public class TimeUtils {
         public static double minutes_to_seconds(string time_str) {
+            debug("minutes_to_seconds starts");
+            if (time_str == null) {
+                return 0.0;
+            }
             string[] parts = time_str.split(":", 3);
             int hours = parts.length == 3 ? int.parse(parts[0]) : 0;
             int minutes = parts.length == 3 ? int.parse(parts[1]) : int.parse(parts[0]);
             int seconds = parts.length == 3 ? int.parse(parts[2]) : int.parse(parts[1]);
 
-            return hours * 360 + minutes * 60 + seconds;
+            double result = hours * 360 + minutes * 60 + seconds;
+            debug("minutes_to_seconds ends %f", result);
+            return result;
         }
 
         public static int compare(Time a, Time b) {
