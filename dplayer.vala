@@ -824,64 +824,6 @@ int main(string[] args) {
 #endif
             }
 
-            var header_menu_button = new Gtk.MenuButton();
-            {
-                var header_menu = new Gtk.Menu();
-                {
-                    var menu_item_config = new Gtk.ImageMenuItem.with_label(Text.MENU_CONFIG);
-                    {
-                        menu_item_config.always_show_image = true;
-                        menu_item_config.image = new Image.from_icon_name(
-                            IconName.Symbolic.PREFERENCES_SYSTEM,
-                            IconSize.SMALL_TOOLBAR
-                            );
-                        menu_item_config.activate.connect(() => {
-                                show_config_dialog(main_win);
-                            });
-                    }
-
-                    var menu_item_about = new Gtk.ImageMenuItem.with_label(Text.MENU_ABOUT);
-                    {
-                        menu_item_about.always_show_image = true;
-                        menu_item_about.image = new Image.from_icon_name(
-                            IconName.Symbolic.HELP_FAQ,
-                            IconSize.SMALL_TOOLBAR
-                            );
-                        menu_item_about.activate.connect(() => {
-                                show_about_dialog(main_win);
-                            });
-                    }
-
-                    var menu_item_quit = new ImageMenuItem.with_label(Text.MENU_QUIT);
-                    {
-                        menu_item_quit.always_show_image = true;
-                        menu_item_quit.image = new Image.from_icon_name(
-                            IconName.Symbolic.EXIT,
-                            IconSize.SMALL_TOOLBAR
-                            );
-                        menu_item_quit.activate.connect(() => {
-                                if (music.playing) {
-                                    music.quit();
-                                }
-                                Gtk.main_quit();
-                            });
-                    }
-
-                    header_menu.halign = Align.END;
-                    header_menu.add(menu_item_config);
-                    header_menu.add(menu_item_about);
-                    header_menu.add(new SeparatorMenuItem());
-                    header_menu.add(menu_item_quit);
-                    header_menu.show_all();
-                }
-
-                header_menu_button.image = new Image.from_icon_name(IconName.Symbolic.OPEN_MENU, IconSize.BUTTON);
-                header_menu_button.get_style_context().add_class(StyleClass.TITLEBUTTON);
-                header_menu_button.direction = ArrowType.DOWN;
-                header_menu_button.popup = header_menu;
-                header_menu_button.use_popover = false;
-            }
-
             var header_fold_button = new Button();
             {
                 header_fold_button.get_style_context().add_class(StyleClass.TITLEBUTTON);
@@ -915,11 +857,43 @@ int main(string[] args) {
 
             }
 
+            var header_close_button = new Button();
+            {
+                header_close_button.get_style_context().add_class(StyleClass.TITLEBUTTON);
+                header_close_button.add(new Image.from_icon_name(IconName.Symbolic.WINDOW_CLOSE, IconSize.BUTTON));
+                header_close_button.sensitive = true;
+                header_close_button.clicked.connect(() => {
+                        application_quit();
+                    });
+            }
+            
+            var header_config_button = new Button();
+            {
+                header_config_button.get_style_context().add_class(StyleClass.TITLEBUTTON);
+                header_config_button.add(new Image.from_icon_name(IconName.Symbolic.APPLICATIONS_SYSTEM, IconSize.BUTTON));
+                header_config_button.sensitive = true;
+                header_config_button.clicked.connect(() => {
+                        show_config_dialog(main_win);
+                    });
+            }
+            
+            var header_about_button = new Button();
+            {
+                header_about_button.get_style_context().add_class(StyleClass.TITLEBUTTON);
+                header_about_button.add(new Image.from_icon_name(IconName.Symbolic.HELP_ABOUT, IconSize.BUTTON));
+                header_about_button.sensitive = true;
+                header_about_button.clicked.connect(() => {
+                        show_about_dialog(main_win);
+                    });
+            }
+            
             win_header.show_close_button = false;
             win_header.title = PROGRAM_NAME;
             win_header.has_subtitle = false;
             win_header.pack_start(header_box);
-            win_header.pack_end(header_menu_button);
+            win_header.pack_end(header_close_button);
+            win_header.pack_end(header_about_button);
+            win_header.pack_end(header_config_button);
             win_header.pack_end(header_fold_button);
         }
     }
@@ -1708,7 +1682,7 @@ int main(string[] args) {
                 }
                 time_label_rest.label = music_total_time;
                 time_label_set(0);
-                time_bar.set_fraction(0.0);
+                time_bar.fraction = 0.0;
                 Timeout.add(100, () => {
                         if (track_number != music.get_current_track_number() || !music.playing) {
                             return Source.REMOVE;
@@ -1717,7 +1691,7 @@ int main(string[] args) {
                         if (!music.paused) {
                             music_time_position += 0.1;
                             time_label_set(music_time_position);
-                            time_bar.set_fraction(music_time_position / music_total_time_seconds);
+                            time_bar.fraction = (music_time_position / music_total_time_seconds);
                         }
                         return Source.CONTINUE;
                     }, Priority.DEFAULT);

@@ -50,6 +50,8 @@ namespace DPlayer {
             public const string DOCUMENT_SAVE = "document-save-symbolic";
             public const string ZOOM_IN = "zoom-in-symbolic";
             public const string ZOOM_OUT = "zoom-out-symbolic";
+            public const string APPLICATIONS_SYSTEM = "applications-system-symbolic";
+            public const string HELP_ABOUT = "help-about-symbolic";
         }
         public const string AUDIO_FILE = "audio-x-generic";
         public const string MEDIA_OPTICAL = "media-optical";

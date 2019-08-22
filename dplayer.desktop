@@ -9,6 +9,6 @@ Exec=dplayer
 Icon=dplayer.png
 Type=Application
 Terminal=false
-Categories=AudioPlayer;MusicPlayer
+Categories=AudioVideo;Audio;Player
 StartupWMClass=dplayer
 Keywords=Music;Audio;Player;Media
