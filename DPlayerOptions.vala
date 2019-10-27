@@ -26,5 +26,6 @@ namespace DPlayer {
         public ShowThumbsAt show_thumbs_at;
         public int playlist_image_size;
         public string? last_playlist_name;
+        public bool play_style;
     }
 }

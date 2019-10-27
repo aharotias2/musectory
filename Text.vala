@@ -77,6 +77,7 @@ namespace DPlayer {
         public const string CONFIG_DIALOG_HEADER_THUMBS = "the size of thumbnails";
         public const string CONFIG_DIALOG_HEADER_PLAYLIST_IMAGE = "the size of playlist's image";
         public const string CONFIG_DIALOG_HEADER_CSD = "Use CSD?";
+        public const string CONFIG_DIALOG_PLAY_STYLE = "Play all files when one file was selected?";
         public const string DIALOG_YES = "Yes";
         public const string DIALOG_NO = "No";
         public const string DIALOG_OPEN_FILE = "Open File";

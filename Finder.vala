@@ -68,6 +68,7 @@ namespace DPlayer {
         private Thread<void *>? thread;
         private ImageLoaderThreadData? thdata;
         private Gdk.Pixbuf? icon_pixbuf;
+        private Image? mini_icon;
 
         public signal void bookmark_button_clicked(string file_path);
         public signal void add_button_clicked(string file_path);
@@ -115,6 +116,9 @@ namespace DPlayer {
                                                                                        this.icon_size,
                                                                                        this.icon_size,
                                                                                        Gdk.InterpType.BILINEAR));
+                                                        if (mini_icon != null) {
+                                                            mini_icon.visible = true;
+                                                        }
                                                     }
                                                     return Source.REMOVE;
                                                 }
@@ -173,28 +177,18 @@ namespace DPlayer {
                                 item_label.get_style_context().add_class(StyleClass.FINDER_ITEM_LABEL);
                             }
 
-                            Button? mini_icon_button = null;
+                            Image mini_icon = null;
                             {
-                                Image mini_icon = null;
-                                {
-                                    if (file_type == DFileType.FILE && icon_pixbuf != file_pixbuf) {
-                                        mini_icon = new Image.from_icon_name(IconName.Symbolic.AUDIO_FILE, IconSize.LARGE_TOOLBAR);
-                                    } else if (file_type == DFileType.DISC && icon_pixbuf != cd_pixbuf) {
-                                        mini_icon = new Image.from_icon_name(IconName.Symbolic.FOLDER, IconSize.LARGE_TOOLBAR);
-                                    }
-                                
-                                    if (mini_icon != null) {
-                                        mini_icon.halign = Align.START;
-                                        mini_icon.valign = Align.START;
-                                    }
+                                if (file_type == DFileType.FILE) {
+                                    mini_icon = new Image.from_icon_name(IconName.AUDIO_FILE, IconSize.LARGE_TOOLBAR);
+                                } else if (file_type == DFileType.DISC) {
+                                    mini_icon = new Image.from_icon_name(IconName.FOLDER, IconSize.LARGE_TOOLBAR);
+                                    mini_icon.visible = false;
                                 }
-
+                                
                                 if (mini_icon != null) {
-                                    mini_icon_button = new Button();
-                                    mini_icon_button.halign = Align.START;
-                                    mini_icon_button.valign = Align.START;
-                                    mini_icon_button.get_style_context().add_class(StyleClass.FINDER_MINI_ICON);
-                                    mini_icon_button.add(mini_icon);
+                                    mini_icon.halign = Align.START;
+                                    mini_icon.valign = Align.START;
                                 }
                             }
                             
@@ -202,9 +196,9 @@ namespace DPlayer {
                             widget_overlay1.add_overlay(item_label);
                             widget_overlay1.set_overlay_pass_through(item_label, true);
 
-                            if (mini_icon_button != null) {
-                                widget_overlay1.add_overlay(mini_icon_button);
-                                widget_overlay1.set_overlay_pass_through(mini_icon_button, true);
+                            if (mini_icon != null) {
+                                widget_overlay1.add_overlay(mini_icon);
+                                widget_overlay1.set_overlay_pass_through(mini_icon, true);
                             }
                         }
 
