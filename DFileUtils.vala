@@ -32,31 +32,45 @@ namespace DPlayer {
         public DFileType determine_file_type() throws FileError {
             DFileType answer = DFileType.UNKNOWN;
             GLib.Dir dir;
-
-            if (FileUtils.test(dir_path, FileTest.IS_REGULAR)) {
-                return DFileType.FILE;
-            }
-
-            if (dir_path.slice(dir_path.last_index_of_char('/'), dir_path.length) == "/..") {
-                return DFileType.PARENT;
-            }
-
-            try {
-                dir = Dir.open(dir_path, 0);
-            } catch (FileError e) {
-                stderr.printf("FileError at determin_file_type: cannot open directory %s.\n", dir_path);
-                throw e;
-            }
-
-            string? name = null;
-
-            while ((name = dir.read_name()) != null) {
-                string path = Path.build_path(Path.DIR_SEPARATOR_S, dir_path, name);
-
-                if (FileUtils.test(path, FileTest.IS_DIR)) {
-                    return DFileType.DIRECTORY;
+            File dir_file = File.new_for_path(dir_path);
+            FileInfo file_info = dir_file.query_info("standard::*", 0);
+            FileType file_type = file_info.get_file_type();
+            if (file_type == FileType.REGULAR) {
+                answer = DFileType.FILE;
+            } else if (file_type == FileType.DIRECTORY) {
+                if (dir_path.slice(dir_path.last_index_of_char('/'), dir_path.length) == "/..") {
+                    answer = DFileType.PARENT;
                 } else {
-                    answer = DFileType.DISC;
+                    answer = DFileType.DIRECTORY;
+
+                    try {
+                        dir = Dir.open(dir_path, 0);
+                    } catch (FileError e) {
+                        stderr.printf("FileError at determin_file_type: cannot open directory %s.\n", dir_path);
+                        throw e;
+                    }
+
+                    string? name = null;
+                    bool find_file_flag = false;
+                
+                    while ((name = dir.read_name()) != null) {
+                        if (name == "." || name == "..") {
+                            continue;
+                        }
+                        string path = Path.build_path(Path.DIR_SEPARATOR_S, dir_path, name);
+                        FileInfo info = File.new_for_path(path).query_info("standard::*", 0);
+                        FileType type = info.get_file_type();
+                        if (type == FileType.DIRECTORY) {
+                            answer = DFileType.DIRECTORY;
+                            break;
+                        } else {
+                            string mime_type = info.get_content_type();
+                            debug("mime_type: %s\n", mime_type);
+                            if (mime_type.split("/")[0] == "audio") {
+                                answer = DFileType.DISC;
+                            }
+                        }
+                    }
                 }
             }
             return answer;
@@ -75,10 +89,16 @@ namespace DPlayer {
 
             while ((name = dir.read_name()) != null) {
                 string path = Path.build_path(Path.DIR_SEPARATOR_S, dir_path, name);
-                if (FileUtils.test(path, FileTest.IS_DIR)) {
+                File f = File.new_for_path(path);
+                FileInfo fi = f.query_info("standard::*", 0);
+                FileType ft = fi.get_file_type();
+                if (ft == FileType.DIRECTORY) {
                     dir_list.insert_sorted(path.dup(), (a, b) => { return a.collate(b); });
-                } else if (FileUtils.test(path, FileTest.IS_REGULAR)) {
-                    file_list.insert_sorted(path.dup(), (a, b) => { return a.collate(b); });
+                } else if (ft == FileType.REGULAR) {
+                    string mime_type = fi.get_content_type();
+                    if (mime_type.split("/")[0] == "audio") {
+                        file_list.insert_sorted(path.dup(), (a, b) => { return a.collate(b); });
+                    }
                 }
             }
         }
@@ -103,13 +123,19 @@ namespace DPlayer {
 
             while ((name = dir.read_name()) != null) {
                 string path = Path.build_path(Path.DIR_SEPARATOR_S, dir_path, name);
-
-                if (FileUtils.test(path, FileTest.IS_DIR)) {
+                File f = File.new_for_path(path);
+                FileInfo fi = f.query_info("standard::*", 0);
+                FileType ft = fi.get_file_type();
+                
+                if (ft == FileType.DIRECTORY) {
                     dir_list.insert_sorted(name, (a, b) => { return a.collate(b); });
-                } else {
-                    var file_info = new DFileInfo();
-                    if (MPlayer.get_file_info(path, ref file_info)) {
-                        file_list.insert_sorted(file_info, file_compare_func);
+                } else if (ft == FileType.REGULAR) {
+                    string mime_type = fi.get_content_type();
+                    if (mime_type.split("/")[0] == "audio") {
+                        var file_info = new DFileInfo();
+                        if (MPlayer.get_file_info(path, ref file_info)) {
+                            file_list.insert_sorted(file_info, file_compare_func);
+                        }
                     }
                 }
             }
@@ -175,9 +201,13 @@ namespace DPlayer {
 
                 while ((name = dir.read_name()) != null) {
                     string path = Path.build_path(Path.DIR_SEPARATOR_S, dir_path, name);
-
-                    if (FileUtils.test(path, FileTest.IS_REGULAR)) {
-                        if (MPlayer.is_music_file(path)) {
+                    File f = File.new_for_path(path);
+                    FileInfo fi = f.query_info("standard::*", 0);
+                    FileType ft = fi.get_file_type();
+                    
+                    if (ft == FileType.REGULAR) {
+                        string mime_type = fi.get_content_type();
+                        if (mime_type.split("/")[0] == "audio") {
                             debug("load_first_artwork: found a file: " + path);
                             string pic_file_path_temp = MPlayer.create_artwork_file(path);
                             debug("first artwork in dir: " + pic_file_path_temp);
@@ -219,8 +249,11 @@ namespace DPlayer {
             
             while ((name = dir.read_name()) != null) {
                 string path = Path.build_path(Path.DIR_SEPARATOR_S, dir_path, name);
-
-                if (FileUtils.test(path, FileTest.IS_DIR)) {
+                File f = File.new_for_path(path);
+                FileInfo fi = f.query_info("standard::*", 0);
+                FileType ft = fi.get_file_type();
+                
+                if (ft == FileType.DIRECTORY) {
                     debug("contains_music: dir: " + path);
                     if (depth < max_depth) {
                         if (new DFileUtils(path).contains_music(max_depth, depth + 1)) {
@@ -228,9 +261,8 @@ namespace DPlayer {
                         }
                     }
                 } else {
-                    debug("contains_music: file" + path);
-                    DFileInfo file_info = new DFileInfo();
-                    if (MPlayer.get_file_info(path, ref file_info)) {
+                    string mime_type = fi.get_content_type();
+                    if (mime_type.split("/")[0] == "audio") {
                         return true;
                     }
                 }
