@@ -155,7 +155,7 @@ namespace DPlayer {
 				if (playing) {
 					quit();
 				}
-				Timeout.add(1, () => {
+				Idle.add(() => {
 						if (!playing) {
 							debug("*music restart from %d, ao_type: %s", start_pos, this.ao_type);
 							start(ref file_list, this.ao_type);

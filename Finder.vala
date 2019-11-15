@@ -102,7 +102,7 @@ namespace DPlayer {
                                     debug("file_type: disc");
                                     bool thread_started = false;
                                     thdata = new ImageLoaderThreadData(this.file_path, this.icon_size);
-                                    Timeout.add(80, () => {
+                                    Idle.add(() => {
                                             try {
                                                 if (!thread_started) {
                                                     thread = new Thread<void*>.try(this.file_path, thdata.run);
@@ -431,7 +431,7 @@ namespace DPlayer {
             while_label.label = Text.FINDER_LOAD_FILES;
             int size = get_level_size();
 
-            Timeout.add(10, () => {
+            Idle.add(() => {
 
                     file_info_list = new DFileUtils(dir_path).get_file_info_and_artwork_list_in_dir();
 
@@ -452,7 +452,7 @@ namespace DPlayer {
                     uint i = 0;
                     finder_container.add(finder);
                     
-                    Timeout.add(40, () => {
+                    Idle.add(() => {
                             if (i < this.file_info_list.length()) {
                                 DFileInfo file_info = this.file_info_list.nth_data(i);
                                 if (file_info.name != "..") {

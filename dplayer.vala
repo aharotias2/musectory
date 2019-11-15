@@ -143,7 +143,7 @@ void application_quit() {
         music.quit();
     }
 
-    Timeout.add(1, () => {
+    Idle.add(() => {
             if (!music.playing) {
                 Gtk.main_quit();
                 if (playlist.name != null) {
@@ -922,7 +922,7 @@ int main(string[] args) {
                     artwork_button.visible = false;
                     music_view_overlay.visible = true;
 
-                    Timeout.add(80, () => {
+                    Idle.add(() => {
                             debug("enter timeout artwork_button.clicked");
                             int size = int.min(music_view_container.get_allocated_width(),
                                                music_view_container.get_allocated_height());
@@ -953,7 +953,7 @@ int main(string[] args) {
                             }
                         } else {
                             finder.change_cursor(Gdk.CursorType.WATCH);
-                            Timeout.add(1, () => {
+                            Idle.add(() => {
                                     debug("play-pause button was clicked. music is not playing. start it.");
                                     if (stack.finder_is_visible()) {
                                         playlist.new_list_from_path(finder.dir_path);
@@ -1350,7 +1350,7 @@ int main(string[] args) {
                                     if (music.playing) {
                                         music.quit();
                                     }
-                                    Timeout.add(100, () => {
+                                    Idle.add(() => {
                                             if (music.playing) {
                                                 return Source.CONTINUE;
                                             } else {
@@ -1425,7 +1425,7 @@ int main(string[] args) {
                             music.quit();
                         }
                     
-                        Timeout.add(10, () => {
+                        Idle.add(() => {
                                 if (music.playing) {
                                     return Source.CONTINUE;
                                 } else {
@@ -1682,7 +1682,7 @@ int main(string[] args) {
                 time_label_rest.label = music_total_time;
                 time_label_set(0);
                 time_bar.fraction = 0.0;
-                Timeout.add(100, () => {
+                Idle.add(() => {
                         if (track_number != music.get_current_track_number() || !music.playing) {
                             return Source.REMOVE;
                         }
@@ -1712,7 +1712,7 @@ int main(string[] args) {
                         artwork_button.visible = true;
                         debug("make artwork button visible");
                     }
-                    Timeout.add(10, () => {
+                    Idle.add(() => {
                             debug("enter timeout artwork size");
                             int size = int.min(music_view_container.get_allocated_width(),
                                                music_view_container.get_allocated_height());
