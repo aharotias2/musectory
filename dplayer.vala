@@ -75,7 +75,7 @@ Button header_zoomin_button;
 Button header_zoomout_button;
 Image music_view_artwork;
 Label music_title;
-ProgressBar time_bar;
+Scale time_bar;
 Label time_label_current;
 Label time_label_rest;
 ToolButton play_pause_button;
@@ -991,7 +991,7 @@ int main(string[] args) {
                             if (playlist.get_track() == 0 || music_time_position > 1.0) {
                                 music.move_pos(0);
                                 music_time_position = 0;
-                                time_bar.fraction = 0;
+                                time_bar.set_value(0.0);
                                 time_label_set(0);
                             } else {
                                 music.play_prev();
@@ -1023,10 +1023,16 @@ int main(string[] args) {
                 music_title.margin_end = 5;
             }
 
-            time_bar = new ProgressBar();
+            time_bar = new Scale.with_range(Orientation.HORIZONTAL, 0.0, 1.0, 0.01);
             {
                 time_bar.set_size_request(-1, 12);
-                time_bar.show_text = false;
+                time_bar.draw_value = false;
+                time_bar.has_origin = true;
+                time_bar.change_value.connect((scroll_type, value) => {
+                        music_time_position = music_total_time_seconds * value;
+                        music.move_pos((int) (value * 100));
+                        return false;
+                    });
             }
 
             var time_label_box = new Box(Orientation.HORIZONTAL, 0);
@@ -1626,7 +1632,7 @@ int main(string[] args) {
     music = new Music();
     {
         music.on_quit.connect((pid, status) => {
-                time_bar.fraction = 0.0;
+                time_bar.set_value(0.0);
                 time_label_set(0);
 
                 ((Gtk.Image)play_pause_button.icon_widget).icon_name = IconName.Symbolic.MEDIA_PLAYBACK_START;
@@ -1681,8 +1687,8 @@ int main(string[] args) {
                 }
                 time_label_rest.label = music_total_time;
                 time_label_set(0);
-                time_bar.fraction = 0.0;
-                Idle.add(() => {
+                time_bar.set_value(0.0);
+                Timeout.add(100, () => {
                         if (track_number != music.get_current_track_number() || !music.playing) {
                             return Source.REMOVE;
                         }
@@ -1690,7 +1696,7 @@ int main(string[] args) {
                         if (!music.paused) {
                             music_time_position += 0.1;
                             time_label_set(music_time_position);
-                            time_bar.fraction = (music_time_position / music_total_time_seconds);
+                            time_bar.set_value(music_time_position / music_total_time_seconds);
                         }
                         return Source.CONTINUE;
                     }, Priority.DEFAULT);
