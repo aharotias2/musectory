@@ -83,6 +83,7 @@ ToolButton next_track_button;
 ToolButton prev_track_button;
 ToggleButton toggle_shuffle_button;
 ToggleButton toggle_repeat_button;
+Entry location;
 DPlayer.Finder finder;
 TreeView bookmark_tree;
 TreeIter bookmark_root;
@@ -1411,7 +1412,7 @@ int main(string[] args) {
             finder = new DPlayer.Finder();
             {
                 finder.set_default_icon_size(options.icon_size);
-                
+
                 finder.bookmark_button_clicked.connect((file_path) => {
                         add_bookmark(file_path);
                     });
@@ -1484,7 +1485,7 @@ int main(string[] args) {
                 finder_overlay.add_overlay(go_playlist_button);
             }
         }
-        
+
         finder_paned.pack1(bookmark_frame, false, true);
         finder_paned.pack2(finder_overlay, true, true);
     }
@@ -1731,7 +1732,7 @@ int main(string[] args) {
                 //playlist.set_track(-1);
             });
     }
-
+    
     //----------------------------------------------------------------------------------
     // Creating the main window
     //----------------------------------------------------------------------------------

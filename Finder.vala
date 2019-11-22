@@ -340,6 +340,7 @@ namespace DPlayer {
         public string dir_path { get; set; }
         public bool activate_on_single_click { get; set; }
 
+        public signal void dir_changed(string dir_path);
         public signal void bookmark_button_clicked(string file_path);
         public signal void add_button_clicked(string file_path);
         public signal void play_button_clicked(string file_path);
@@ -430,7 +431,7 @@ namespace DPlayer {
             while_label.visible = true;
             while_label.label = Text.FINDER_LOAD_FILES;
             int size = get_level_size();
-
+            dir_changed(dir_path);
             Idle.add(() => {
 
                     file_info_list = new DFileUtils(dir_path).get_file_info_and_artwork_list_in_dir();
