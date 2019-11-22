@@ -200,12 +200,12 @@ void show_config_dialog(Window main_win) {
     if (config_dialog == null) {
         string _ao_type = options.ao_type;
         bool _use_csd = options.use_csd;
-        RadioButton *p_radio_audio_alsa;
-        RadioButton *p_radio_audio_pulse;
-        RadioButton *p_radio_use_csd_yes;
-        RadioButton *p_radio_use_csd_no;
-        SpinButton *p_spin_thumbnail_size;
-        SpinButton *p_spin_playlist_image_size;
+        RadioButton radio_audio_alsa;
+        RadioButton radio_audio_pulse;
+        RadioButton radio_use_csd_yes;
+        RadioButton radio_use_csd_no;
+        SpinButton spin_thumbnail_size;
+        SpinButton spin_playlist_image_size;
 
         config_dialog = new Dialog.with_buttons(PROGRAM_NAME + Text.SETTINGS,
                                                 main_win,
@@ -222,7 +222,7 @@ void show_config_dialog(Window main_win) {
                 {
                     var frame_audio_choice_vbox = new Box(Orientation.VERTICAL, 0);
                     {
-                        var radio_audio_alsa = new RadioButton.with_label(null, "ALSA");
+                        radio_audio_alsa = new RadioButton.with_label(null, "ALSA");
                         {
                             if (options.ao_type == "alsa") {
                                 radio_audio_alsa.active = true;
@@ -230,10 +230,9 @@ void show_config_dialog(Window main_win) {
                             radio_audio_alsa.toggled.connect(() => {
                                     _ao_type = radio_audio_alsa.active ? "alsa" : "pulse";
                                 });
-                            p_radio_audio_alsa = radio_audio_alsa;
                         }
 
-                        var radio_audio_pulse = new RadioButton.with_label_from_widget(radio_audio_alsa, "PulseAudio");
+                        radio_audio_pulse = new RadioButton.with_label_from_widget(radio_audio_alsa, "PulseAudio");
                         {
                             if (options.ao_type == "pulse") {
                                 radio_audio_pulse.active = true;
@@ -241,7 +240,6 @@ void show_config_dialog(Window main_win) {
                             radio_audio_pulse.toggled.connect(() => {
                                     _ao_type = radio_audio_pulse.active ? "pulse" : "alsa";
                                 });
-                            p_radio_audio_pulse = radio_audio_pulse;
                         }
 
                         frame_audio_choice_vbox.margin = 5;
@@ -254,12 +252,11 @@ void show_config_dialog(Window main_win) {
 
                 var frame_thumbnail_size = new Frame(Text.CONFIG_DIALOG_HEADER_THUMBS);
                 {
-                    var spin_thumbnail_size = new SpinButton.with_range(1, 500, 1);
+                    spin_thumbnail_size = new SpinButton.with_range(1, 500, 1);
                     {
                         spin_thumbnail_size.margin = 5;
                         spin_thumbnail_size.numeric = false;
                         spin_thumbnail_size.value = options.thumbnail_size;
-                        p_spin_thumbnail_size = spin_thumbnail_size;
                     }
 
                     frame_thumbnail_size.add(spin_thumbnail_size);
@@ -267,12 +264,11 @@ void show_config_dialog(Window main_win) {
 
                 var frame_playlist_image_size = new Frame(Text.CONFIG_DIALOG_HEADER_PLAYLIST_IMAGE);
                 {
-                    var spin_playlist_image_size = new SpinButton.with_range(16, 256, 1);
+                    spin_playlist_image_size = new SpinButton.with_range(16, 256, 1);
                     {
                         spin_playlist_image_size.margin = 5;
                         spin_playlist_image_size.numeric = false;
                         spin_playlist_image_size.value = options.playlist_image_size;
-                        p_spin_playlist_image_size = spin_playlist_image_size;
                     }
 
                     frame_playlist_image_size.add(spin_playlist_image_size);
@@ -282,7 +278,7 @@ void show_config_dialog(Window main_win) {
                 {
                     var frame_use_csd_box = new Box(Orientation.HORIZONTAL, 0);
                     {
-                        var radio_use_csd_yes = new RadioButton.with_label(null, Text.DIALOG_YES);
+                        radio_use_csd_yes = new RadioButton.with_label(null, Text.DIALOG_YES);
                         {
                             if (options.use_csd) {
                                 radio_use_csd_yes.active = true;
@@ -290,10 +286,9 @@ void show_config_dialog(Window main_win) {
                             radio_use_csd_yes.toggled.connect(() => {
                                     _use_csd = true;
                                 });
-                            p_radio_use_csd_yes = radio_use_csd_yes;
                         }
 
-                        var radio_use_csd_no = new RadioButton.with_label_from_widget(radio_use_csd_yes, Text.DIALOG_NO);
+                        radio_use_csd_no = new RadioButton.with_label_from_widget(radio_use_csd_yes, Text.DIALOG_NO);
                         {
                             if (!options.use_csd) {
                                 radio_use_csd_no.active = true;
@@ -301,7 +296,6 @@ void show_config_dialog(Window main_win) {
                             radio_use_csd_no.toggled.connect(() => {
                                     _use_csd = false;
                                 });
-                            p_radio_use_csd_no = radio_use_csd_no;
                         }
 
                         frame_use_csd_box.pack_start(radio_use_csd_yes);
@@ -323,8 +317,8 @@ void show_config_dialog(Window main_win) {
                     switch (response_id) {
                     case ResponseType.ACCEPT:
                         options.ao_type = _ao_type;
-                        options.thumbnail_size = (int)p_spin_thumbnail_size->value;
-                        options.playlist_image_size = (int)p_spin_playlist_image_size->value;
+                        options.thumbnail_size = (int)spin_thumbnail_size.value;
+                        options.playlist_image_size = (int)spin_playlist_image_size.value;
                         if (artwork.pixbuf != null) {
                             artwork.pixbuf = MyUtils.PixbufUtils.scale_limited(current_playing_artwork,
                                                                                options.thumbnail_size);
@@ -341,18 +335,18 @@ void show_config_dialog(Window main_win) {
                     case ResponseType.CANCEL:
                         switch (options.ao_type) {
                         case "alsa":
-                            p_radio_audio_alsa->active = true;
+                            radio_audio_alsa.active = true;
                             break;
 
                         case "pulse":
-                            p_radio_audio_pulse->active = true;
+                            radio_audio_pulse.active = true;
                             break;
                         }
                                     
                         if (options.use_csd) {
-                            p_radio_use_csd_yes->active = true;
+                            radio_use_csd_yes.active = true;
                         } else {
-                            p_radio_use_csd_no->active = true;
+                            radio_use_csd_no.active = true;
                         }
 
                         break;
@@ -675,10 +669,10 @@ int main(string[] args) {
     // Initialization of local variables
     //----------------------------------------------------------------------------------
 
-    Revealer *p_bookmark_revealer = null;
-    Button *p_music_view_close_button = null;
+    Revealer bookmark_revealer = null;
+    Button music_view_close_button = null;
     
-    TreeViewColumn *p_bookmark_title_col = null;
+    TreeViewColumn bookmark_title_col = null;
 
     var screen = Gdk.Screen.get_default();
 
@@ -1154,7 +1148,7 @@ int main(string[] args) {
             {
                 bookmark_tree = new TreeView();
                 {
-                    var bookmark_title_col = new TreeViewColumn();
+                    bookmark_title_col = new TreeViewColumn();
                     {
                         var bookmark_icon_cell = new CellRendererPixbuf();
                         var bookmark_label_cell = new CellRendererText();
@@ -1170,7 +1164,6 @@ int main(string[] args) {
                         bookmark_title_col.set_title("label");
                         bookmark_title_col.sizing = TreeViewColumnSizing.AUTOSIZE;
                         bookmark_title_col.max_width = window_default_width / 4;
-                        p_bookmark_title_col = bookmark_title_col;
                     }
 
                     var bookmark_del_col = new TreeViewColumn();
@@ -1596,7 +1589,7 @@ int main(string[] args) {
     //----------------------------------------------------------------------------------
     music_view_overlay = new Overlay();
     {
-        var music_view_close_button = new Button.from_icon_name(IconName.Symbolic.WINDOW_CLOSE, IconSize.BUTTON);
+        music_view_close_button = new Button.from_icon_name(IconName.Symbolic.WINDOW_CLOSE, IconSize.BUTTON);
         {
             music_view_close_button.halign = Align.END;
             music_view_close_button.valign = Align.START;
@@ -1607,7 +1600,6 @@ int main(string[] args) {
                     header_switch_button.sensitive = true;
                     header_add_button.sensitive = true;
                 });
-            p_music_view_close_button = music_view_close_button;
         }
 
         music_view_container = new ScrolledWindow(null, null);
@@ -1795,7 +1787,7 @@ int main(string[] args) {
                                        music_view_container.get_allocated_height());
                     music_view_artwork.pixbuf = MyUtils.PixbufUtils.scale_limited(current_playing_artwork, size);
                 }
-                p_bookmark_title_col->max_width = main_win.get_allocated_width() / 4;
+                bookmark_title_col.max_width = main_win.get_allocated_width() / 4;
                 return false;
             });
 
