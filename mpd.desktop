@@ -1,14 +1,14 @@
 [Desktop Entry]
 Version=1.0
-Name=dplayer
+Name=mpd
 GenericName=Audio Player
 Comment=Audio Player mimic MFPlayer of Windows
 MimeType=
-TryExec=dplayer
-Exec=dplayer
-Icon=dplayer.png
+TryExec=mpd
+Exec=mpd
+Icon=mpd.png
 Type=Application
 Terminal=false
 Categories=AudioVideo;Audio;Player
-StartupWMClass=dplayer
+StartupWMClass=mpd
 Keywords=Music;Audio;Player;Media

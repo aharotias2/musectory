@@ -1,5 +1,5 @@
-namespace DPlayer {
-    public const string PROGRAM_NAME = "dplayer";
+namespace Mpd {
+    public const string PROGRAM_NAME = "mpd";
     
     namespace StyleClass {
         public const string TITLEBUTTON = "titlebutton";
@@ -65,7 +65,7 @@ namespace DPlayer {
     
     namespace Text {
         public const string EMPTY = "";
-        public const string PROGRAM_NAME = "dplayer";
+        public const string PROGRAM_NAME = "mpd";
         public const string DESCRIPTION = "フォルダで音楽を管理する人のためのプレイヤ";
         public const string COPYRIGHT = "Ⓒ 2017 Tanaka Takayuki";
         public const string SETTINGS = " settings";
@@ -96,26 +96,26 @@ namespace DPlayer {
         public const string MENU_MOVE_UP = "Move this item up";
         public const string MENU_MOVE_DOWN = "Move this item down";
         public const string DEFAULT_CSS = "/*\n"+
-            " * This file is part of dplayer.\n"+
+            " * This file is part of mpd.\n"+
             " * \n"+
-            " *     dplayer is free software: you can redistribute it and/or modify\n"+
+            " *     mpd is free software: you can redistribute it and/or modify\n"+
             " *     it under the terms of the GNU General Public License as published by\n"+
             " *     the Free Software Foundation, either version 3 of the License, or\n"+
             " *     (at your option) any later version.\n"+
             " * \n"+
-            " *     dplayer is distributed in the hope that it will be useful,\n"+
+            " *     mpd is distributed in the hope that it will be useful,\n"+
             " *     but WITHOUT ANY WARRANTY; without even the implied warranty of\n"+
             " *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"+
             " *     GNU General Public License for more details.\n"+
             " * \n"+
             " *     You should have received a copy of the GNU General Public License\n"+
-            " *     along with dplayer.  If not, see <http://www.gnu.org/licenses/>.\n"+
+            " *     along with mpd.  If not, see <http://www.gnu.org/licenses/>.\n"+
             " * \n"+
             " * Copyright 2018 Takayuki Tanaka\n"+
             " */\n"+
             "\n"+
             "/***********************************************************\n"+
-            " *                  dplayer style sheet                    *\n"+
+            " *                  mpd style sheet                    *\n"+
             " ***********************************************************/\n"+
             ".title {\n"+
             "    font-size: 17px;\n"+

@@ -1,4 +1,4 @@
-# dplayer
+# Mpd
 Windows's MFPlayer-like music player for GTK-3
 ## Requirements
 * vala
@@ -8,7 +8,7 @@ Windows's MFPlayer-like music player for GTK-3
 * MPlayer (runtime only)
 ## Build
 ```
-cd dplayer
+cd mpd
 make
 ```
 ## Install
@@ -16,8 +16,8 @@ make
 make install
 ```
 ## Other informations
-* It uses /tmp/dplayer directory. You should chmod your user name on this directory.
-* It creates directory "~/.dplayer" to put configuration and resource files.
+* It uses /tmp/mpd directory. You should chmod your user name on this directory.
+* It creates directory "~/.mpd" to put configuration and resource files.
 ## TODO
 * functions to cache finder view on Gtk.Stack (if possible).
 * ~~functions to update artwork file if audio file is newer than artwork file.~~

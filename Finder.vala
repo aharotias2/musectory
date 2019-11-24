@@ -1,25 +1,25 @@
 /*
- * This file is part of dplayer.
+ * This file is part of mpd.
  * 
- *     dplayer is free software: you can redistribute it and/or modify
+ *     mpd is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
  * 
- *     dplayer is distributed in the hope that it will be useful,
+ *     mpd is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
  * 
  *     You should have received a copy of the GNU General Public License
- *     along with dplayer.  If not, see <http://www.gnu.org/licenses/>.
+ *     along with mpd.  If not, see <http://www.gnu.org/licenses/>.
  * 
  * Copyright 2018 Takayuki Tanaka
  */
 
-using Gtk, DPlayer;
+using Gtk, Mpd;
 
-namespace DPlayer {
+namespace Mpd {
 
     Gdk.Pixbuf parent_pixbuf;
     Gdk.Pixbuf folder_pixbuf;
@@ -456,6 +456,10 @@ namespace DPlayer {
                     Idle.add(() => {
                             if (i < this.file_info_list.length()) {
                                 DFileInfo file_info = this.file_info_list.nth_data(i);
+                                if (file_info.name == "..") {
+                                    i++;
+                                    return Source.CONTINUE;
+                                }
                                 if (file_info.name != "..") {
                                     while_label.label = Text.FILE_LOADED.printf(file_info.name);
                                 }
