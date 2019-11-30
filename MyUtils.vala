@@ -120,6 +120,18 @@ namespace MyUtils {
             }
         }
 
+        public static Gdk.Pixbuf scale(Gdk.Pixbuf pixbuf, int size) {
+            size = int.max(10, size);
+            if (pixbuf.width >= pixbuf.height) {
+                return pixbuf.scale_simple(size,
+                                           (int) (size * ((double) pixbuf.height / pixbuf.width)),
+                                           Gdk.InterpType.BILINEAR);
+            } else {
+                return pixbuf.scale_simple((int) (size * ((double) pixbuf.width / pixbuf.height)),
+                                           size,
+                                           Gdk.InterpType.BILINEAR);
+            }
+        }
     }
 
     public class StringUtils {

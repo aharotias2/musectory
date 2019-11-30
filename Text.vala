@@ -31,6 +31,7 @@ namespace Mpd {
             public const string OPEN_MENU = "open-menu-symbolic";
             public const string GO_UP = "go-up-symbolic";
             public const string GO_DOWN = "go-down-symbolic";
+            public const string GO_PREVIOUS = "go-previous-symbolic";
             public const string MEDIA_PLAYBACK_START = "media-playback-start-symbolic";
             public const string MEDIA_PLAYBACK_PAUSE = "media-playback-pause-symbolic";
             public const string MEDIA_SKIP_FORWARD = "media-skip-forward-symbolic";
@@ -117,16 +118,16 @@ namespace Mpd {
             "/***********************************************************\n"+
             " *                  mpd style sheet                    *\n"+
             " ***********************************************************/\n"+
-            ".title {\n"+
-            "    font-size: 17px;\n"+
-            "}\n"+
-            "\n"+
-            ".album {\n"+
+            ".playlist_title {\n"+
             "    font-size: 12px;\n"+
             "}\n"+
             "\n"+
-            ".artist, .genre {\n"+
-            "    font-size: 12px;\n"+
+            ".playlist_album {\n"+
+            "    font-size: 9px;\n"+
+            "}\n"+
+            "\n"+
+            ".playlist_artist, .playlist_genre {\n"+
+            "    font-size: 9px;\n"+
             "    font-style: italic;\n"+
             "}\n"+
             "\n"+
@@ -172,6 +173,9 @@ namespace Mpd {
         public const string TOOLTIP_SHOW_PLAYLIST = "Show playlist";
         public const string TOOLTIP_SAVE_FINDER = "Bookmark this directory";
         public const string TOOLTIP_SAVE_PLAYLIST = "Save this playlist";
+        public const string TOOLTIP_FINDER_ZOOMIN = "Zoom in";
+        public const string TOOLTIP_FINDER_ZOOMOUT = "Zoom out";
+        public const string TOOLTIP_FINDER_GO_UP = "Go up";
         public const string ERROR_WRITE_CONFIG = "Error: can not write to config file.\n";
         public const string ERROR_NO_MPLAYER = "mplayer command does not exist.\n";
         public const string ERROR_UNKOWN_OPTION = "%s: Unknown command line options \"%s\"";

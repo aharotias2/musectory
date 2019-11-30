@@ -53,8 +53,6 @@ Gdk.Pixbuf cd_pixbuf;
 Gdk.Pixbuf folder_pixbuf;
 Gdk.Pixbuf file_pixbuf;
 Gdk.Pixbuf parent_pixbuf;
-Image view_list_image;
-Image view_grid_image;
 int max_width;
 int max_height;
 int artwork_max_size;
@@ -705,8 +703,6 @@ int main(string[] args) {
             folder_pixbuf = icon_theme.load_icon(IconName.FOLDER, 64, 0);
         }
         parent_pixbuf = icon_theme.load_icon(IconName.GO_UP, 64, 0);
-        view_list_image = new Image.from_icon_name(IconName.Symbolic.VIEW_LIST, IconSize.BUTTON);
-        view_grid_image = new Image.from_icon_name(IconName.Symbolic.VIEW_GRID, IconSize.BUTTON);
     } catch (Error e) {
         stderr.printf(Text.ERROR_LOAD_ICON);
         Process.exit(1);
@@ -749,7 +745,7 @@ int main(string[] args) {
                                 }
                                 music_view_artwork.visible = false;
                                 stack.show_playlist();
-                                header_switch_button.image = view_grid_image;
+                                (header_switch_button.image as Image).icon_name = IconName.Symbolic.GO_PREVIOUS;
                             } else if (stack.playlist_is_visible()) {
                                 if (options.use_csd) {
                                     win_header.set_title(finder.dir_path);
@@ -761,7 +757,7 @@ int main(string[] args) {
                                 }
                                 music_view_artwork.visible = false;
                                 stack.show_finder();
-                                header_switch_button.image = view_list_image;
+                                (header_switch_button.image as Image).icon_name = IconName.Symbolic.VIEW_LIST;
                             }
                         });
                 }
@@ -770,6 +766,7 @@ int main(string[] args) {
                 {
                     header_add_button.get_style_context().add_class(StyleClass.TITLEBUTTON);
                     header_add_button.add(new Image.from_icon_name(IconName.Symbolic.BOOKMARK_NEW, IconSize.BUTTON));
+                    header_add_button.tooltip_text = Text.TOOLTIP_SAVE_PLAYLIST;
                     header_add_button.clicked.connect(() => {
                             playlist_save_action();
                         });
@@ -827,17 +824,6 @@ int main(string[] args) {
 
             }
 
-            /*
-            var header_close_button = new Button();
-            {
-                header_close_button.get_style_context().add_class(StyleClass.TITLEBUTTON);
-                header_close_button.add(new Image.from_icon_name(IconName.Symbolic.WINDOW_CLOSE, IconSize.BUTTON));
-                header_close_button.sensitive = true;
-                header_close_button.clicked.connect(() => {
-                        application_quit();
-                    });
-            }
-            */
             var header_config_button = new Button();
             {
                 header_config_button.get_style_context().add_class(StyleClass.TITLEBUTTON);
@@ -862,10 +848,9 @@ int main(string[] args) {
             win_header.title = PROGRAM_NAME;
             win_header.has_subtitle = false;
             win_header.pack_start(header_box);
-//            win_header.pack_end(header_close_button);
-            win_header.pack_end(header_about_button);
-            win_header.pack_end(header_config_button);
             win_header.pack_end(header_fold_button);
+            win_header.pack_end(header_about_button);
+//            win_header.pack_end(header_config_button);
         }
     }
 
@@ -932,7 +917,7 @@ int main(string[] args) {
                                     }
                                     stack.show_playlist();
                                     header_switch_button.sensitive = true;
-                                    header_switch_button.image = view_grid_image;
+                                    (header_switch_button.image as Image).icon_name = IconName.GO_PREVIOUS;
                                     var file_path_list = playlist.get_file_path_list();
                                     music.start(ref file_path_list, options.ao_type);
                                     finder.change_cursor(Gdk.CursorType.LEFT_PTR);
@@ -1388,8 +1373,9 @@ int main(string[] args) {
         {
             var finder_toolbar = new Box(Orientation.HORIZONTAL, 4);
             {
-                finder_parent_button = new Button.from_icon_name("go-up", IconSize.BUTTON);
+                finder_parent_button = new Button.from_icon_name(IconName.Symbolic.GO_UP, IconSize.BUTTON);
                 {
+                    finder_parent_button.tooltip_text = Text.TOOLTIP_FINDER_GO_UP;
                     finder_parent_button.clicked.connect(() => {
                             string path = File.new_for_path(current_dir).get_parent().get_path();
                             finder.change_dir(path);
@@ -1403,6 +1389,7 @@ int main(string[] args) {
                                                                      IconSize.BUTTON);
                     {
                         finder_zoomin_button.get_style_context().add_class(StyleClass.TITLEBUTTON);
+                        finder_zoomin_button.tooltip_text = Text.TOOLTIP_FINDER_ZOOMIN;
                         finder_zoomin_button.clicked.connect(() => {
                                 finder.zoom_in();
                             });
@@ -1412,6 +1399,7 @@ int main(string[] args) {
                                                                       IconSize.BUTTON);
                     {
                         finder_zoomout_button.get_style_context().add_class(StyleClass.TITLEBUTTON);
+                        finder_zoomout_button.tooltip_text = Text.TOOLTIP_FINDER_ZOOMOUT;
                         finder_zoomout_button.clicked.connect(() => {
                                 finder.zoom_out();
                             });
@@ -1435,6 +1423,7 @@ int main(string[] args) {
                 {
                     finder_add_button.get_style_context().add_class(StyleClass.TITLEBUTTON);
                     finder_add_button.add(new Image.from_icon_name(IconName.Symbolic.BOOKMARK_NEW, IconSize.BUTTON));
+                    finder_add_button.tooltip_text = Text.TOOLTIP_SAVE_FINDER;
                     finder_add_button.clicked.connect(() => {
                             playlist_save_action();
                         });
@@ -1486,7 +1475,7 @@ int main(string[] args) {
                                             music.start(ref file_path_list, options.ao_type);
                                         }
                                         ((Gtk.Image)play_pause_button.icon_widget).icon_name = IconName.Symbolic.MEDIA_PLAYBACK_PAUSE;
-                                        header_switch_button.image = view_grid_image;
+                                        (header_switch_button.image as Image).icon_name = IconName.Symbolic.GO_PREVIOUS;
                                         header_switch_button.sensitive = true;
                                         stack.show_playlist();
                                         finder.change_cursor(Gdk.CursorType.LEFT_PTR);
@@ -1546,7 +1535,7 @@ int main(string[] args) {
     {
         var playlist_toolbar = new Box(Orientation.VERTICAL, 0);
         {
-            var back_button = new ToolButton(new Image.from_icon_name(IconName.GO_PREVIOUS,
+            var back_button = new ToolButton(new Image.from_icon_name(IconName.Symbolic.GO_PREVIOUS,
                                                                       IconSize.SMALL_TOOLBAR),
                                              null);
             {
@@ -1558,7 +1547,7 @@ int main(string[] args) {
                     });
             }
 
-            var save_button = new ToolButton(new Image.from_icon_name(IconName.DOCUMENT_SAVE,
+            var save_button = new ToolButton(new Image.from_icon_name(IconName.Symbolic.DOCUMENT_SAVE,
                                                                       IconSize.SMALL_TOOLBAR),
                                              null);
             {
@@ -1617,7 +1606,7 @@ int main(string[] args) {
                         } else {
                             music.start(ref list, options.ao_type);
                             ((Gtk.Image)play_pause_button.icon_widget).icon_name = IconName.Symbolic.MEDIA_PLAYBACK_PAUSE;
-                            header_switch_button.image = view_grid_image;
+                            (header_switch_button.image as Image).icon_name = IconName.Symbolic.VIEW_GRID;
                             header_switch_button.sensitive = true;
                             stack.show_playlist();
                         }
@@ -1797,17 +1786,11 @@ int main(string[] args) {
                 {
                     stack.finder_is_selected.connect(() => {
                             header_add_button.visible = false;
-                            finder_zoomin_button.sensitive = true;
-                            finder_zoomout_button.sensitive = true;
-                            header_switch_button.tooltip_text = Text.TOOLTIP_SHOW_FINDER;
-                            finder_add_button.tooltip_text = Text.TOOLTIP_SAVE_FINDER;
+                            header_switch_button.tooltip_text = Text.TOOLTIP_SHOW_PLAYLIST;
                         });
                     stack.playlist_is_selected.connect(() => {
                             header_add_button.visible = true;
-                            finder_zoomin_button.sensitive = false;
-                            finder_zoomout_button.sensitive = false;
-                            header_switch_button.tooltip_text = Text.TOOLTIP_SHOW_PLAYLIST;
-                            finder_add_button.tooltip_text = Text.TOOLTIP_SAVE_PLAYLIST;
+                            header_switch_button.tooltip_text = Text.TOOLTIP_SHOW_FINDER;
                         });
                 }
                 
@@ -1836,7 +1819,7 @@ int main(string[] args) {
                 if (music_view_overlay.visible && current_playing_artwork != null) {
                     int size = int.min(music_view_container.get_allocated_width(),
                                        music_view_container.get_allocated_height());
-                    music_view_artwork.pixbuf = MyUtils.PixbufUtils.scale_limited(current_playing_artwork, size);
+                    music_view_artwork.pixbuf = MyUtils.PixbufUtils.scale(current_playing_artwork, size);
                 }
                 bookmark_title_col.max_width = main_win.get_allocated_width() / 4;
                 return false;
@@ -1868,7 +1851,7 @@ int main(string[] args) {
     music_view_overlay.visible = false;
     music_view_artwork.visible = false;
     finder.hide_while_label();
-    header_switch_button.image = view_list_image;
+    (header_switch_button.image as Image).icon_name = IconName.Symbolic.VIEW_LIST;
     header_switch_button.sensitive = false;
     finder_add_button.sensitive = false;
     finder_zoomout_button.sensitive = false;

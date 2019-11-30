@@ -90,7 +90,7 @@ namespace Mpd {
                             {
                                 title.ellipsize = EllipsizeMode.END;
                                 title.set_halign(Align.START);
-                                title.get_style_context().add_class("title");
+                                title.get_style_context().add_class("playlist_title");
                             }
 
                             string album_year = file.album != null ? file.album : "Unkown Album";
@@ -102,21 +102,21 @@ namespace Mpd {
                             {
                                 album.ellipsize = EllipsizeMode.END;
                                 album.set_halign(Align.START);
-                                album.get_style_context().add_class("album");
+                                album.get_style_context().add_class("playlist_album");
                             }
 
                             Label artist = new Label(file.artist != null ? file.artist : "Unkown Artist");
                             {
                                 artist.ellipsize = EllipsizeMode.END;
                                 artist.set_halign(Align.START);
-                                artist.get_style_context().add_class("artist");
+                                artist.get_style_context().add_class("playlist_artist");
                             }
 
                             Label genre = new Label(file.genre != null ? file.genre : "Unkown Genre");
                             {
                                 genre.ellipsize = EllipsizeMode.END;
                                 genre.set_halign(Align.START);
-                                genre.get_style_context().add_class("genre");
+                                genre.get_style_context().add_class("playlist_genre");
                             }
 
                             grid2.attach(title, 0, 0, 5, 1);
