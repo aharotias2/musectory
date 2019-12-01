@@ -1854,8 +1854,8 @@ int main(string[] args) {
     (header_switch_button.image as Image).icon_name = IconName.Symbolic.VIEW_LIST;
     header_switch_button.sensitive = false;
     finder_add_button.sensitive = false;
-    finder_zoomout_button.sensitive = false;
-    finder_zoomin_button.sensitive = false;
+    finder_zoomout_button.sensitive = true;
+    finder_zoomin_button.sensitive = true;
     stack.show_finder();
     finder.change_dir(current_dir);
     if (options.last_playlist_name != "") {
