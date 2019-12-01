@@ -321,8 +321,8 @@ void show_config_dialog(Window main_win) {
                         options.thumbnail_size = (int)spin_thumbnail_size.value;
                         options.playlist_image_size = (int)spin_playlist_image_size.value;
                         if (artwork.pixbuf != null) {
-                            artwork.pixbuf = MyUtils.PixbufUtils.scale_limited(current_playing_artwork,
-                                                                               options.thumbnail_size);
+                            artwork.pixbuf = MyUtils.PixbufUtils.scale(current_playing_artwork,
+                                                                       options.thumbnail_size);
                         }
                         playlist.resize_artworks(options.playlist_image_size);
                         debug("_use_csd: " + (_use_csd ? "true" : "false"));
@@ -879,11 +879,11 @@ int main(string[] args) {
                     artwork_button.visible = false;
                     music_view_overlay.visible = true;
 
-                    Idle.add(() => {
+                    Timeout.add(300, () => {
                             debug("enter timeout artwork_button.clicked");
                             int size = int.min(music_view_container.get_allocated_width(),
                                                music_view_container.get_allocated_height());
-                            music_view_artwork.pixbuf = MyUtils.PixbufUtils.scale_limited(current_playing_artwork, size);
+                            music_view_artwork.pixbuf = MyUtils.PixbufUtils.scale(current_playing_artwork, size);
                             music_view_artwork.visible = true;
                             header_switch_button.sensitive = false;
                             finder_add_button.sensitive = false;
@@ -1742,7 +1742,7 @@ int main(string[] args) {
                 debug("artwork_max_size: " + artwork_max_size.to_string());
                 current_playing_artwork = file_info.artwork;
                 if (current_playing_artwork != null) {
-                    artwork.set_from_pixbuf(MyUtils.PixbufUtils.scale_limited(current_playing_artwork,
+                    artwork.set_from_pixbuf(MyUtils.PixbufUtils.scale(current_playing_artwork,
                                                                               options.thumbnail_size));
                     if (!music_view_artwork.visible) {
                         artwork_button.visible = true;
@@ -1752,8 +1752,8 @@ int main(string[] args) {
                             debug("enter timeout artwork size");
                             int size = int.min(music_view_container.get_allocated_width(),
                                                music_view_container.get_allocated_height());
-                            music_view_artwork.pixbuf = MyUtils.PixbufUtils.scale_limited(current_playing_artwork,
-                                                                                         size);
+                            music_view_artwork.pixbuf = MyUtils.PixbufUtils.scale(current_playing_artwork,
+                                                                                  size);
                             debug("music view artwork size: " + size.to_string());
                             return Source.REMOVE;
                         });
