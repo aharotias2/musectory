@@ -556,8 +556,8 @@ int main(string[] args) {
     options.use_csd = true;
     options.thumbnail_size = 80;
     options.show_thumbs_at = ShowThumbsAt.ALBUMS;
-    options.playlist_image_size = 64;
-    options.icon_size = 48;
+    options.playlist_image_size = 52;
+    options.icon_size = 128;
     options.last_playlist_name = "";
     
     current_dir = null;

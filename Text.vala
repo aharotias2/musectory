@@ -120,19 +120,23 @@ namespace Mpd {
  *                  dplayer style sheet                    *
  ***********************************************************/
 .playlist_title {
+    padding: 6px 0px 2px 0px;
     font-size: 12px;
 }
 
 .playlist_album {
+    padding: 2px 0px 6px 0px;
     font-size: 9px;
 }
 
 .playlist_artist {
+    padding: 6px 0px 2px 0px;
     font-size: 11px;
     font-style: italic;
 }
 
 .playlist_genre {
+    padding: 2px 0px 6px 0px;
     font-size: 9px;
     font-style: italic;
 }
