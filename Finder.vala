@@ -102,7 +102,7 @@ namespace Mpd {
                                     debug("file_type: disc");
                                     bool thread_started = false;
                                     thdata = new ImageLoaderThreadData(this.file_path, this.icon_size);
-                                    Idle.add(() => {
+                                    Timeout.add(100, () => {
                                             try {
                                                 if (!thread_started) {
                                                     thread = new Thread<void*>.try(this.file_path, thdata.run);
@@ -432,8 +432,8 @@ namespace Mpd {
             while_label.label = Text.FINDER_LOAD_FILES;
             int size = get_level_size();
             dir_changed(dir_path);
-            Idle.add(() => {
-
+            Timeout.add(100, () => {
+                    
                     file_info_list = new DFileUtils(dir_path).get_file_info_and_artwork_list_in_dir();
 
                     if (finder != null) {

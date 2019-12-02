@@ -96,76 +96,82 @@ namespace Mpd {
         public const string MENU_REMOVE_ITEM = "Remove this item";
         public const string MENU_MOVE_UP = "Move this item up";
         public const string MENU_MOVE_DOWN = "Move this item down";
-        public const string DEFAULT_CSS = "/*\n"+
-            " * This file is part of mpd.\n"+
-            " * \n"+
-            " *     mpd is free software: you can redistribute it and/or modify\n"+
-            " *     it under the terms of the GNU General Public License as published by\n"+
-            " *     the Free Software Foundation, either version 3 of the License, or\n"+
-            " *     (at your option) any later version.\n"+
-            " * \n"+
-            " *     mpd is distributed in the hope that it will be useful,\n"+
-            " *     but WITHOUT ANY WARRANTY; without even the implied warranty of\n"+
-            " *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"+
-            " *     GNU General Public License for more details.\n"+
-            " * \n"+
-            " *     You should have received a copy of the GNU General Public License\n"+
-            " *     along with mpd.  If not, see <http://www.gnu.org/licenses/>.\n"+
-            " * \n"+
-            " * Copyright 2018 Takayuki Tanaka\n"+
-            " */\n"+
-            "\n"+
-            "/***********************************************************\n"+
-            " *                  mpd style sheet                    *\n"+
-            " ***********************************************************/\n"+
-            ".playlist_title {\n"+
-            "    font-size: 12px;\n"+
-            "}\n"+
-            "\n"+
-            ".playlist_album {\n"+
-            "    font-size: 9px;\n"+
-            "}\n"+
-            "\n"+
-            ".playlist_artist, .playlist_genre {\n"+
-            "    font-size: 9px;\n"+
-            "    font-style: italic;\n"+
-            "}\n"+
-            "\n"+
-            ".artwork_background {\n"+
-            "    background-color: rgba(0, 0, 0, 0.85);\n"+
-            "    color: #ffffff;\n"+
-            "}\n"+
-            "\n"+
-            ".tooltip {\n"+
-            "    color: rgba(252, 252, 252, 1.0);\n"+
-            "    font-style: italic;\n"+
-            "    padding: 4px;\n"+
-            "    /* not working */\n"+
-            "    border-radius: 2px;\n"+
-            "    box-shadow: none;\n"+
-            "}\n"+
-            "\n"+
-            ".tooltip.background {\n"+
-            "    box-shadow: inset 0px 1px rgba(0, 0, 0, 0.5);\n"+
-            "    background-color: rgba(9, 9, 9, 0.5);\n"+
-            "}\n"+
-            ".finder_icon {\n"+
-            "    box-shadow: 10px 10px 10px 10px rgba(0, 0, 0, 0.4);\n"+
-            "}\n"+
-            ".finder_item_label {\n"+
-            "    background-color: rgba(10, 10, 10, 0.5);\n"+
-            "    color: rgba(228, 228, 228, 1.0);\n"+
-            "}\n"+
-            ".finder_mini_icon {\n"+
-            "    background-color: rgba(128, 128, 128, 0.5);\n"+
-            "}\n"+
-            ".finder_button {\n"+
-            "}\n"+
-            ".while_label {\n"+
-            "    background-color: rgba(16, 16, 16, 0.5);\n"+
-            "    color: rgba(228, 228, 228, 1.0);\n"+
-            "}\n"+
-            "\n";
+        public const string DEFAULT_CSS = """
+/*
+ * This file is part of dplayer.
+ * 
+ *     dplayer is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ * 
+ *     dplayer is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ * 
+ *     You should have received a copy of the GNU General Public License
+ *     along with dplayer.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ * Copyright 2018 Takayuki Tanaka
+ */
+
+/***********************************************************
+ *                  dplayer style sheet                    *
+ ***********************************************************/
+.playlist_title {
+    font-size: 12px;
+}
+
+.playlist_album {
+    font-size: 9px;
+}
+
+.playlist_artist {
+    font-size: 11px;
+    font-style: italic;
+}
+
+.playlist_genre {
+    font-size: 9px;
+    font-style: italic;
+}
+
+.artwork_background {
+    background-color: rgba(0, 0, 0, 0.85);
+    color: #ffffff;
+}
+
+.tooltip {
+    color: rgba(252, 252, 252, 1.0);
+    font-style: italic;
+    padding: 4px;
+    /* not working */
+    border-radius: 2px;
+    box-shadow: none;
+}
+
+.tooltip.background {
+    box-shadow: inset 0px 1px rgba(0, 0, 0, 0.5);
+    background-color: rgba(9, 9, 9, 0.5);
+}
+.finder_icon {
+    box-shadow: 10px 10px 10px 10px rgba(0, 0, 0, 0.4);
+}
+.finder_item_label {
+    background-color: rgba(10, 10, 10, 0.5);
+    color: rgba(228, 228, 228, 1.0);
+}
+.finder_mini_icon {
+    background-color: rgba(128, 128, 128, 0.0);
+}
+.finder_button {
+}
+.while_label {
+    background-color: rgba(16, 16, 16, 0.5);
+    color: rgba(228, 228, 228, 1.0);
+}
+""";
         public const string MARKUP_BOLD_ITALIC = "<b><i>%s</i></b>";
         public const string FINDER_LOAD_FILES = "Loading data from disk...";
         public const string FILE_LOADED = "%s is loaded";
