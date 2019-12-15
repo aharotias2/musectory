@@ -126,12 +126,12 @@ namespace Mpd {
 
 .playlist_album {
     padding: 2px 0px 6px 0px;
-    font-size: 9px;
+    font-size: 11px;
 }
 
 .playlist_artist {
     padding: 6px 0px 2px 0px;
-    font-size: 11px;
+    font-size: 9px;
     font-style: italic;
 }
 

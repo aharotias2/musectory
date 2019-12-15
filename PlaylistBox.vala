@@ -120,8 +120,8 @@ namespace Mpd {
                             }
 
                             grid2.attach(title, 0, 0, 5, 1);
-                            grid2.attach(album, 0, 1, 5, 1);
-                            grid2.attach(artist, 5, 0, 2, 1);
+                            grid2.attach(artist, 0, 1, 5, 1);
+                            grid2.attach(album, 5, 0, 2, 1);
                             grid2.attach(genre, 5, 1, 2, 1);
                             grid2.row_homogeneous = false;
                             grid2.column_homogeneous = true;
