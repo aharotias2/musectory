@@ -1432,7 +1432,6 @@ int main(string[] args) {
                 finder_add_button = new Button.from_icon_name(IconName.Symbolic.BOOKMARK_NEW, IconSize.BUTTON);
                 {
                     finder_add_button.get_style_context().add_class(StyleClass.TITLEBUTTON);
-//                    finder_add_button.add(new Image.from_icon_name(IconName.Symbolic.BOOKMARK_NEW, IconSize.BUTTON));
                     finder_add_button.tooltip_text = Text.TOOLTIP_SAVE_FINDER;
                     finder_add_button.clicked.connect(() => {
                             playlist_save_action();
