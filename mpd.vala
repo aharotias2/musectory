@@ -73,6 +73,7 @@ Button finder_add_button;
 Button finder_parent_button;
 Button finder_zoomin_button;
 Button finder_zoomout_button;
+Button finder_refresh_button;
 Entry finder_location;
 Image music_view_artwork;
 Label music_title;
@@ -1419,10 +1420,19 @@ int main(string[] args) {
                         });
                 }
 
+                finder_refresh_button = new Button.from_icon_name(IconName.Symbolic.VIEW_REFRESH, IconSize.BUTTON);
+                {
+                    finder_refresh_button.get_style_context().add_class(StyleClass.TITLEBUTTON);
+                    finder_refresh_button.tooltip_text = Text.TOOLTIP_REFRESH_FINDER;
+                    finder_refresh_button.clicked.connect(() => {
+                            finder.change_dir(current_dir);
+                        });
+                }
+                
                 finder_add_button = new Button.from_icon_name(IconName.Symbolic.BOOKMARK_NEW, IconSize.BUTTON);
                 {
                     finder_add_button.get_style_context().add_class(StyleClass.TITLEBUTTON);
-                    finder_add_button.add(new Image.from_icon_name(IconName.Symbolic.BOOKMARK_NEW, IconSize.BUTTON));
+//                    finder_add_button.add(new Image.from_icon_name(IconName.Symbolic.BOOKMARK_NEW, IconSize.BUTTON));
                     finder_add_button.tooltip_text = Text.TOOLTIP_SAVE_FINDER;
                     finder_add_button.clicked.connect(() => {
                             playlist_save_action();
@@ -1432,6 +1442,7 @@ int main(string[] args) {
                 finder_toolbar.pack_start(finder_parent_button, false, false);
                 finder_toolbar.pack_start(finder_zoom_box, false, false);
                 finder_toolbar.pack_start(finder_location, true, true);
+                finder_toolbar.pack_start(finder_refresh_button, false, false);
                 finder_toolbar.pack_start(finder_add_button, false, false);
             }
             

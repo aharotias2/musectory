@@ -53,6 +53,7 @@ namespace Mpd {
             public const string ZOOM_OUT = "zoom-out-symbolic";
             public const string APPLICATIONS_SYSTEM = "applications-system-symbolic";
             public const string HELP_ABOUT = "help-about-symbolic";
+            public const string VIEW_REFRESH = "view-refresh-symbolic";
         }
         public const string AUDIO_FILE = "audio-x-generic";
         public const string MEDIA_OPTICAL = "media-optical";
@@ -186,6 +187,7 @@ namespace Mpd {
         public const string TOOLTIP_FINDER_ZOOMIN = "Zoom in";
         public const string TOOLTIP_FINDER_ZOOMOUT = "Zoom out";
         public const string TOOLTIP_FINDER_GO_UP = "Go up";
+        public const string TOOLTIP_REFRESH_FINDER = "Reload";
         public const string ERROR_WRITE_CONFIG = "Error: can not write to config file.\n";
         public const string ERROR_NO_MPLAYER = "mplayer command does not exist.\n";
         public const string ERROR_UNKOWN_OPTION = "%s: Unknown command line options \"%s\"";
