@@ -222,15 +222,19 @@ namespace Mpd {
             }
             
             public void on_enter() {
-                if (!playing) {
+                if (playing) {
                     icon_area.status = PlaylistItemStatus.PAUSED;
+                } else {
+                    icon_area.status = PlaylistItemStatus.PLAYING;
                 }
             }
 
             public void on_leave() {
                 if (!playing) {
                     icon_area.status = PlaylistItemStatus.NORMAL;
-                }
+                } else {
+                    icon_area.status = PlaylistItemStatus.PLAYING;
+                }                    
             }
 
             public void set_as_playing() {
@@ -466,10 +470,12 @@ namespace Mpd {
 
         public void move_to_next_track() {
             move_cursor((int) tracker.inc());
+            set_track((int)tracker.current);
         }
 
         public void move_to_prev_track() {
             move_cursor((int) tracker.dec());
+            set_track((int)tracker.current);
         }
 
         public void move_cursor(int index) {

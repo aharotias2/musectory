@@ -72,10 +72,10 @@ namespace Mpd {
                 draw_number(da, ctx);
                 break;
             case PlaylistItemStatus.PLAYING:
-                draw_pause_icon(da, ctx);
+                draw_playback_icon(da, ctx);
                 break;
             case PlaylistItemStatus.PAUSED:
-                draw_playback_icon(da, ctx);
+                draw_pause_icon(da, ctx);
                 break;
             case PlaylistItemStatus.HIDDEN:
             default:
