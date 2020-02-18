@@ -394,7 +394,7 @@ bool playlist_exists(string name) {
                 return true;
             }
         } while (store.iter_next(ref iter));
-	}
+    }
     return false;
 }
 
@@ -1091,7 +1091,7 @@ int main(string[] args) {
             controller_third_box.pack_start(toggle_repeat_button, false, false);
         }
 
-	controller.margin = 4;
+    controller.margin = 4;
         controller.pack_start(artwork_button, false, false);
         controller.pack_start(controller_second_box, false, false);
         controller.pack_start(time_bar_box, true, true);

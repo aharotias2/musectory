@@ -18,142 +18,142 @@
  */
 
 namespace Mpd {
-	public class MPlayer : Object {
-		private static string track_name;
-		private static string default_outdir;
+    public class MPlayer : Object {
+        private static string track_name;
+        private static string default_outdir;
 
-		private static string get_outdir(string? destdir) {
-			return "jpeg:outdir=%s,png:outdir=%s".printf(destdir, destdir);
-		}
+        private static string get_outdir(string? destdir) {
+            return "jpeg:outdir=%s,png:outdir=%s".printf(destdir, destdir);
+        }
 
-		public static string quit_command() {
-			return "quit\n";
-		}
+        public static string quit_command() {
+            return "quit\n";
+        }
 
-		public static string pause_command() {
-			return "pause\n";
-		}
+        public static string pause_command() {
+            return "pause\n";
+        }
 
-		public static string volume_command(double value) {
-			return "volume %d 1\n".printf((int) value);
-		}
+        public static string volume_command(double value) {
+            return "volume %d 1\n".printf((int) value);
+        }
 
-		public static string step_forward_command(uint step) {
-			return "pt_step %u\n".printf(step);
-		}
+        public static string step_forward_command(uint step) {
+            return "pt_step %u\n".printf(step);
+        }
 
-		public static string step_backward_command(uint step) {
-			return "pt_step -%u\n".printf(step);
-		}
+        public static string step_backward_command(uint step) {
+            return "pt_step -%u\n".printf(step);
+        }
 
-		public static string move_pos(int value) {
-			return "pausing_keep seek %d 1\n".printf(value);
-		}
+        public static string move_pos(int value) {
+            return "pausing_keep seek %d 1\n".printf(value);
+        }
 
-		public static string[] get_playback_command(ref List<string> file_list, string aotype, bool shuffle, bool repeat) {
-			string[] playback_command = {"mplayer", "-novideo", "-slave", "-quiet", "-ao", aotype};
-			Array<string> spawn_args_array = new Array<string>();
-			spawn_args_array.data = playback_command;
-			if (shuffle) {
-				spawn_args_array.append_val("-shuffle");
-			}
-			if (repeat) {
-				spawn_args_array.append_val("-loop");
-				spawn_args_array.append_val("0");
-			}
-			foreach(string file_path in file_list) {
-				spawn_args_array.append_val(file_path.dup());
-			}
-			return spawn_args_array.data;
-		}
+        public static string[] get_playback_command(ref List<string> file_list, string aotype, bool shuffle, bool repeat) {
+            string[] playback_command = {"mplayer", "-novideo", "-slave", "-quiet", "-ao", aotype};
+            Array<string> spawn_args_array = new Array<string>();
+            spawn_args_array.data = playback_command;
+            if (shuffle) {
+                spawn_args_array.append_val("-shuffle");
+            }
+            if (repeat) {
+                spawn_args_array.append_val("-loop");
+                spawn_args_array.append_val("0");
+            }
+            foreach(string file_path in file_list) {
+                spawn_args_array.append_val(file_path.dup());
+            }
+            return spawn_args_array.data;
+        }
 
-		public static bool when_new_track_started(string mplayer_output) {
-			if (mplayer_output.index_of("Playing ") >= 0) {
-				// delete "Playing" and trailing "."
-				track_name = mplayer_output.slice(8, mplayer_output.length - 2);
-				return true;
-			} else {
-				return false;
-			}
-		}
+        public static bool when_new_track_started(string mplayer_output) {
+            if (mplayer_output.index_of("Playing ") >= 0) {
+                // delete "Playing" and trailing "."
+                track_name = mplayer_output.slice(8, mplayer_output.length - 2);
+                return true;
+            } else {
+                return false;
+            }
+        }
 
-		public static bool when_current_track_ended(string mplayer_output) {
-			if (mplayer_output.index_of("\n") == 0) {
-				track_name = "";
-				return true;
-			} else {
-				return false;
-			}
-		}
+        public static bool when_current_track_ended(string mplayer_output) {
+            if (mplayer_output.index_of("\n") == 0) {
+                track_name = "";
+                return true;
+            } else {
+                return false;
+            }
+        }
 
-		public static string get_track_name_from_output(string mplayer_output) {
-			return track_name;
-		}
+        public static string get_track_name_from_output(string mplayer_output) {
+            return track_name;
+        }
 
-		public static List<DFileInfo?> get_file_info_and_artwork_list_from_file_list(List<string> file_name_list)
-		requires (file_name_list.length() > 0) {
-			var info_list = new List<DFileInfo?>();
-			if (default_outdir == null) {
-				default_outdir = get_default_out_dir();
-			}
-			Cli cli = new Cli("mplayer", "-ao", "null", "-demuxer", "lavf", "-vo", get_outdir(default_outdir),
-							  "-ss", "00:00:00", "-endpos", "0", "-frames", "1", "-identify");
-			cli.add_args(file_name_list);
-			cli.execute();
+        public static List<DFileInfo?> get_file_info_and_artwork_list_from_file_list(List<string> file_name_list)
+        requires (file_name_list.length() > 0) {
+            var info_list = new List<DFileInfo?>();
+            if (default_outdir == null) {
+                default_outdir = get_default_out_dir();
+            }
+            Cli cli = new Cli("mplayer", "-ao", "null", "-demuxer", "lavf", "-vo", get_outdir(default_outdir),
+                              "-ss", "00:00:00", "-endpos", "0", "-frames", "1", "-identify");
+            cli.add_args(file_name_list);
+            cli.execute();
 
-			if (cli.status != 0 || cli.stdout.index_of("ID_AUDIO_ID=") < 0) {
-				return info_list;
-			}
+            if (cli.status != 0 || cli.stdout.index_of("ID_AUDIO_ID=") < 0) {
+                return info_list;
+            }
 
-			string[] metadata = cli.stdout.split("\n\n");
+            string[] metadata = cli.stdout.split("\n\n");
 
-			int i = 0;
-			int j = 1;
-			while (i < metadata.length) {
-				string file_path = file_name_list.nth_data(i);
-				DFileInfo info = new DFileInfo();
-				if (set_file_info_from_mplayer_output(metadata[i + 1], ref info)) {
-					info.dir = Path.get_dirname(file_path);
-					info.path = file_path;
-					info.name = Path.get_basename(file_path);
-					if (metadata[i + 1].index_of("output directory:") > 0) {
-						info.artwork = get_music_artwork_from_mplayer_output(file_path, j);
-						j++;
-					}
-					info_list.append(info);
-				}
-				i++;
-			}
-			return info_list;
-		}
+            int i = 0;
+            int j = 1;
+            while (i < metadata.length) {
+                string file_path = file_name_list.nth_data(i);
+                DFileInfo info = new DFileInfo();
+                if (set_file_info_from_mplayer_output(metadata[i + 1], ref info)) {
+                    info.dir = Path.get_dirname(file_path);
+                    info.path = file_path;
+                    info.name = Path.get_basename(file_path);
+                    if (metadata[i + 1].index_of("output directory:") > 0) {
+                        info.artwork = get_music_artwork_from_mplayer_output(file_path, j);
+                        j++;
+                    }
+                    info_list.append(info);
+                }
+                i++;
+            }
+            return info_list;
+        }
 
-		public static bool get_file_info(string file_path, ref DFileInfo info) {
-			Cli cli = new Cli("mplayer", "-vo", "null", "-ao", "null", "-identify", "-frames", "0", file_path);
-			cli.execute();
+        public static bool get_file_info(string file_path, ref DFileInfo info) {
+            Cli cli = new Cli("mplayer", "-vo", "null", "-ao", "null", "-identify", "-frames", "0", file_path);
+            cli.execute();
 
-			if (cli.status != 0 || cli.stdout.index_of("ID_AUDIO_ID=") < 0) {
-				return false;
-			}
+            if (cli.status != 0 || cli.stdout.index_of("ID_AUDIO_ID=") < 0) {
+                return false;
+            }
 
-			string metadata = cli.stdout;
+            string metadata = cli.stdout;
 
-			info.name = file_path.slice(file_path.last_index_of_char('/') + 1, file_path.length);
-			info.path = file_path;
+            info.name = file_path.slice(file_path.last_index_of_char('/') + 1, file_path.length);
+            info.path = file_path;
 
-			return set_file_info_from_mplayer_output(metadata, ref info);
-		}
+            return set_file_info_from_mplayer_output(metadata, ref info);
+        }
 
-		public static bool is_music_file(string file_path) {
-			Cli cli = new Cli("mplayer", "-vo", "null", "-ao", "null", "-identify", "-frames", "0", file_path);
-			cli.execute();
-			return cli.status == 0 && cli.stdout.index_of("ID_AUDIO_ID=") >= 0;
-		}
+        public static bool is_music_file(string file_path) {
+            Cli cli = new Cli("mplayer", "-vo", "null", "-ao", "null", "-identify", "-frames", "0", file_path);
+            cli.execute();
+            return cli.status == 0 && cli.stdout.index_of("ID_AUDIO_ID=") >= 0;
+        }
 
-		public static bool contains_music(string dir_path) {
-			return false;
-		}
+        public static bool contains_music(string dir_path) {
+            return false;
+        }
 
-		public static string? create_artwork_file(string file_path) {
+        public static string? create_artwork_file(string file_path) {
             DPath path = new DPath(file_path);
 
             try {
@@ -184,26 +184,26 @@ namespace Mpd {
                 stderr.printf("ERROR: creating directory was failed: (path: %s)\n", path.tmp_dir);
                 return null;
             }
-		}
-		
-		public static Gdk.Pixbuf? get_music_artwork(string pic_file_path, int? size=-1) {
+        }
+        
+        public static Gdk.Pixbuf? get_music_artwork(string pic_file_path, int? size=-1) {
             if (MyUtils.FileUtils.is_empty(pic_file_path)) {
                 return null;
             }
-			try {
-				if (size < 0) {
-					return new Gdk.Pixbuf.from_file(pic_file_path);
-				} else {
-					return new Gdk.Pixbuf.from_file_at_size(pic_file_path, size, size);
-				}
-			} catch (Error e) {
-				FileUtils.remove(pic_file_path);
-				stderr.printf("MPlayer.get_music_artwork: load %s is failed\n", pic_file_path);
-				return null;
-			}
-		}
+            try {
+                if (size < 0) {
+                    return new Gdk.Pixbuf.from_file(pic_file_path);
+                } else {
+                    return new Gdk.Pixbuf.from_file_at_size(pic_file_path, size, size);
+                }
+            } catch (Error e) {
+                FileUtils.remove(pic_file_path);
+                stderr.printf("MPlayer.get_music_artwork: load %s is failed\n", pic_file_path);
+                return null;
+            }
+        }
 
-		public static Gdk.Pixbuf? get_music_artwork_from_mplayer_output(string file_path, int index, int? size=-1) {
+        public static Gdk.Pixbuf? get_music_artwork_from_mplayer_output(string file_path, int index, int? size=-1) {
             DPath path = new DPath.with_index(file_path, index);
             if (!path.pic_exists) {
                 path.put_pic_file(index);
@@ -217,25 +217,25 @@ namespace Mpd {
                         stderr.printf("ERROR: It was failed to copy %s to %s", path.pic_file, path2.pic_file);
                     }
                 }
-			}
+            }
 
-			try {
-				if (size < 0) {
-					return new Gdk.Pixbuf.from_file(path.pic_file);
-				} else {
-					return new Gdk.Pixbuf.from_file_at_size(path.pic_file, size, size);
-				}
-			} catch (Error e) {
-				FileUtils.remove(path.pic_file);
-				debug("get_music_artwork_from_mplayer_output: load %s is failed", path.pic_file);
-				return null;
-			}
-		}
+            try {
+                if (size < 0) {
+                    return new Gdk.Pixbuf.from_file(path.pic_file);
+                } else {
+                    return new Gdk.Pixbuf.from_file_at_size(path.pic_file, size, size);
+                }
+            } catch (Error e) {
+                FileUtils.remove(path.pic_file);
+                debug("get_music_artwork_from_mplayer_output: load %s is failed", path.pic_file);
+                return null;
+            }
+        }
 
-		//--------------------------------------------------------------------------------------
-		// プライベートメソッド - MPlayerのメタデータ出力を解析し、DFileInfo型のオブジェクトに
-		// セットする。
-		//--------------------------------------------------------------------------------------
+        //--------------------------------------------------------------------------------------
+        // プライベートメソッド - MPlayerのメタデータ出力を解析し、DFileInfo型のオブジェクトに
+        // セットする。
+        //--------------------------------------------------------------------------------------
         public const string TMP_BASE = "/tmp/" + PROGRAM_NAME;
         public const string OUT_DIR = TMP_BASE + "/tmp";
         
@@ -243,74 +243,74 @@ namespace Mpd {
             return "/tmp/" + PROGRAM_NAME + "/tmp";
         }
         
-		private static bool set_file_info_from_mplayer_output(string metadata, ref DFileInfo info) {
-			if (metadata != null && metadata != "" && metadata.index_of("ID_AUDIO_ID") > 0) {
-				string[] lines = metadata.split("\n", 1000);
-				for (int i = 0; i < lines.length; i++) {
-					if (lines[i] == "") {
-						continue;
-					}
+        private static bool set_file_info_from_mplayer_output(string metadata, ref DFileInfo info) {
+            if (metadata != null && metadata != "" && metadata.index_of("ID_AUDIO_ID") > 0) {
+                string[] lines = metadata.split("\n", 1000);
+                for (int i = 0; i < lines.length; i++) {
+                    if (lines[i] == "") {
+                        continue;
+                    }
 
-					string key;
-					string value;
+                    string key;
+                    string value;
 
-					if (lines[i].index_of("ID_") >= 0) {
-						if (lines[i].index_of("ID_CLIP_INFO_NAME") >= 0) {
-							key = lines[i].split("=", 2)[1].ascii_down();
-							i++;
-							value = lines[i].split("=", 2)[1].strip();
+                    if (lines[i].index_of("ID_") >= 0) {
+                        if (lines[i].index_of("ID_CLIP_INFO_NAME") >= 0) {
+                            key = lines[i].split("=", 2)[1].ascii_down();
+                            i++;
+                            value = lines[i].split("=", 2)[1].strip();
 
-							switch (key) {
-							case "title":
-								info.title = value;
-								break;
+                            switch (key) {
+                            case "title":
+                                info.title = value;
+                                break;
 
-							case "artist":
-								info.artist = value;
-								break;
+                            case "artist":
+                                info.artist = value;
+                                break;
 
-							case "album":
-								info.album = value;
-								break;
+                            case "album":
+                                info.album = value;
+                                break;
 
-							case "genre":
-								info.genre = value;
-								break;
+                            case "genre":
+                                info.genre = value;
+                                break;
 
-							case "comment":
-								info.comment = value;
-								break;
+                            case "comment":
+                                info.comment = value;
+                                break;
 
-							case "track":
-								info.track = value;
-								break;
+                            case "track":
+                                info.track = value;
+                                break;
 
-							case "disc":
-								info.disc = value;
-								break;
+                            case "disc":
+                                info.disc = value;
+                                break;
 
-							case "date":
-							case "year":
-								info.date = value;
-								break;
-							}
-						} else if (lines[i].index_of("ID_LENGTH") >= 0) {
-							int val = int.parse(lines[i].split("=", 2)[1].split(".", 2)[0]);
-							string time_str;
-							if (val > 3600) {
-								time_str = "%d:%02d:%02".printf(val / 360, val % 360 / 60, val % 60);
-							} else {
-								time_str = "%02d:%02d".printf(val /60, val % 60);
-							}
-							info.time_length = time_str;
-						}
-					}
-				}
-				return true;
-			} else {
-				return false;
-			}
-		}
+                            case "date":
+                            case "year":
+                                info.date = value;
+                                break;
+                            }
+                        } else if (lines[i].index_of("ID_LENGTH") >= 0) {
+                            int val = int.parse(lines[i].split("=", 2)[1].split(".", 2)[0]);
+                            string time_str;
+                            if (val > 3600) {
+                                time_str = "%d:%02d:%02".printf(val / 360, val % 360 / 60, val % 60);
+                            } else {
+                                time_str = "%02d:%02d".printf(val /60, val % 60);
+                            }
+                            info.time_length = time_str;
+                        }
+                    }
+                }
+                return true;
+            } else {
+                return false;
+            }
+        }
 
         private class DPath {
 
@@ -388,7 +388,7 @@ namespace Mpd {
             }
             
             public void put_pic_file(int index = 1) {
-				string? temp_file_path = get_tmp_pic_path(index);
+                string? temp_file_path = get_tmp_pic_path(index);
                 if (temp_file_path != null) {
                     string ext = MyUtils.FilePathUtils.extension_of(temp_file_path);
                     set_pic_ext(ext);
@@ -403,5 +403,5 @@ namespace Mpd {
             private string v_tmp_dir;
             private string v_pic_file;
         }
-	}
+    }
 }
