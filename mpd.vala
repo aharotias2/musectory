@@ -933,8 +933,8 @@ int main(string[] args) {
             {
                 next_track_button.sensitive = false;
                 next_track_button.clicked.connect(() => {
-                        music.play_next();
                         playlist.move_to_next_track();
+                        music.play_next();
                     });
             }
 

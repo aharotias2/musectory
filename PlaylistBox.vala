@@ -25,7 +25,7 @@ namespace Mpd {
     public class PlaylistBox : Bin {
         private class PlaylistItem : ListBoxRow {
             public int image_size { get; set; }
-            private bool playing;
+            private PlaylistItemStatus status;
             private PlaylistDrawingArea icon_area;
             public string track_title { get; private set; }
             private string tooltip_text;
@@ -37,7 +37,7 @@ namespace Mpd {
             
             public PlaylistItem(DFileInfo file, int image_size) {
                 file_info = file;
-                playing = false;
+                status = PlaylistItemStatus.NORMAL;
                 debug("PlaylistItem.image_size = %d", image_size);
                 this.image_size = image_size;
                 EventBox ev_box = new EventBox();
@@ -66,7 +66,6 @@ namespace Mpd {
                                 icon_area.set_area_size(image_size);
                                 icon_area.halign = Align.CENTER;
                                 icon_area.valign = Align.CENTER;
-                                icon_area.status = PlaylistItemStatus.NORMAL;
                                 icon_area.index = get_index();
                                 icon_area.does_draw_outline = true;
                             }
@@ -222,41 +221,45 @@ namespace Mpd {
             }
             
             public void on_enter() {
-                if (playing) {
+                switch (status) {
+                case PlaylistItemStatus.PLAYING:
                     icon_area.status = PlaylistItemStatus.PAUSED;
-                } else {
+                    break;
+                case PlaylistItemStatus.PAUSED:
+                case PlaylistItemStatus.NORMAL:
                     icon_area.status = PlaylistItemStatus.PLAYING;
+                    break;
                 }
             }
 
             public void on_leave() {
-                if (!playing) {
-                    icon_area.status = PlaylistItemStatus.NORMAL;
-                } else {
+                switch (status) {
+                case PlaylistItemStatus.PLAYING:
                     icon_area.status = PlaylistItemStatus.PLAYING;
-                }                    
+                    break;
+                case PlaylistItemStatus.PAUSED:
+                    icon_area.status = PlaylistItemStatus.PAUSED;
+                    break;
+                case PlaylistItemStatus.NORMAL:
+                    icon_area.status = PlaylistItemStatus.NORMAL;
+                    break;
+                }
             }
 
-            public void set_as_playing() {
-                playing = true;
-                icon_area.status = PlaylistItemStatus.PLAYING;
-            }
-
-            public void set_as_number() {
-                playing = false;
-                icon_area.status = PlaylistItemStatus.NORMAL;
-            }
-
-            public void set_as_paused() {
-                playing = true;
-                icon_area.status = PlaylistItemStatus.PAUSED;
+            public void set_status(PlaylistItemStatus status) {
+                this.status = status;
+                icon_area.status = status;
             }
 
             public void on_click() {
-                if (icon_area.status == PlaylistItemStatus.PLAYING) {
-                    set_as_paused();
-                } else {
-                    set_as_playing();
+                switch (status) {
+                case PlaylistItemStatus.PLAYING:
+                    set_status(PlaylistItemStatus.PAUSED);
+                    break;
+                case PlaylistItemStatus.PAUSED:
+                case PlaylistItemStatus.NORMAL:
+                    set_status(PlaylistItemStatus.PLAYING);
+                    break;
                 }
             }
 
@@ -438,10 +441,10 @@ namespace Mpd {
                         if (i == tracker.current) {
                             item.on_click();
                         } else {
-                            item.set_as_playing();
+                            item.set_status(PlaylistItemStatus.PLAYING);
                         }
                     } else {
-                        item.set_as_number();
+                        item.set_status(PlaylistItemStatus.NORMAL);
                     }
                 }
                 i++;
