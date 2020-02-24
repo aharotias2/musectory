@@ -160,9 +160,10 @@ namespace Mpd {
     box-shadow: inset 0px 1px rgba(0, 0, 0, 0.5);
     background-color: rgba(9, 9, 9, 0.5);
 }
+
 .finder_icon {
-    box-shadow: 10px 10px 10px 10px rgba(0, 0, 0, 0.4);
 }
+
 .finder_item_label {
     background-color: rgba(10, 10, 10, 0.5);
     color: rgba(228, 228, 228, 1.0);
