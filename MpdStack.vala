@@ -24,16 +24,18 @@ class MpdStack : Bin {
     private bool use_csd;
     public signal void finder_is_selected();
     public signal void playlist_is_selected();
-    public MpdStack(Widget finder, Widget playlist, bool use_csd) {
+    public MpdStack(bool use_csd) {
         this.stack = new Stack();
         {
             this.stack.transition_type = StackTransitionType.UNDER_UP;
-            this.stack.add_named(finder, "finder");
-            this.stack.add_named(playlist, "playlist");
         }
         this.use_csd = use_csd;
 
         add(this.stack);
+    }
+
+    public void add_named(Widget widget, string name) {
+        this.stack.add_named(widget, name);
     }
     
     public bool stack_is_visible() {

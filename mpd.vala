@@ -99,7 +99,6 @@ int window_default_width = 900;
 int window_default_height = 750;
 
 Dialog? help_dialog = null;
-Dialog? config_dialog = null;
 Dialog? save_playlist_dialog = null;
 
 const Gdk.RGBA music_view_bg_color = {0.1, 0.1, 0.1, 1.0};
@@ -196,175 +195,6 @@ void show_about_dialog(Window main_win) {
         }
     }
     help_dialog.visible = true;
-}
-
-void show_config_dialog(Window main_win) {
-    if (config_dialog == null) {
-        string _ao_type = options.ao_type;
-        bool _use_csd = options.use_csd;
-        RadioButton radio_audio_alsa;
-        RadioButton radio_audio_pulse;
-        RadioButton radio_use_csd_yes;
-        RadioButton radio_use_csd_no;
-        SpinButton spin_thumbnail_size;
-        SpinButton spin_playlist_image_size;
-
-        config_dialog = new Dialog.with_buttons(PROGRAM_NAME + Text.SETTINGS,
-                                                main_win,
-                                                DialogFlags.MODAL | DialogFlags.DESTROY_WITH_PARENT,
-                                                Text.DIALOG_OK,
-                                                ResponseType.ACCEPT,
-                                                Text.DIALOG_CANCEL,
-                                                ResponseType.CANCEL);
-        {
-            var config_dialog_vbox = new Box(Orientation.VERTICAL, 5);
-            {
-                // Select ALSA or PulseAudio
-                var frame_audio_choice = new Frame(Text.CONFIG_DIALOG_HEADER_AUDIO);
-                {
-                    var frame_audio_choice_vbox = new Box(Orientation.VERTICAL, 0);
-                    {
-                        radio_audio_alsa = new RadioButton.with_label(null, "ALSA");
-                        {
-                            if (options.ao_type == "alsa") {
-                                radio_audio_alsa.active = true;
-                            }
-                            radio_audio_alsa.toggled.connect(() => {
-                                    _ao_type = radio_audio_alsa.active ? "alsa" : "pulse";
-                                });
-                        }
-
-                        radio_audio_pulse = new RadioButton.with_label_from_widget(radio_audio_alsa, "PulseAudio");
-                        {
-                            if (options.ao_type == "pulse") {
-                                radio_audio_pulse.active = true;
-                            }
-                            radio_audio_pulse.toggled.connect(() => {
-                                    _ao_type = radio_audio_pulse.active ? "pulse" : "alsa";
-                                });
-                        }
-
-                        frame_audio_choice_vbox.margin = 5;
-                        frame_audio_choice_vbox.pack_start(radio_audio_alsa);
-                        frame_audio_choice_vbox.pack_start(radio_audio_pulse);
-                    }
-
-                    frame_audio_choice.add(frame_audio_choice_vbox);
-                }
-
-                var frame_thumbnail_size = new Frame(Text.CONFIG_DIALOG_HEADER_THUMBS);
-                {
-                    spin_thumbnail_size = new SpinButton.with_range(1, 500, 1);
-                    {
-                        spin_thumbnail_size.margin = 5;
-                        spin_thumbnail_size.numeric = false;
-                        spin_thumbnail_size.value = options.thumbnail_size;
-                    }
-
-                    frame_thumbnail_size.add(spin_thumbnail_size);
-                }
-
-                var frame_playlist_image_size = new Frame(Text.CONFIG_DIALOG_HEADER_PLAYLIST_IMAGE);
-                {
-                    spin_playlist_image_size = new SpinButton.with_range(16, 256, 1);
-                    {
-                        spin_playlist_image_size.margin = 5;
-                        spin_playlist_image_size.numeric = false;
-                        spin_playlist_image_size.value = options.playlist_image_size;
-                    }
-
-                    frame_playlist_image_size.add(spin_playlist_image_size);
-                }
-
-                var frame_use_csd = new Frame(Text.CONFIG_DIALOG_HEADER_CSD);
-                {
-                    var frame_use_csd_box = new Box(Orientation.HORIZONTAL, 0);
-                    {
-                        radio_use_csd_yes = new RadioButton.with_label(null, Text.DIALOG_YES);
-                        {
-                            if (options.use_csd) {
-                                radio_use_csd_yes.active = true;
-                            }
-                            radio_use_csd_yes.toggled.connect(() => {
-                                    _use_csd = true;
-                                });
-                        }
-
-                        radio_use_csd_no = new RadioButton.with_label_from_widget(radio_use_csd_yes, Text.DIALOG_NO);
-                        {
-                            if (!options.use_csd) {
-                                radio_use_csd_no.active = true;
-                            }
-                            radio_use_csd_no.toggled.connect(() => {
-                                    _use_csd = false;
-                                });
-                        }
-
-                        frame_use_csd_box.pack_start(radio_use_csd_yes);
-                        frame_use_csd_box.pack_start(radio_use_csd_no);
-                    }
-                    frame_use_csd.add(frame_use_csd_box);
-                }
-
-                config_dialog_vbox.margin = 5;
-                config_dialog_vbox.pack_start(frame_audio_choice);
-                config_dialog_vbox.pack_start(frame_thumbnail_size);
-                config_dialog_vbox.pack_start(frame_playlist_image_size);
-                config_dialog_vbox.pack_start(frame_use_csd);
-            }
-
-            config_dialog.get_content_area().add(config_dialog_vbox);
-
-            config_dialog.response.connect((response_id) => {
-                    switch (response_id) {
-                    case ResponseType.ACCEPT:
-                        options.ao_type = _ao_type;
-                        options.thumbnail_size = (int)spin_thumbnail_size.value;
-                        options.playlist_image_size = (int)spin_playlist_image_size.value;
-                        if (artwork.pixbuf != null) {
-                            artwork.pixbuf = MyUtils.PixbufUtils.scale(current_playing_artwork,
-                                                                       options.thumbnail_size);
-                        }
-                        playlist.resize_artworks(options.playlist_image_size);
-                        debug("_use_csd: " + (_use_csd ? "true" : "false"));
-                        debug("options.use_csd: " + (options.use_csd ? "true" : "false"));
-                        if (options.use_csd != _use_csd) {
-                            options.use_csd = _use_csd;
-                        }
-
-                        break;
-
-                    case ResponseType.CANCEL:
-                        switch (options.ao_type) {
-                        case "alsa":
-                            radio_audio_alsa.active = true;
-                            break;
-
-                        case "pulse":
-                            radio_audio_pulse.active = true;
-                            break;
-                        }
-                                    
-                        if (options.use_csd) {
-                            radio_use_csd_yes.active = true;
-                        } else {
-                            radio_use_csd_no.active = true;
-                        }
-
-                        break;
-                    }
-                    config_dialog.visible = false;
-                });
-
-            config_dialog.destroy.connect(() => {
-                    config_dialog = null;
-                });
-
-            config_dialog.show_all();
-        }
-    } else {
-        config_dialog.visible = true;
-    }
 }
 
 void add_bookmark(string file_path) {
@@ -824,16 +654,6 @@ int main(string[] args) {
                     });
 
             }
-
-            var header_config_button = new Button();
-            {
-                header_config_button.get_style_context().add_class(StyleClass.TITLEBUTTON);
-                header_config_button.add(new Image.from_icon_name(IconName.Symbolic.APPLICATIONS_SYSTEM, IconSize.BUTTON));
-                header_config_button.sensitive = true;
-                header_config_button.clicked.connect(() => {
-                        show_config_dialog(main_win);
-                    });
-            }
             
             var header_about_button = new Button();
             {
@@ -851,7 +671,6 @@ int main(string[] args) {
             win_header.pack_start(header_box);
             win_header.pack_end(header_fold_button);
             win_header.pack_end(header_about_button);
-//            win_header.pack_end(header_config_button);
         }
     }
 
@@ -904,10 +723,11 @@ int main(string[] args) {
                             debug("play-pause button was clicked. music is playing. pause it.");
                             music.pause();
                             playlist.toggle_status();
+                            var icon = ((Gtk.Image)play_pause_button.icon_widget);
                             if (music.paused) {
-                                ((Gtk.Image)play_pause_button.icon_widget).icon_name = IconName.Symbolic.MEDIA_PLAYBACK_START;
+                                icon.icon_name = IconName.Symbolic.MEDIA_PLAYBACK_START;
                             } else {
-                                ((Gtk.Image)play_pause_button.icon_widget).icon_name = IconName.Symbolic.MEDIA_PLAYBACK_PAUSE;
+                                icon.icon_name = IconName.Symbolic.MEDIA_PLAYBACK_PAUSE;
                             }
                         } else {
                             finder.change_cursor(Gdk.CursorType.WATCH);
@@ -1032,14 +852,15 @@ int main(string[] args) {
                                 if (music.playing) {
                                     music.set_volume(volume_bar.get_value());
                                 }
+                                var icon = ((Gtk.Image) volume_button.icon_widget);
                                 if (volume_bar.get_value() == 0) {
-                                    ((Gtk.Image) volume_button.icon_widget).icon_name = IconName.Symbolic.AUDIO_VOLUME_MUTED;
+                                    icon.icon_name = IconName.Symbolic.AUDIO_VOLUME_MUTED;
                                 } else if (volume_bar.get_value() < 35) {
-                                    ((Gtk.Image) volume_button.icon_widget).icon_name = IconName.Symbolic.AUDIO_VOLUME_LOW;
+                                    icon.icon_name = IconName.Symbolic.AUDIO_VOLUME_LOW;
                                 } else if (volume_bar.get_value() < 75) {
-                                    ((Gtk.Image) volume_button.icon_widget).icon_name = IconName.Symbolic.AUDIO_VOLUME_MEDIUM;
+                                    icon.icon_name = IconName.Symbolic.AUDIO_VOLUME_MEDIUM;
                                 } else {
-                                    ((Gtk.Image) volume_button.icon_widget).icon_name = IconName.Symbolic.AUDIO_VOLUME_HIGH;
+                                    icon.icon_name = IconName.Symbolic.AUDIO_VOLUME_HIGH;
                                 }
                             });
 
@@ -1342,15 +1163,6 @@ int main(string[] args) {
                                 }
                                 file_chooser.destroy ();
                                 break;
-                            case MenuType.CONFIG:
-                                show_config_dialog(main_win);
-                                break;
-                            case MenuType.ABOUT:
-                                show_about_dialog(main_win);
-                                break;
-                            case MenuType.QUIT:
-                                application_quit();
-                                break;
                             }
                         });
 
@@ -1586,10 +1398,11 @@ int main(string[] args) {
                         if (step == 0) {
                             music.pause();
                             playlist.toggle_status();
+                            var icon = ((Gtk.Image)play_pause_button.icon_widget);
                             if (music.paused) {
-                                ((Gtk.Image)play_pause_button.icon_widget).icon_name = IconName.Symbolic.MEDIA_PLAYBACK_START;
+                                icon.icon_name = IconName.Symbolic.MEDIA_PLAYBACK_START;
                             } else {
-                                ((Gtk.Image)play_pause_button.icon_widget).icon_name = IconName.Symbolic.MEDIA_PLAYBACK_PAUSE;
+                                icon.icon_name = IconName.Symbolic.MEDIA_PLAYBACK_PAUSE;
                             }
                         } else {
                             debug("playlist restarted from track %d", index);
@@ -1789,11 +1602,10 @@ int main(string[] args) {
         {
             var main_overlay = new Overlay();
             {
-                stack = new MpdStack(//finder_hbox,
-                    finder_paned,
-                    playlist_vbox,
-                    options.use_csd);
+                stack = new MpdStack(options.use_csd);
                 {
+                    stack.add_named(finder_paned, "finder");
+                    stack.add_named(playlist_vbox, "playlist");
                     stack.finder_is_selected.connect(() => {
                             header_add_button.visible = false;
                             header_switch_button.tooltip_text = Text.TOOLTIP_SHOW_PLAYLIST;

@@ -49,9 +49,8 @@ namespace Mpd {
                             Gdk.InterpType bilinear = Gdk.InterpType.BILINEAR;
                             image_artwork = null;
                             if (file.artwork != null) {
-                                Gdk.Pixbuf scaled_artwork = file.artwork.scale_simple(image_size,
-                                                                                      image_size,
-                                                                                      bilinear);
+                                Gdk.Pixbuf scaled_artwork;
+                                scaled_artwork= file.artwork.scale_simple(image_size, image_size, bilinear);
                                 image_artwork = new Image.from_pixbuf(scaled_artwork);
                                 {
                                     image_artwork.set_size_request(image_size, image_size);
@@ -379,7 +378,9 @@ namespace Mpd {
                 file_type = file_util.determine_file_type();
                 switch (file_type) {
                 case DFileType.FILE:
-                    new_playlist = new DFileUtils(Path.get_dirname(file_path)).find_file_infos_recursively();
+                    List<string> file_name_list = new List<string>();
+                    file_name_list.append(file_path);
+                    new_playlist = MPlayer.get_file_info_and_artwork_list_from_file_list(file_name_list);
                     break;
                 case DFileType.DISC:
                 case DFileType.DIRECTORY:

@@ -112,12 +112,30 @@ namespace Mpd {
 
         public void play_next(int step = 1) {
             debug("next command was called");
-            send_mplayer_command(MPlayer.step_forward_command(step));
+            if (playlist_changed) {
+                var new_index = current_track_number + step;
+                if (new_index >= file_list.length()) {
+                    new_index = (int) file_list.length() - 1;
+                }
+                restart_playlist(new_index, "pulse");
+                playlist_changed = false;
+            } else {
+                send_mplayer_command(MPlayer.step_forward_command(step));
+            }
         }
 
         public void play_prev(int step = 1) {
             debug("prev command was called.");
-            send_mplayer_command(MPlayer.step_backward_command(step));
+            if (playlist_changed) {
+                var new_index = current_track_number - step;
+                if (new_index < 0) {
+                    new_index = 0;
+                }
+                restart_playlist(new_index, "pulse");
+                playlist_changed = false;
+            } else {
+                send_mplayer_command(MPlayer.step_backward_command(step));
+            }
         }
 
         public void move_pos(int pos_in_percent) {
@@ -143,11 +161,13 @@ namespace Mpd {
 
         public void restart_playlist(int start_pos, string ao_type) {
             if (start_pos < 0 || file_list.length() <= start_pos) {
-                debug("restart_playlist failed. start_pos is out of range (%d/%u)", start_pos, file_list.length());
+                debug("restart_playlist failed. start_pos is out of range (%d/%u)",
+                      start_pos, file_list.length());
                 return;
             }
 
-            debug("restart playlist command was called (current: %d, new: %d)", current_track_number, start_pos);
+            debug("restart playlist command was called (current: %d, new: %d)",
+                  current_track_number, start_pos);
 
             this.ao_type = ao_type;
 
