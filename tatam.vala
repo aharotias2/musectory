@@ -1,23 +1,23 @@
 /*
- * This file is part of mpd.
+ * This file is part of tatam.
  * 
- *     mpd is free software: you can redistribute it and/or modify
+ *     tatam is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
  * 
- *     mpd is distributed in the hope that it will be useful,
+ *     tatam is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
  * 
  *     You should have received a copy of the GNU General Public License
- *     along with mpd.  If not, see <http://www.gnu.org/licenses/>.
+ *     along with tatam.  If not, see <http://www.gnu.org/licenses/>.
  * 
  * Copyright 2018 Takayuki Tanaka
  */
 
-using Gtk, Mpd;
+using Gtk, Tatam;
 
 //--------------------------------------------------------------------------------------
 // Delegates
@@ -62,7 +62,7 @@ int artwork_max_size;
 //--------------------------------------------------------------------------------------
 Window main_win;
 HeaderBar? win_header;
-MpdStack stack;
+TatamStack stack;
 Button artwork_button;
 Image artwork;
 Box controller;
@@ -85,11 +85,11 @@ ToolButton next_track_button;
 ToolButton prev_track_button;
 ToggleButton toggle_shuffle_button;
 ToggleButton toggle_repeat_button;
-Mpd.Finder finder;
+Tatam.Finder finder;
 TreeView bookmark_tree;
 TreeIter bookmark_root;
 TreeIter playlist_root;
-Mpd.PlaylistBox playlist;
+Tatam.PlaylistBox playlist;
 ScrolledWindow music_view_container;
 Label playlist_view_dir_label;
 TimeLabelSetFunc time_label_set;
@@ -112,7 +112,7 @@ const string[] icon_dirs = {"/usr/share/icons/hicolor/48x48/apps/",
 // other global variables
 //--------------------------------------------------------------------------------------
 bool print_message_of_send_mplayer_command;
-MpdOptions options;
+TatamOptions options;
 
 //--------------------------------------------------------------------------------------
 // utility functions
@@ -1259,7 +1259,7 @@ int main(string[] args) {
             
             var finder_overlay = new Overlay();
             {
-                finder = new Mpd.Finder();
+                finder = new Tatam.Finder();
                 {
                     finder.set_default_icon_size(options.icon_size);
 
@@ -1602,7 +1602,7 @@ int main(string[] args) {
         {
             var main_overlay = new Overlay();
             {
-                stack = new MpdStack(options.use_csd);
+                stack = new TatamStack(options.use_csd);
                 {
                     stack.add_named(finder_paned, "finder");
                     stack.add_named(playlist_vbox, "playlist");

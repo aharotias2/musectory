@@ -1,14 +1,14 @@
 [Desktop Entry]
 Version=1.0
-Name=mpd
+Name=tatam
 GenericName=Audio Player
 Comment=Audio Player mimic MFPlayer of Windows
 MimeType=
-TryExec=mpd
-Exec=mpd
-Icon=mpd.png
+TryExec=tatam
+Exec=tatam
+Icon=tatam.png
 Type=Application
 Terminal=false
 Categories=AudioVideo;Audio;Player
-StartupWMClass=mpd
+StartupWMClass=tatam
 Keywords=Music;Audio;Player;Media

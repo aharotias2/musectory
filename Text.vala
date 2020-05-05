@@ -1,5 +1,5 @@
-namespace Mpd {
-    public const string PROGRAM_NAME = "mpd";
+namespace Tatam {
+    public const string PROGRAM_NAME = "tatam";
     
     namespace StyleClass {
         public const string TITLEBUTTON = "titlebutton";
@@ -67,7 +67,7 @@ namespace Mpd {
     
     namespace Text {
         public const string EMPTY = "";
-        public const string PROGRAM_NAME = "mpd";
+        public const string PROGRAM_NAME = "tatam";
         public const string DESCRIPTION = "フォルダで音楽を管理する人のためのプレイヤ";
         public const string COPYRIGHT = "Ⓒ 2017 Tanaka Takayuki";
         public const string SETTINGS = " settings";

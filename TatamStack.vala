@@ -1,30 +1,30 @@
 /*
- * This file is part of mpd.
+ * This file is part of tatam.
  * 
- *     mpd is free software: you can redistribute it and/or modify
+ *     tatam is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
  * 
- *     mpd is distributed in the hope that it will be useful,
+ *     tatam is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
  * 
  *     You should have received a copy of the GNU General Public License
- *     along with mpd.  If not, see <http://www.gnu.org/licenses/>.
+ *     along with tatam.  If not, see <http://www.gnu.org/licenses/>.
  * 
  * Copyright 2018 Takayuki Tanaka
  */
 
-using Gtk, Mpd;
+using Gtk, Tatam;
 
-class MpdStack : Bin {
+class TatamStack : Bin {
     private Stack stack;
     private bool use_csd;
     public signal void finder_is_selected();
     public signal void playlist_is_selected();
-    public MpdStack(bool use_csd) {
+    public TatamStack(bool use_csd) {
         this.stack = new Stack();
         {
             this.stack.transition_type = StackTransitionType.UNDER_UP;
