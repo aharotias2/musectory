@@ -20,7 +20,7 @@
 namespace Tatam {
     class DFileUtils : Object {
         public string dir_path { get; set; }
-        public CompareFunc<DFileInfo?> file_compare_func;
+        public CompareFunc<Tatam.FileInfo?> file_compare_func;
 
         public DFileUtils(string dir_path) {
             this.dir_path = dir_path;
@@ -29,19 +29,19 @@ namespace Tatam {
             };
         }
 
-        public DFileType determine_file_type() throws FileError {
-            DFileType answer = DFileType.UNKNOWN;
+        public Tatam.FileType determine_file_type() throws FileError {
+            Tatam.FileType answer = Tatam.FileType.UNKNOWN;
             GLib.Dir dir;
             File dir_file = File.new_for_path(dir_path);
             FileInfo file_info = dir_file.query_info("standard::*", 0);
             FileType file_type = file_info.get_file_type();
             if (file_type == FileType.REGULAR) {
-                answer = DFileType.FILE;
+                answer = Tatam.FileType.FILE;
             } else if (file_type == FileType.DIRECTORY) {
                 if (dir_path.slice(dir_path.last_index_of_char('/'), dir_path.length) == "/..") {
-                    answer = DFileType.PARENT;
+                    answer = Tatam.FileType.PARENT;
                 } else {
-                    answer = DFileType.DIRECTORY;
+                    answer = Tatam.FileType.DIRECTORY;
 
                     try {
                         dir = Dir.open(dir_path, 0);
@@ -61,13 +61,13 @@ namespace Tatam {
                         FileInfo info = File.new_for_path(path).query_info("standard::*", 0);
                         FileType type = info.get_file_type();
                         if (type == FileType.DIRECTORY) {
-                            answer = DFileType.DIRECTORY;
+                            answer = Tatam.FileType.DIRECTORY;
                             break;
                         } else {
                             string mime_type = info.get_content_type();
                             debug("mime_type: %s\n", mime_type);
                             if (mime_type.split("/")[0] == "audio") {
-                                answer = DFileType.DISC;
+                                answer = Tatam.FileType.DISC;
                             }
                         }
                     }
@@ -103,10 +103,10 @@ namespace Tatam {
             }
         }
 
-        public void find_dir_files(ref List<string> dir_list, ref List<DFileInfo?> file_list) throws FileError {
+        public void find_dir_files(ref List<string> dir_list, ref List<Tatam.FileInfo?> file_list) throws FileError {
             Dir dir;
 
-            if (!FileUtils.test(dir_path, FileTest.IS_DIR)) {
+            if (!GLib.FileUtils.test(dir_path, FileTest.IS_DIR)) {
                 return;
             }
 
@@ -119,7 +119,7 @@ namespace Tatam {
 
             string? name = null;
             dir_list = new List<string>();
-            file_list = new List<DFileInfo?>();
+            file_list = new List<Tatam.FileInfo?>();
 
             while ((name = dir.read_name()) != null) {
                 string path = Path.build_path(Path.DIR_SEPARATOR_S, dir_path, name);
@@ -151,12 +151,12 @@ namespace Tatam {
             return file_list;
         }
 
-        public List<DFileInfo?>? get_file_info_and_artwork_list_in_dir() {
-            if (!FileUtils.test(dir_path, FileTest.IS_DIR)) {
+        public List<Tatam.FileInfo?>? get_file_info_and_artwork_list_in_dir() {
+            if (!GLib.FileUtils.test(dir_path, FileTest.IS_DIR)) {
                 return null;
             }
 
-            List<DFileInfo?> info_list = new List<DFileInfo?>();
+            List<Tatam.FileInfo?> info_list = new List<Tatam.FileInfo?>();
             List<string> dir_list = new List<string>();
             List<string> file_list = new List<string>();
             find_dir_file_names(ref dir_list, ref file_list);
@@ -172,9 +172,9 @@ namespace Tatam {
         }
 
 
-        public List<DFileInfo?> find_file_infos_recursively() throws FileError {
-            if (!FileUtils.test(dir_path, FileTest.IS_DIR)) {
-                return new List<DFileInfo?>();
+        public List<Tatam.FileInfo?> find_file_infos_recursively() throws FileError {
+            if (!GLib.FileUtils.test(dir_path, FileTest.IS_DIR)) {
+                return new List<Tatam.FileInfo?>();
             }
 
             var file_list = find_file_names_recursively();
@@ -184,8 +184,8 @@ namespace Tatam {
         public Gdk.Pixbuf? load_first_artwork(int size) throws FileError {
             Dir dir;
             string dir_artwork_path = create_dir_artwork_path("");
-            if (FileUtils.test(dir_path, FileTest.IS_DIR)) {
-                if (FileUtils.test(dir_artwork_path, FileTest.EXISTS)) {
+            if (GLib.FileUtils.test(dir_path, FileTest.IS_DIR)) {
+                if (GLib.FileUtils.test(dir_artwork_path, FileTest.EXISTS)) {
                     debug("dir artwork file exists: " + dir_artwork_path);
                     return MPlayer.get_music_artwork(dir_artwork_path, size);
                 }
@@ -271,20 +271,20 @@ namespace Tatam {
             return false;
         }
 
-        public DFileInfo make_parent_file_info() {
-            DFileInfo parent = new DFileInfo();
+        public Tatam.FileInfo make_parent_file_info() {
+            Tatam.FileInfo parent = new DFileInfo();
             parent.path = Path.get_dirname(dir_path);
             parent.name = "..";
-            parent.file_type = DFileType.PARENT;
+            parent.file_type = Tatam.FileType.PARENT;
             return parent;
         }
 
-        public DFileInfo make_subdir_info(string subdir_path) {
-            DFileInfo info = new DFileInfo();
+        public Tatam.FileInfo make_subdir_info(string subdir_path) {
+            Tatam.FileInfo info = new DFileInfo();
             info.dir = dir_path.dup();
             info.path = subdir_path.dup();
             info.name = Path.get_basename(subdir_path);
-            info.file_type = DFileType.DIRECTORY;
+            info.file_type = Tatam.FileType.DIRECTORY;
             return info;
         }
     }

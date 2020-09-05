@@ -17,15 +17,17 @@
  * Copyright 2018 Takayuki Tanaka
  */
 
+using Gdk;
+
 namespace Tatam {
-    struct TatamOptions {
-        public string ao_type;
-        public bool use_csd;
-        public int icon_size;
-        public int thumbnail_size;
-        public ShowThumbsAt show_thumbs_at;
-        public int playlist_image_size;
-        public string? last_playlist_name;
-        public bool play_style;
+    public class StringUtils {
+        public static List<string> array_to_list(string[] array) {
+            List<string> list = new List<string>();
+            foreach (string item in array) {
+                list.append(item);
+            }
+            return list;
+        }
     }
 }
+

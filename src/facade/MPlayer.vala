@@ -90,9 +90,9 @@ namespace Tatam {
             return track_name;
         }
 
-        public static List<DFileInfo?> get_file_info_and_artwork_list_from_file_list(List<string> file_name_list)
+        public static List<Tatam.FileInfo?> get_file_info_and_artwork_list_from_file_list(List<string> file_name_list)
         requires (file_name_list.length() > 0) {
-            var info_list = new List<DFileInfo?>();
+            var info_list = new List<Tatam.FileInfo?>();
             if (default_outdir == null) {
                 default_outdir = get_default_out_dir();
             }
@@ -111,7 +111,7 @@ namespace Tatam {
             int j = 1;
             while (i < metadata.length) {
                 string file_path = file_name_list.nth_data(i);
-                DFileInfo info = new DFileInfo();
+                Tatam.FileInfo info = new DFileInfo();
                 if (set_file_info_from_mplayer_output(metadata[i + 1], ref info)) {
                     info.dir = Path.get_dirname(file_path);
                     info.path = file_path;
@@ -127,7 +127,7 @@ namespace Tatam {
             return info_list;
         }
 
-        public static bool get_file_info(string file_path, ref DFileInfo info) {
+        public static bool get_file_info(string file_path, ref Tatam.FileInfo info) {
             Cli cli = new Cli("mplayer", "-vo", "null", "-ao", "null", "-identify", "-frames", "0", file_path);
             cli.execute();
 
@@ -158,7 +158,7 @@ namespace Tatam {
 
             try {
                 if (!path.pic_exists) {
-                    if (!FileUtils.test(path.tmp_dir, FileTest.EXISTS)) {
+                    if (!GLib.FileUtils.test(path.tmp_dir, FileTest.EXISTS)) {
                         debug("created a directory: %s", path.tmp_dir);
                         File dir = File.new_for_path(path.tmp_dir);
                         dir.make_directory_with_parents();
@@ -243,7 +243,7 @@ namespace Tatam {
             return "/tmp/" + PROGRAM_NAME + "/tmp";
         }
         
-        private static bool set_file_info_from_mplayer_output(string metadata, ref DFileInfo info) {
+        private static bool set_file_info_from_mplayer_output(string metadata, ref Tatam.FileInfo info) {
             if (metadata != null && metadata != "" && metadata.index_of("ID_AUDIO_ID") > 0) {
                 string[] lines = metadata.split("\n", 1000);
                 for (int i = 0; i < lines.length; i++) {
@@ -348,13 +348,13 @@ namespace Tatam {
             
             private void set_pic_exists(string file_path) {
                 v_pic_exists = true;
-                if (FileUtils.test(v_pic_file + ".jpg", FileTest.EXISTS)
+                if (GLib.FileUtils.test(v_pic_file + ".jpg", FileTest.EXISTS)
                     && MyUtils.FileUtils.compare_mtime(v_pic_file + ".jpg", file_path) >= 0) {
                     v_pic_file += ".jpg";
-                } else if (FileUtils.test(v_pic_file + ".png", FileTest.EXISTS)
+                } else if (GLib.FileUtils.test(v_pic_file + ".png", FileTest.EXISTS)
                            && MyUtils.FileUtils.compare_mtime(v_pic_file + ".png", file_path) >= 0) {
                     v_pic_file += ".png";
-                } else if (FileUtils.test(v_pic_file + ".jpeg", FileTest.EXISTS)
+                } else if (GLib.FileUtils.test(v_pic_file + ".jpeg", FileTest.EXISTS)
                            && MyUtils.FileUtils.compare_mtime(v_pic_file + ".jpeg", file_path) >= 0) {
                     v_pic_file += ".jpeg";
                 } else {
@@ -367,13 +367,13 @@ namespace Tatam {
                     string tmp_file_path = "%s/%08d".printf(v_tmp_dir, index);
                     string ext = ".jpg";
                     string tmp_file_path2 = tmp_file_path + ext;
-                    if (!FileUtils.test(tmp_file_path2, FileTest.EXISTS)) {
+                    if (!GLib.FileUtils.test(tmp_file_path2, FileTest.EXISTS)) {
                         ext = ".jpeg";
                         tmp_file_path2 = tmp_file_path + ext;
-                        if (!FileUtils.test(tmp_file_path2, FileTest.EXISTS)) {
+                        if (!GLib.FileUtils.test(tmp_file_path2, FileTest.EXISTS)) {
                             ext = ".png";
                             tmp_file_path2 = tmp_file_path + ext;
-                            if (!FileUtils.test(tmp_file_path2, FileTest.EXISTS)) {
+                            if (!GLib.FileUtils.test(tmp_file_path2, FileTest.EXISTS)) {
                                 MyUtils.FileUtils.create_empty_file(tmp_file_path2);
                             }
                         }

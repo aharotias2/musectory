@@ -18,7 +18,7 @@
  */
 
 namespace Tatam {
-    public class DFileInfo : Object {
+    public class FileInfo : Object {
         public string dir { get; set; }
         public string name { get; set; }
         public string path { get; set; }
@@ -30,8 +30,26 @@ namespace Tatam {
         public string track { get; set; }
         public string disc { get; set; }
         public string date { get; set; }
-        public string time_length { get; set; }
-        public DFileType file_type { get; set; }
+        public uint time_length { get; set; }
+        public Tatam.FileType file_type { get; set; }
         public Gdk.Pixbuf artwork { get; set; }
+    }
+
+    public FileInfo copy() {
+        Tatam.FileInfo cp = new Tatam.FileInfo();
+        cp.dir = this.dir;
+        cp.name = this.name;
+        cp.path = this.path;
+        cp.album = this.album;
+        cp.artist = this.artist;
+        cp.comment = this.comment;
+        cp.genre = this.genre;
+        cp.title = this.title;
+        cp.track = this.track;
+        cp.disc = this.disc;
+        cp.date = this.date;
+        cp.time_length = this.time_length;
+        cp.artwork = this.artwork;
+        return b;
     }
 }

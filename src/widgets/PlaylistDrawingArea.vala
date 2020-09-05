@@ -20,7 +20,6 @@
 using Gdk;
 using Gtk;
 using Cairo;
-using MyUtils;
 
 namespace Tatam {
     public enum PlaylistItemStatus {

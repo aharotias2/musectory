@@ -14,16 +14,17 @@
  *     You should have received a copy of the GNU General Public License
  *     along with tatam.  If not, see <http://www.gnu.org/licenses/>.
  * 
- * Copyright 2018 Takayuki Tanaka
+ * Copyright 2020 Takayuki Tanaka
  */
 
 namespace Tatam {
 
     [Flags]
-    public enum DFileType {
+    public enum FileType {
         DIRECTORY,
         DISC,
         FILE,
+        MUSIC,
         PARENT,
         UNKNOWN,
         ALL
