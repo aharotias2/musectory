@@ -18,7 +18,7 @@
  */
 
 namespace Tatam {
-    public class SmallTime {
+    public class SmallTime : GLib.Object {
         public enum FormatType {
             HOURS_MINUTES_SECONDS_DECISECONDS,
             MINUTES_SECONDS_DECISECONDS,

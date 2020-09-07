@@ -79,7 +79,8 @@ namespace Tatam {
                         });
                 }
 
-                finder_refresh_button = new Button.from_icon_name(IconName.Symbolic.VIEW_REFRESH, IconSize.BUTTON);
+                finder_refresh_button = new Button.from_icon_name(IconName.Symbolic.VIEW_REFRESH,
+                                                                  IconSize.BUTTON);
                 {
                     finder_refresh_button.get_style_context().add_class(StyleClass.TITLEBUTTON);
                     finder_refresh_button.tooltip_text = Text.TOOLTIP_REFRESH_FINDER;
@@ -88,7 +89,8 @@ namespace Tatam {
                         });
                 }
                 
-                finder_add_button = new Button.from_icon_name(IconName.Symbolic.BOOKMARK_NEW, IconSize.BUTTON);
+                finder_add_button = new Button.from_icon_name(IconName.Symbolic.BOOKMARK_NEW,
+                                                              IconSize.BUTTON);
                 {
                     finder_add_button.get_style_context().add_class(StyleClass.TITLEBUTTON);
                     finder_add_button.tooltip_text = Text.TOOLTIP_SAVE_FINDER;
@@ -97,12 +99,14 @@ namespace Tatam {
                         });
                 }
                 
-                this.pack_start(finder_parent_button, false, false);
-                this.pack_start(finder_zoom_box, false, false);
-                this.pack_start(finder_location, true, true);
-                this.pack_start(finder_refresh_button, false, false);
-                this.pack_start(finder_add_button, false, false);
+                box.pack_start(finder_parent_button, false, false);
+                box.pack_start(finder_zoom_box, false, false);
+                box.pack_start(finder_location, true, true);
+                box.pack_start(finder_refresh_button, false, false);
+                box.pack_start(finder_add_button, false, false);
             }
+
+            add(box);
         }
     }
 }

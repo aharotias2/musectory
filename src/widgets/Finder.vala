@@ -22,10 +22,10 @@ using Gtk;
 namespace Tatam {
     public class Finder : Bin {
         public class Builder {
-            protec Gdk.Pixbuf parent_pixbuf_value;
-            private Gdk.Pixbuf folder_pixbuf_value;
-            private Gdk.Pixbuf file_pixbuf_value;
-            private Gdk.Pixbuf cd_pixbuf_value;
+            public Gdk.Pixbuf parent_pixbuf_value;
+            public Gdk.Pixbuf folder_pixbuf_value;
+            public Gdk.Pixbuf file_pixbuf_value;
+            public Gdk.Pixbuf cd_pixbuf_value;
 
             public Builder parent_pixbuf(Gdk.Pixbuf pixbuf) {
                 this.parent_pixbuf_value = pixbuf;

@@ -20,6 +20,8 @@
 namespace Tatam {
     public errordomain Error {
         FILE_DOES_NOT_EXISTS,
-        FILE_IS_NOT_A_DIRECTORY
+        FILE_IS_NOT_A_DIRECTORY,
+        FILE_IS_NOT_AN_AUDIO,
+        GST_MESSAGE_ERROR,
     }
 }

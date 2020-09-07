@@ -27,7 +27,18 @@ namespace Tatam {
         MUSIC,
         PARENT,
         UNKNOWN,
-        ALL
+        ALL;
+        public string get_name() {
+            switch (this) {
+            case DIRECTORY: return "DIRECTORY";
+            case DISC: return "DISC";
+            case FILE: return "FILE";
+            case MUSIC: return "MUSIC";
+            case PARENT: return "PARENT";
+            case UNKNOWN: return "UNKNOWN";
+            case ALL: default: return "ALL";
+            }
+        }
     }
 
     public enum MusicViewIconType {

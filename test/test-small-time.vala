@@ -14,6 +14,10 @@ int main(string[] args) {
         test("2:03.1");
         test("30.5", Tatam.SmallTime.FormatType.MINUTES_SECONDS_DECISECONDS);
         test("5");
+        test2(1000);
+        test2(11111);
+        test2(36360);
+        test2(600000000);
         return 0;
     } catch (RegexError e) {
         stderr.printf(@"RegexError: $(e.message)\n");
@@ -24,6 +28,14 @@ int main(string[] args) {
 void test(string testee, Tatam.SmallTime.FormatType format_type = Tatam.SmallTime.FormatType.MINUMUM) {
     Tatam.SmallTime small_time = new Tatam.SmallTime.from_string(testee, format_type);
     print(@"original string: $(testee)\n");
+    print(@"small_time.milliseconds: $(small_time.milliseconds)\n");
+    print(@"small_time.to_string(): $(small_time.to_string())\n");
+    print("\n");
+}
+
+void test2(uint milliseconds) {
+    Tatam.SmallTime small_time = new Tatam.SmallTime.from_milliseconds(milliseconds);
+    print(@"original milliseconds: $(milliseconds)\n");
     print(@"small_time.milliseconds: $(small_time.milliseconds)\n");
     print(@"small_time.to_string(): $(small_time.to_string())\n");
     print("\n");

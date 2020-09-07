@@ -62,7 +62,7 @@ namespace Tatam {
                 return type;
             }
 
-            if (file_type != FileType.DIRECTORY) {
+            if (g_file_type != GLib.FileType.DIRECTORY) {
                 type = Tatam.FileType.UNKNOWN;
                 return type;
             }
@@ -81,7 +81,7 @@ namespace Tatam {
                     }
                     return true;
                 });
-            dir_reader.read();
+            dir_reader.run();
             return type;
         }
 
@@ -93,7 +93,7 @@ namespace Tatam {
             try {
                 dir_list = new GLib.List<string>();
                 file_list = new GLib.List<string>();
-                DirectoryReader dir_reader = new Directory_reader(this.path);
+                DirectoryReader dir_reader = new DirectoryReader(this.path);
                 dir_reader.dir_found.connect((dir) => {
                         dir_list.insert_sorted(path.dup(), (a, b) => { return a.collate(b); });
                     });

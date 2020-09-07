@@ -48,7 +48,7 @@ namespace Tatam {
         public int to_int() {
             int result = 0;
             for (int i = 0; i < data.length; i++) {
-                if (hex.valid_char(i)) {
+                if (data.valid_char(i)) {
                     unichar c = data.get_char(i);
                     if (c.isdigit()) {
                         result *= 16;

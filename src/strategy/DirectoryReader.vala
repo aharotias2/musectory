@@ -21,12 +21,12 @@ namespace Tatam {
     public class DirectoryReader : Object {
         private string path;
 
-        public signal bool directory_found(File directory);
-        public signal bool file_found(File file);
+        public signal bool directory_found(GLib.File directory);
+        public signal bool file_found(GLib.File file);
         
         public DirectoryReader(string path) throws Tatam.Error {
             GLib.File file = GLib.File.new_for_path(path);
-            if (file.query_exists()) {
+            if (!file.query_exists()) {
                 throw new Tatam.Error.FILE_DOES_NOT_EXISTS(Text.ERROR_FILE_DOES_NOT_EXISTS.printf(path));
             }
             GLib.FileType file_type = file.query_file_type(0);
@@ -36,7 +36,7 @@ namespace Tatam {
             this.path = path;
         }
 
-        public bool run() throws GLib.FileError {
+        public void run() throws GLib.FileError {
             string? name;
             GLib.Dir dir = Dir.open(this.path);
             while ((name = dir.read_name()) != null) {

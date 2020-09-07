@@ -90,7 +90,7 @@ int main(string[] args) {
         }
         
         if (GLib.FileUtils.test(config_file_path, FileTest.EXISTS)) {
-            FileUtils.get_contents(config_file_path, out config_file_contents);
+            GLib.FileUtils.get_contents(config_file_path, out config_file_contents);
 
             string[] config_file_lines = config_file_contents.split("\n", -1);
 
@@ -134,7 +134,7 @@ int main(string[] args) {
     //----------------------------------------------------------------------------------
     // create temporary working directory
     //----------------------------------------------------------------------------------
-    GLib.File tmp_dir = File.new_for_path("/tmp/" + PROGRAM_NAME);
+    GLib.File tmp_dir = GLib.File.new_for_path("/tmp/" + PROGRAM_NAME);
     if (!GLib.FileUtils.test("/tmp/" + PROGRAM_NAME, FileTest.EXISTS)) {
         try {
             tmp_dir.make_directory();

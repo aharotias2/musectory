@@ -187,7 +187,7 @@ namespace Tatam {
         }
         
         public static Gdk.Pixbuf? get_music_artwork(string pic_file_path, int? size=-1) {
-            if (MyUtils.FileUtils.is_empty(pic_file_path)) {
+            if (Tatam.FileUtils.is_empty(pic_file_path)) {
                 return null;
             }
             try {
@@ -208,7 +208,7 @@ namespace Tatam {
             if (!path.pic_exists) {
                 path.put_pic_file(index);
                 DPath path2 = new DPath(Path.get_dirname(file_path));
-                if (MyUtils.FileUtils.is_empty(path2.pic_file)) {
+                if (Tatam.FileUtils.is_empty(path2.pic_file)) {
                     File f1 = File.new_for_path(path.pic_file);
                     File f2 = File.new_for_path(path2.pic_file);
                     try {
@@ -349,13 +349,13 @@ namespace Tatam {
             private void set_pic_exists(string file_path) {
                 v_pic_exists = true;
                 if (GLib.FileUtils.test(v_pic_file + ".jpg", FileTest.EXISTS)
-                    && MyUtils.FileUtils.compare_mtime(v_pic_file + ".jpg", file_path) >= 0) {
+                    && Tatam.FileUtils.compare_mtime(v_pic_file + ".jpg", file_path) >= 0) {
                     v_pic_file += ".jpg";
                 } else if (GLib.FileUtils.test(v_pic_file + ".png", FileTest.EXISTS)
-                           && MyUtils.FileUtils.compare_mtime(v_pic_file + ".png", file_path) >= 0) {
+                           && Tatam.FileUtils.compare_mtime(v_pic_file + ".png", file_path) >= 0) {
                     v_pic_file += ".png";
                 } else if (GLib.FileUtils.test(v_pic_file + ".jpeg", FileTest.EXISTS)
-                           && MyUtils.FileUtils.compare_mtime(v_pic_file + ".jpeg", file_path) >= 0) {
+                           && Tatam.FileUtils.compare_mtime(v_pic_file + ".jpeg", file_path) >= 0) {
                     v_pic_file += ".jpeg";
                 } else {
                     v_pic_exists = false;
@@ -374,7 +374,7 @@ namespace Tatam {
                             ext = ".png";
                             tmp_file_path2 = tmp_file_path + ext;
                             if (!GLib.FileUtils.test(tmp_file_path2, FileTest.EXISTS)) {
-                                MyUtils.FileUtils.create_empty_file(tmp_file_path2);
+                                Tatam.FileUtils.create_empty_file(tmp_file_path2);
                             }
                         }
                     }
@@ -390,7 +390,7 @@ namespace Tatam {
             public void put_pic_file(int index = 1) {
                 string? temp_file_path = get_tmp_pic_path(index);
                 if (temp_file_path != null) {
-                    string ext = MyUtils.FilePathUtils.extension_of(temp_file_path);
+                    string ext = Tatam.FilePathUtils.extension_of(temp_file_path);
                     set_pic_ext(ext);
                     debug("get_music_artwork_from_mplayer_output: temp_file_path2 = %s, pic_file_path = %s\n", temp_file_path, v_pic_file);
                     FileUtils.rename(temp_file_path, v_pic_file);

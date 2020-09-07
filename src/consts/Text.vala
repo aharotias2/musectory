@@ -71,5 +71,7 @@ namespace Tatam {
         public const string ERROR_OPEN_FILE = "FileError catched with file_info.path '%s' which is cannot open\n";
         public const string ERROR_FILE_DOES_NOT_EXISTS = "File does not exists (%s)\n";
         public const string ERROR_FILE_IS_NOT_A_DIRECTORY = "File is not a directory (%s)\n";
+        public const string ERROR_FILE_IS_NOT_AN_AUDIO = "File is not an audio file (%s)\n";
+        public const string ERROR_GST_MESSAGE = "Gstreamer messaging error\n";
     }
 }
