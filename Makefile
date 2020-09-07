@@ -24,3 +24,6 @@ test-small-time: test/test-small-time.vala src/atoms/SmallTime.vala
 
 test-metadata: test/test-metadata.vala src/strategy/MetadataReader.vala src/consts/Error.vala src/consts/Text.vala src/strategy/DirectoryReader.vala src/atoms/SmallTime.vala src/models/FileInfo.vala src/adapters/FileInfoAdapter.vala src/consts/enums.vala
 	valac --pkg=gdk-3.0 --pkg=posix --pkg=json-glib-1.0 --pkg=gio-2.0 --pkg=glib-2.0 --pkg=gstreamer-1.0 --pkg=gee-0.8 -o build/test/test-metadata $^
+
+test-files: test/test-files.vala src/strategy/DirectoryReader.vala src/consts/Error.vala src/consts/Text.vala
+	valac --pkg=posix --pkg=gio-2.0 --pkg=glib-2.0 -o build/test/test-files $^

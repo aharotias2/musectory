@@ -20,7 +20,6 @@
 namespace Tatam {
     public class DirectoryReader : Object {
         private string path;
-
         public signal bool directory_found(GLib.File directory);
         public signal bool file_found(GLib.File file);
         
@@ -36,7 +35,7 @@ namespace Tatam {
             this.path = path;
         }
 
-        public void run() throws GLib.FileError {
+        public virtual void run() throws GLib.FileError {
             string? name;
             GLib.Dir dir = Dir.open(this.path);
             while ((name = dir.read_name()) != null) {
@@ -58,7 +57,7 @@ namespace Tatam {
             }
         }
 
-        public async void run_async(bool is_async) throws GLib.FileError {
+        public virtual async void run_async(bool is_async) throws GLib.FileError {
             string? name;
             GLib.Dir dir = Dir.open(this.path);
             while ((name = dir.read_name()) != null) {

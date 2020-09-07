@@ -29,7 +29,6 @@ namespace Tatam {
         
         public MetadataReader() {
             pipeline = new Pipeline("metadata-pipeline");
-            
             uridecoder = ElementFactory.make("uridecodebin", "uridecoder");
             pipeline.add(uridecoder);
             fakesink = ElementFactory.make("fakesink", "sink");
