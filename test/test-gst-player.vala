@@ -17,42 +17,35 @@
  * Copyright 2020 Takayuki Tanaka
  */
 
-public class TestMetadata : TestBase {
+public class TestGstPlayer : TestBase{
     private static Posix.FILE output;
 
     public static int main(string[] args) {
         output = Posix.FILE.fdopen(1, "w");
         set_print_handler((text) => output.printf(text));
         Gst.init(ref args);
-        GLib.MainLoop main_loop = new GLib.MainLoop();
+        GLib.MainLoop main_loop = new GLib.MainLoop();        
         try {
             string file_path = choose_file("/var/run/media/ta/TOSHIBAEXT/Music4");
-            int return_status = 0;
-            run_test.begin(file_path, (res, obj) => {
-                    try {
-                        run_test.end(obj);
-                        return_status = 0;
-                    } catch (Tatam.Error e) {
-                        stderr.printf(@"Tatam.Error: %s\n", e.message);
-                        return_status = 2;
-                    } catch (GLib.Error e) {
-                        stderr.printf(@"GLib.Error: %s\n", e.message);
-                        return_status = 2;
-                    }
+            Tatam.GstPlayer player = new Tatam.GstPlayer();
+            player.error_occured.connect((error) => {
+                    stderr.printf(@"Error: $(error.message)\n");
+                });
+            player.finished.connect(() => {
                     main_loop.quit();
                 });
+            player.unpaused.connect(() => {
+                    print("Unpaused\n");
+                });
+            player.paused.connect(() => {
+                    print("Paused\n");
+                });
+            player.play(file_path);
             main_loop.run();
             return 0;
         } catch (GLib.Error e) {
             stderr.printf(@"Error: %s\n", e.message);
             return 1;
         }
-    }
-
-    private static async void run_test(string file_path) throws Tatam.Error, GLib.Error {
-        Tatam.FileInfoAdapter file_info_adapter = new Tatam.FileInfoAdapter();
-        Tatam.FileInfo file_info = yield file_info_adapter.read_metadata_from_path(file_path);
-        Json.Node json = Json.from_string(file_info.to_string());
-        print("%s\n", Json.to_string(json, true));
     }
 }
