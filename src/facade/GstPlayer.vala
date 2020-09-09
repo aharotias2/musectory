@@ -15,9 +15,7 @@ namespace Tatam {
             playing_status = Gst.State.NULL;
             playbin = ElementFactory.make("playbin", "player");
             Gst.Bus bus = playbin.get_bus();
-            bus.add_watch(1, handle_message);
-            keyboard_input = new IOChannel.unix_new(stdin.fileno());
-            keyboard_input.add_watch(IOCondition.IN, handle_keyboard);
+            bus.add_watch(0, handle_message);
         }
         
         public void play(string file_path) {
@@ -48,17 +46,17 @@ namespace Tatam {
                 finished();
                 return false;
             case MessageType.STATE_CHANGED:
-                debug("message state_changed");
-                Gst.State old_state, new_state, pending_state;
-                message.parse_state_changed(out old_state, out new_state, out pending_state);
                 if (message.src == playbin) {
-                    playing_status = new_state;
-                    if (new_state == Gst.State.PLAYING) {
-                        unpause();
-                        unpaused();
-                    } else if (new_state == Gst.State.PAUSED) {
-                        pause();
-                        paused();
+                    Gst.State old_state, new_state, pending_state;
+                    message.parse_state_changed(out old_state, out new_state, out pending_state);
+                    debug("message state_changed from %s to %s", old_state.to_string(), new_state.to_string());
+                    if (playing_status != new_state) {
+                        playing_status = new_state;
+                        if (playing_status == Gst.State.PLAYING) {
+                            unpaused();
+                        } else if (playing_status == Gst.State.PAUSED) {
+                            paused();
+                        }
                     }
                 }
                 return true;
@@ -67,41 +65,11 @@ namespace Tatam {
             }
         }
 
-        private bool handle_keyboard(IOChannel channel, IOCondition condition) {
-            try {
-                string line;
-                size_t length;
-                size_t terminator_pos;
-                IOStatus returned_status = channel.read_line(out line, out length, out terminator_pos);
-                if (returned_status == IOStatus.NORMAL) {
-                    switch (line) {
-                    case "q":
-                        debug("keyboard q");
-                        finished();
-                        break;
-                    case " ":
-                        debug("keyboard space");
-                        if (playing_status == Gst.State.PLAYING) {
-                            paused();
-                        } else {
-                            unpaused();
-                        }
-                        break;
-                    }
-                }
-                return true;
-            } catch (ConvertError e) {
-                return false;
-            } catch (IOChannelError e) {
-                return false;
-            }
-        }
-
-        private void pause() {
+        public void pause() {
             playbin.set_state(Gst.State.PAUSED);
         }
 
-        private void unpause() {
+        public void unpause() {
             playbin.set_state(Gst.State.PLAYING);
         }
     }

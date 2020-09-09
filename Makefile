@@ -28,6 +28,6 @@ test-metadata: test/test-metadata.vala src/strategy/MetadataReader.vala src/cons
 test-files: test/test-files.vala src/strategy/DirectoryReader.vala src/consts/Error.vala src/consts/Text.vala
 	valac --pkg=posix --pkg=gio-2.0 --pkg=glib-2.0 -o build/test/test-files $^
 
-test-player: test/test-base.vala test/test-gst-player.vala src/facade/GstPlayer.vala src/atoms/SmallTime.vala src/strategy/DirectoryReader.vala src/consts/Error.vala src/consts/Text.vala
-	valac --pkg=posix --pkg=glib-2.0 --pkg=gio-2.0 --pkg=gstreamer-1.0 -o build/test/test-player $^
+test-gst-player: test/test-gst-player.vala src/widgets/Controller.vala src/adapters/FileInfoAdapter.vala src/models/FileInfo.vala src/strategy/MetadataReader.vala src/consts/enums.vala src/utils/PixbufUtils.vala src/consts/IconNames.vala src/consts/StyleClass.vala src/facade/GstPlayer.vala src/atoms/SmallTime.vala src/strategy/DirectoryReader.vala src/consts/Error.vala src/consts/Text.vala
+	valac --pkg=posix --pkg=gtk+-3.0 --pkg=gstreamer-1.0 -o build/test/test-gst-player $^
 

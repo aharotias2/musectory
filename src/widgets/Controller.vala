@@ -44,6 +44,8 @@ namespace Tatam {
         private SmallTime music_total_time_value;
         private SmallTime music_current_time_value;
         private SmallTime music_rest_time_value;
+        private uint artwork_size_value;
+        private bool running;
         
         public signal void artwork_clicked();
         public signal void play_button_clicked();
@@ -110,8 +112,23 @@ namespace Tatam {
                 }
             }
         }
+
+        public uint artwork_size {
+            get {
+                return artwork_size_value;
+            }
+            set {
+                artwork_size_value = value;
+            }
+        }
+        
+        public void set_artwork(Gdk.Pixbuf pixbuf) {
+            Gdk.Pixbuf resized_pixbuf = PixbufUtils.scale_limited(pixbuf, (int) this.artwork_size);
+            artwork.pixbuf = resized_pixbuf;
+        }
         
         public Controller() {
+            this.artwork_size_value = 128;
             this.play_pause_button_state = PlayPauseButtonState.PLAY;
             this.music_total_time_value = new SmallTime(0);
             this.music_current_time_value = new SmallTime(0);
@@ -131,7 +148,6 @@ namespace Tatam {
                     artwork_button.get_style_context().add_class(StyleClass.FLAT);
                     artwork_button.add(artwork);
                     artwork_button.clicked.connect(() => {
-                            artwork_button.visible = false;
                             artwork_clicked();
                         });
                 }
@@ -146,9 +162,17 @@ namespace Tatam {
                         play_pause_button.clicked.connect(() => {
                                 if (play_pause_button_state == PlayPauseButtonState.PLAY) {
                                     play_pause_button_state = PlayPauseButtonState.PAUSE;
+                                    running = true;
+                                    Timeout.add(100, () => {
+                                            if (running) {
+                                                music_current_time += 100;
+                                            }
+                                            return running;
+                                        });
                                     play_button_clicked();
                                 } else {
                                     play_pause_button_state = PlayPauseButtonState.PLAY;
+                                    running = false;
                                     pause_button_clicked();
                                 }
                             });
@@ -204,8 +228,14 @@ namespace Tatam {
                         time_bar.has_origin = true;
                         time_bar.set_increments(SMALL_STEP_MILLISECONDS, BIG_STEP_MILLISECONDS);
                         time_bar.value_changed.connect(() => {
+                                debug("value_changed %u", (uint) time_bar.get_value());
                                 music_current_time = (uint) time_bar.get_value();
+                            });
+                        time_bar.change_value.connect((scroll_type, new_value) => {
+                                debug("change_value %f, %f", new_value, time_bar.get_value());
+                                
                                 time_position_changed(time_bar.get_value());
+                                return false;
                             });
                     }
 
@@ -311,6 +341,7 @@ namespace Tatam {
             }
 
             add(main_box);
+            running = false;
         }
 
         public void show_buttons() {
