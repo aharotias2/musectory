@@ -21,10 +21,10 @@ using Gdk;
 
 namespace Tatam {
     public class StringUtils {
-        public static List<string> array_to_list(string[] array) {
-            List<string> list = new List<string>();
+        public static Gee.List<string> array_to_list(string[] array) {
+            Gee.List<string> list = new Gee.ArrayList<string>();
             foreach (string item in array) {
-                list.append(item);
+                list.add(item);
             }
             return list;
         }

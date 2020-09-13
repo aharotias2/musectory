@@ -23,22 +23,22 @@ using Tatam;
 
 namespace Tatam {
     public class PlaylistBox : Bin {
-        private GLib.ListStore? store;
+        private GLib.Gee.ListStore? store;
         private ScrolledWindow? scrolled;
         private Tracker tracker;
-        public ListBox? list_box { get; set; }
+        public Gee.ListBox? list_box { get; set; }
         public int image_size { get; set; }
         public string? name { get; set; }
 
-        public signal void changed(List<string> file_path_list);
+        public signal void changed(Gee.List<string> file_path_list);
         
         public PlaylistBox() {
             name = null;
-            store = new GLib.ListStore(typeof(Tatam.FileInfo));
+            store = new GLib.Gee.ListStore(typeof(Tatam.FileInfo));
             tracker = new Tracker();
             scrolled = new ScrolledWindow(null, null);
             {
-                list_box = new ListBox();
+                list_box = new Gee.ArrayListBox();
                 {
                     list_box.bind_model(store, create_list_item);
                     list_box.activate_on_single_click = true;
@@ -63,7 +63,7 @@ namespace Tatam {
             }
         }
             
-        public void append_list(List<Tatam.FileInfo?> file_list) {
+        public void append_list(Gee.List<Tatam.FileInfo?> file_list) {
             foreach (Tatam.FileInfo? file_info in file_list) {
                 add_item(file_info);
             }
@@ -103,14 +103,14 @@ namespace Tatam {
             return null;
         }
 
-        public List<string> get_file_path_list() {
-            var list = new List<string>();
+        public Gee.List<string> get_file_path_list() {
+            var list = new Gee.ArrayList<string>();
             Tatam.FileInfo? file = null;
             int i = 0;
             do {
                 file = (Tatam.FileInfo?) store.get_item(i++);
                 if (file != null) {
-                    list.append(file.path);
+                    list.add(file.path);
                 }
             } while (file != null);
 
@@ -122,21 +122,20 @@ namespace Tatam {
         }
 
         public void append_list_from_path(string file_path) {
-            var new_playlist = new List<Tatam.FileInfo?>();
+            var new_playlist = new Gee.ArrayList<Tatam.FileInfo?>();
 
-            var file_util = new DFileUtils(file_path);
             Tatam.FileType file_type;
             try {
-                file_type = file_util.determine_file_type();
+                file_type = Tatam.Files.get_file_type(file_path);
                 switch (file_type) {
                 case Tatam.FileType.FILE:
-                    List<string> file_name_list = new List<string>();
-                    file_name_list.append(file_path);
+                    Gee.List<string> file_name_list = new Gee.ArrayList<string>();
+                    file_name_list.add(file_path);
                     new_playlist = MPlayer.get_file_info_and_artwork_list_from_file_list(file_name_list);
                     break;
                 case Tatam.FileType.DISC:
                 case Tatam.FileType.DIRECTORY:
-                    new_playlist = new DFileUtils(file_path).find_file_infos_recursively();
+                    new_playlist = Tatam.Files.find_file_infos_recursively(file_path);
                     break;
                 case Tatam.FileType.PARENT:
                 default:
@@ -157,8 +156,8 @@ namespace Tatam {
             debug("playlist append list: current track = %u", tracker.current);
         }
 
-        public void append_list_from_path_list(List<string> path_list) {
-            List<Tatam.FileInfo?> new_playlist = MPlayer.get_file_info_and_artwork_list_from_file_list(path_list);
+        public void append_list_from_path_list(Gee.List<string> path_list) {
+            Gee.List<Tatam.FileInfo?> new_playlist = MPlayer.get_file_info_and_artwork_list_from_file_list(path_list);
             append_list(new_playlist);
             tracker.reset(get_list_size(), tracker.current);
             debug("playlist append list: current track = %u", tracker.current);
@@ -168,7 +167,6 @@ namespace Tatam {
             store.remove(n);
             tracker.reset(get_list_size(), tracker.current < tracker.max ? tracker.current : tracker.max - 1);
         }
-
         
         public uint get_max_track() {
             return tracker.max;
@@ -236,7 +234,7 @@ namespace Tatam {
 
         public void move_cursor(int index) {
             debug("playlist move cursor to %d", index);
-            list_box.select_row((ListBoxRow) get_item(index));
+            list_box.select_row((Gee.ListBoxRow) get_item(index));
         }
 
         public Tatam.FileInfo? nth_track_data(uint n) {
@@ -276,7 +274,7 @@ namespace Tatam {
             append_list_from_path(path);
         }
 
-        public void new_list_from_path_list(List<string> path_list) {
+        public void new_list_from_path_list(Gee.List<string> path_list) {
             store.remove_all();
             tracker.reset(0, 0);
             append_list_from_path_list(path_list);
@@ -286,24 +284,23 @@ namespace Tatam {
             string contents;
             if (GLib.FileUtils.test(m3u_file_path, FileTest.EXISTS)) {
                 FileUtils.get_contents(m3u_file_path, out contents);
-                List<string> list = Tatam.StringUtils.array_to_list(contents.split("\n"));
+                Gee.List<string> list = Tatam.StringUtils.array_to_list(contents.split("\n"));
                 new_list_from_path_list(list);
             }
         }
         
-        private void create_from_directory(string dir, ref List<Tatam.FileInfo?> playlist, bool recursive) {
-            var dir_list = new List<string>();
-            var file_list = new List<Tatam.FileInfo?>();
+        private void create_from_directory(string dir, ref Gee.List<Tatam.FileInfo?> playlist, bool recursive) {
+            var dir_list = new Gee.ArrayList<string>();
+            var file_list = new Gee.ArrayList<Tatam.FileInfo?>();
 
-            var dirutil = new DFileUtils(dir);
             try {
-                dirutil.find_dir_files(ref dir_list, ref file_list);
+                Tatam.Files.find_dir_files(dir, ref dir_list, ref file_list);
             } catch (FileError e) {
                 return;
             }
 
             if (file_list.length() > 0) {
-                playlist.concat((owned) file_list);
+                playlist.add_all((owned) file_list);
             }
 
             if (recursive) {

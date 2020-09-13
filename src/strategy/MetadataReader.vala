@@ -57,7 +57,7 @@ namespace Tatam {
             }
         }
         
-        public async void get_metadata(string file_path) throws Tatam.Error, GLib.Error {
+        public void get_metadata(string file_path) throws Tatam.Error, GLib.Error {
             GLib.File file = GLib.File.new_for_path(file_path);
 
             if (!file.query_exists()) {
@@ -110,8 +110,6 @@ namespace Tatam {
                                         }
                                     }
                                 });
-                            Idle.add(get_metadata.callback);
-                            yield;
                             GLib.Value duration_value = GLib.Value(typeof(Tatam.SmallTime));
                             duration_value.set_object(get_duration());
                             tag_found("duration", duration_value);
@@ -125,8 +123,6 @@ namespace Tatam {
                     } else {
                         debug("Gst null message");
                     }
-                    Idle.add(get_metadata.callback);
-                    yield;
                 }
             } finally {
                 pipeline.set_state(State.NULL);

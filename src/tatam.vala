@@ -30,7 +30,7 @@ using Gtk, Tatam;
 //--------------------------------------------------------------------------------------
 // global variables for file management
 //--------------------------------------------------------------------------------------
-List<string> dirs;
+Gee.List<string> dirs;
 CompareFunc<string> string_compare_func;
 CopyFunc<Tatam.FileInfo?> file_info_copy_func;
 string current_dir = null;
@@ -64,7 +64,7 @@ int main(string[] args) {
         Process.exit(1);
     }
 
-    dirs = new List<string>();
+    dirs = new Gee.ArrayList<string>();
 
     //----------------------------------------------------------------------------------
     // reading config files
@@ -98,7 +98,7 @@ int main(string[] args) {
                 string[] pair = line.split("=", 2);
                 switch (pair[0]) {
                 case "dir":
-                    dirs.append(pair[1]);
+                    dirs.add(pair[1]);
                     break;
 
                 case "thumbnail_size":
@@ -125,10 +125,10 @@ int main(string[] args) {
         }
 
         if (dirs.length() == 0) {
-            dirs.append(Environment.get_home_dir() + "/" + Text.DIR_NAME_MUSIC);
+            dirs.add(Environment.get_home_dir() + "/" + Text.DIR_NAME_MUSIC);
         }
     } catch(GLib.Error e) {
-        dirs.append(Environment.get_home_dir() + "/" + Text.DIR_NAME_MUSIC);
+        dirs.add(Environment.get_home_dir() + "/" + Text.DIR_NAME_MUSIC);
     }
 
     //----------------------------------------------------------------------------------

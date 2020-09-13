@@ -21,6 +21,11 @@ using Gtk;
 
 namespace Tatam {
     private class FinderItem : FlowBoxChild {
+        public static Gdk.Pixbuf? file_pixbuf;
+        public static Gdk.Pixbuf? cd_pixbuf;
+        public static Gdk.Pixbuf? folder_pixbuf;
+        public static Gdk.Pixbuf? parent_pixbuf;
+        
         /* Properties */
         public string file_path { get; private set; }
         public string file_name { get; private set; }
@@ -33,9 +38,8 @@ namespace Tatam {
         public Button bookmark_button { get; private set; }
         public Button play_button { get; private set; }
         public Image icon_image { get; set; }
+        private Tatam.FileInfo file_info;
         
-        private Thread<void *>? thread;
-        private ImageLoaderThreadData? thdata;
         private Gdk.Pixbuf? icon_pixbuf;
         private Image? mini_icon;
 
@@ -44,14 +48,15 @@ namespace Tatam {
         public signal void play_button_clicked(string file_path);
 
         /* Contructor */
-        public FinderItem(ref Tatam.FileInfo file_info, int icon_size, bool use_popover = true) {
+        public FinderItem(Tatam.FileInfo file_info, int icon_size, bool use_popover = true) {
+            this.file_info = file_info;
             this.file_path = file_info.path;
             this.file_name = file_info.name;
             this.dir_path = file_info.dir;
             this.file_type = file_info.file_type;
-            this.thread = null;
-            this.thdata = null;
             this.icon_size = icon_size;
+            this.file_path = Path.build_path(Path.DIR_SEPARATOR_S, dir_path, file_name);
+            debug("file_path: " + file_path);
             
             var ev_box = new EventBox();
             {
@@ -61,74 +66,11 @@ namespace Tatam {
                     {
                         var widget_overlay1 = new Overlay();
                         {
-                            icon_pixbuf = null;
-                            {
-                                this.file_path = Path.build_path(Path.DIR_SEPARATOR_S, dir_path, file_name);
-                                debug("file_path: " + file_path);
+                            icon_pixbuf = create_icon_pixbuf();
 
-                                switch (file_type) {
-                                case Tatam.FileType.DISC:
-                                    debug("file_type: disc");
-                                    bool thread_started = false;
-                                    thdata = new ImageLoaderThreadData(this.file_path, this.icon_size);
-                                    Idle.add(() => {
-                                            try {
-                                                if (!thread_started) {
-                                                    thread = new Thread<void*>.try(this.file_path, thdata.run);
-                                                    thread_started = true;
-                                                } else if (thdata.pixbuf_loaded) {
-                                                    debug("tmp_icon_pixbuf has been loaded");
-                                                    thread.join();
-                                                    if (thdata.icon_pixbuf != null) {
-                                                        icon_pixbuf = thdata.icon_pixbuf;
-                                                        icon_image.set_from_pixbuf(icon_pixbuf.scale_simple(
-                                                                                       this.icon_size,
-                                                                                       this.icon_size,
-                                                                                       Gdk.InterpType.BILINEAR));
-                                                        if (mini_icon != null) {
-                                                            mini_icon.visible = true;
-                                                        }
-                                                    }
-                                                    return Source.REMOVE;
-                                                }
-                                                return Source.CONTINUE;
-                                            } catch (Error e) {
-                                                stderr.printf("ERROR: Starting to read finder artworks was failed");
-                                                return Source.REMOVE;
-                                            }
-                                        }, Priority.DEFAULT);
-                                    if (icon_pixbuf == null) {
-                                        icon_pixbuf = cd_pixbuf;
-                                    }
-                                    break;
-
-                                case Tatam.FileType.DIRECTORY:
-                                    debug("file_type: directory");
-                                    icon_pixbuf = folder_pixbuf;
-                                    break;
-
-                                case Tatam.FileType.PARENT:
-                                    debug("file_type: parent");
-                                    icon_pixbuf = parent_pixbuf;
-                                    break;
-
-                                case Tatam.FileType.FILE:
-                                default:
-                                    debug("file_type: file");
-                                    if (file_info.artwork != null) {
-                                        icon_pixbuf = file_info.artwork;
-                                    } else {
-                                        icon_pixbuf = file_pixbuf;
-                                    }
-                                    break;
-
-                                }
-                            }
-
-                            icon_image = new Image.from_pixbuf(icon_pixbuf.scale_simple(
-                                                                   this.icon_size,
-                                                                   this.icon_size,
-                                                                   Gdk.InterpType.BILINEAR));
+                            icon_image = new Image.from_pixbuf(
+                                Tatam.PixbufUtils.scale_limited(icon_pixbuf, this.icon_size)
+                                );
                             {
                                 icon_image.get_style_context().add_class(StyleClass.FINDER_ICON);
                             }
@@ -149,9 +91,11 @@ namespace Tatam {
                             Image mini_icon = null;
                             {
                                 if (file_type == Tatam.FileType.FILE) {
-                                    mini_icon = new Image.from_icon_name(IconName.AUDIO_FILE, IconSize.LARGE_TOOLBAR);
+                                    mini_icon = new Image.from_icon_name(IconName.AUDIO_FILE,
+                                                                         IconSize.LARGE_TOOLBAR);
                                 } else if (file_type == Tatam.FileType.DISC) {
-                                    mini_icon = new Image.from_icon_name(IconName.FOLDER, IconSize.LARGE_TOOLBAR);
+                                    mini_icon = new Image.from_icon_name(IconName.FOLDER,
+                                                                         IconSize.LARGE_TOOLBAR);
                                     mini_icon.visible = false;
                                 }
                                 
@@ -180,7 +124,8 @@ namespace Tatam {
 
                     var button_box = new Box(Orientation.HORIZONTAL, 5);
                     {
-                        bookmark_button = new Button.from_icon_name(IconName.Symbolic.USER_BOOKMARKS, IconSize.SMALL_TOOLBAR);
+                        bookmark_button = new Button.from_icon_name(IconName.Symbolic.USER_BOOKMARKS,
+                                                                    IconSize.SMALL_TOOLBAR);
                         {
                             bookmark_button.valign = Align.CENTER;
                             bookmark_button.visible = false;
@@ -190,7 +135,8 @@ namespace Tatam {
                                 });
                         }
 
-                        add_button = new Button.from_icon_name(IconName.Symbolic.LIST_ADD, IconSize.SMALL_TOOLBAR);
+                        add_button = new Button.from_icon_name(IconName.Symbolic.LIST_ADD,
+                                                               IconSize.SMALL_TOOLBAR);
                         {
                             add_button.valign = Align.CENTER;
                             add_button.visible = false;
@@ -200,7 +146,8 @@ namespace Tatam {
                                 });
                         }
 
-                        play_button = new Button.from_icon_name(IconName.Symbolic.MEDIA_PLAYBACK_START, IconSize.LARGE_TOOLBAR);
+                        play_button = new Button.from_icon_name(IconName.Symbolic.MEDIA_PLAYBACK_START,
+                                                                IconSize.LARGE_TOOLBAR);
                         {
                             play_button.valign = Align.CENTER;
                             play_button.visible = false;
@@ -214,13 +161,21 @@ namespace Tatam {
                         button_box.valign = Align.CENTER;
                         if (file_type != Tatam.FileType.PARENT) {
                             if (use_popover) {
-                                if (file_type == Tatam.FileType.DIRECTORY || file_type == Tatam.FileType.DISC) {
-                                    button_box.pack_start(add_popover_to_button(bookmark_button, "Add to bookmark list"), false, false);
+                                if (file_type == Tatam.FileType.DIRECTORY
+                                    || file_type == Tatam.FileType.DISC)
+                                {
+                                    button_box.pack_start(add_popover_to_button(bookmark_button,
+                                                                                "Add to bookmark list"),
+                                                          false, false);
                                 }
-                                button_box.pack_start(add_popover_to_button(play_button, "Play it"), false, false);
-                                button_box.pack_start(add_popover_to_button(add_button, "Add to playlist"), false, false);
+                                button_box.pack_start(add_popover_to_button(play_button, "Play it"),
+                                                      false, false);
+                                button_box.pack_start(add_popover_to_button(add_button, "Add to playlist"),
+                                                      false, false);
                             } else {
-                                if (file_type == Tatam.FileType.DIRECTORY || file_type == Tatam.FileType.DISC) {
+                                if (file_type == Tatam.FileType.DIRECTORY
+                                    || file_type == Tatam.FileType.DISC)
+                                {
                                     button_box.pack_start(bookmark_button, false, false);
                                 }
                                 button_box.pack_start(play_button, false, false);
@@ -266,26 +221,91 @@ namespace Tatam {
         /* Private methods */
         private EventBox add_popover_to_button(Button button, string pop_text) {
             var pop = new Popover(button);
-            pop.add(new Label(pop_text));
-            pop.set_default_widget(this);
-            pop.modal = false;
-            pop.transitions_enabled = false;
-            pop.position = PositionType.BOTTOM;
-            pop.show_all();
-
-            var ev_box = new EventBox();
-            ev_box.add(button);
-            ev_box.enter_notify_event.connect((event) => {
-                    pop.visible = true;
-                    return Source.CONTINUE;
-                });
+            {
+                pop.add(new Label(pop_text));
+                pop.set_default_widget(this);
+                pop.modal = false;
+                pop.transitions_enabled = false;
+                pop.position = PositionType.BOTTOM;
+                pop.show_all();
+            }
             
-            ev_box.leave_notify_event.connect((event) => {
-                    pop.visible = false;
-                    return Source.CONTINUE;
-                });
-
+            var ev_box = new EventBox();
+            {
+                ev_box.add(button);
+                ev_box.enter_notify_event.connect((event) => {
+                        pop.visible = true;
+                        return Source.CONTINUE;
+                    });
+            
+                ev_box.leave_notify_event.connect((event) => {
+                        pop.visible = false;
+                        return Source.CONTINUE;
+                    });
+            }
+            
             return (owned) ev_box;
         }
+        
+        private Gdk.Pixbuf? create_icon_pixbuf() {
+            switch (file_type) {
+            case Tatam.FileType.DISC:
+                debug("file_type: disc");
+                load_artwork_async.begin((res, obj) => {
+                        Gdk.Pixbuf? artwork_pixbuf = load_artwork_async.end(obj);
+                        if (artwork_pixbuf != null) {
+                            icon_image.set_from_pixbuf(artwork_pixbuf.scale_simple(
+                                                           this.icon_size,
+                                                           this.icon_size,
+                                                           Gdk.InterpType.BILINEAR));
+                            if (mini_icon != null) {
+                                mini_icon.visible = true;
+                            }
+                        }
+                    });
+                return cd_pixbuf;
+
+            case Tatam.FileType.DIRECTORY:
+                debug("file_type: directory");
+                return folder_pixbuf;
+
+            case Tatam.FileType.PARENT:
+                debug("file_type: parent");
+                return parent_pixbuf;
+
+            case Tatam.FileType.FILE:
+            default:
+                debug("file_type: file");
+                if (file_info.artwork != null) {
+                    return file_info.artwork;
+                } else {
+                    return file_pixbuf;
+                }
+            }
+        }
+
+        private async Gdk.Pixbuf? load_artwork_async() {
+            string thread_name = "thread_artwork_of_" + file_name;
+            Thread<Gdk.Pixbuf?> thread = new Thread<Gdk.Pixbuf?>(thread_name, () => {
+                    debug("thread starts");
+                    Gdk.Pixbuf? artwork_pixbuf = null;
+                    try {
+                        artwork_pixbuf = Files.load_first_artwork(file_path, icon_size);
+                    } catch (Tatam.Error e) {
+                        stderr.printf(@"Tatam.Error: $(e.message)\n");
+                    } catch (FileError e) {
+                        stderr.printf(@"FileError: $(e.message)\n");
+                    }
+                    debug("thread ends %s of %s",
+                          (artwork_pixbuf != null ? "icon has been loaded" : "icon is null"),
+                          file_path
+                        );
+                    Idle.add(load_artwork_async.callback);
+                    return artwork_pixbuf;
+                });
+            yield;
+            return thread.join();
+        }
+
     }
 }

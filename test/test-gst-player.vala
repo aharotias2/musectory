@@ -39,21 +39,14 @@ public class TestGstPlayer {
                     location = new Gtk.Entry();
                     {
                         location.activate.connect(() => {
-                                file_info_reader.read_metadata_from_path.begin(
-                                    location.text,
-                                    (res, obj) => {
-                                        info = file_info_reader.read_metadata_from_path.end(obj);
-                                        controller.music_total_time = info.time_length.milliseconds;
-                                        controller.activate_buttons(true, true);
-                                        controller.set_artwork(info.artwork);
-                                    });
+                                set_controller_artwork.begin();
                             });
                     }
                     
                     find_button = new Gtk.Button.from_icon_name("document-open-symbolic");
                     {
                         find_button.clicked.connect(() => {
-                                location.text = choose_file();
+                                location.text = Tatam.Dialogs.choose_file(window);
                                 location.activate();
                             });
                     }
@@ -77,6 +70,9 @@ public class TestGstPlayer {
                     controller.time_position_changed.connect((new_value) => {
                             gst_player.set_position(new Tatam.SmallTime.from_milliseconds((uint) new_value));
                         });
+                    controller.volume_changed.connect((value) => {
+                            gst_player.volume = value;
+                        });
                 }
                 
                 box_1.pack_start(box_2, false, false);
@@ -84,6 +80,7 @@ public class TestGstPlayer {
             }
 
             window.add(box_1);
+            window.set_default_size(600,10);
             window.destroy.connect(Gtk.main_quit);
             window.show_all();
         }
@@ -91,6 +88,7 @@ public class TestGstPlayer {
 
     private void setup_gst_player() {
         gst_player = new Tatam.GstPlayer();
+        gst_player.volume = 0.5;
         gst_player.error_occured.connect((error) => {
                 stderr.printf(@"Error: $(error.message)\n");
             });
@@ -105,6 +103,19 @@ public class TestGstPlayer {
             });
     }
 
+    private async void set_controller_artwork() {
+        new Thread<int>(null, () => {
+                gst_player.quit();
+                info = file_info_reader.read_metadata_from_path(location.text);
+                controller.music_total_time = info.time_length.milliseconds;
+                controller.activate_buttons(true, true);
+                controller.set_artwork(info.artwork);
+                Idle.add(set_controller_artwork.callback);
+                return 0;
+            });
+        yield;
+    }
+    
     private void setup_file_info_adapter() {
         file_info_reader = new Tatam.FileInfoAdapter();
     }
@@ -116,27 +127,12 @@ public class TestGstPlayer {
         setup_file_info_adapter();
     }
 
-    private string? choose_file() {
-        string? file_path = null;
-        var file_chooser = new Gtk.FileChooserDialog(
-            Tatam.Text.DIALOG_OPEN_FILE, window,
-            Gtk.FileChooserAction.OPEN,
-            Tatam.Text.DIALOG_CANCEL, Gtk.ResponseType.CANCEL,
-            Tatam.Text.DIALOG_OPEN, Gtk.ResponseType.ACCEPT
-            );
-        if (file_chooser.run () == Gtk.ResponseType.ACCEPT) {
-            file_path = file_chooser.get_filename();
-        }
-        file_chooser.destroy ();
-        return file_path;
-    }
-    
     public static int main(string[] args) {
         output = Posix.FILE.fdopen(1, "w");
         set_print_handler((text) => output.printf(text));
         Gst.init(ref args);
         Gtk.init(ref args);
-        TestGstPlayer test = new TestGstPlayer();
+        TestGstPlayer tester = new TestGstPlayer();
         Gtk.main();
         return 0;
     }

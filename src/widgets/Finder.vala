@@ -52,10 +52,6 @@ namespace Tatam {
             }
         }
 
-        private Gdk.Pixbuf parent_pixbuf;
-        private Gdk.Pixbuf folder_pixbuf;
-        private Gdk.Pixbuf file_pixbuf;
-        private Gdk.Pixbuf cd_pixbuf;
         const int max_icon_size = 256;
 
         private int count;
@@ -67,7 +63,7 @@ namespace Tatam {
         private Revealer progress_revealer;
         private Label while_label;
 
-        private List<Tatam.FileInfo?> file_info_list;
+        private Gee.List<Tatam.FileInfo?> file_info_list;
 
         public bool use_popover { get; set; }
         public string dir_path { get; set; }
@@ -101,10 +97,10 @@ namespace Tatam {
             count = 0;
             activate_on_single_click = true;
             icon_theme = Gtk.IconTheme.get_default();
-            file_pixbuf = builder.file_pixbuf_value;
-            cd_pixbuf = builder.cd_pixbuf_value;
-            folder_pixbuf = builder.folder_pixbuf_value;
-            parent_pixbuf = builder.parent_pixbuf_value;
+            FinderItem.file_pixbuf = builder.file_pixbuf_value;
+            FinderItem.cd_pixbuf = builder.cd_pixbuf_value;
+            FinderItem.folder_pixbuf = builder.folder_pixbuf_value;
+            FinderItem.parent_pixbuf = builder.parent_pixbuf_value;
             var overlay_while_label = new Overlay();
             {
                 var finder_box = new Box(Orientation.VERTICAL, 1);
@@ -120,7 +116,7 @@ namespace Tatam {
                         {
                             progress.show_text = false;
                         }
-                
+
                         progress_revealer.reveal_child = false;
                         progress_revealer.transition_type = RevealerTransitionType.SLIDE_DOWN;
                         progress_revealer.valign = Align.START;
@@ -171,7 +167,7 @@ namespace Tatam {
             progress_revealer.reveal_child = true;
             debug("end timeout routine (change_dir) level 1");
             
-            file_info_list = new DFileUtils(dir_path).get_file_info_and_artwork_list_in_dir();
+            file_info_list = Tatam.Files.get_file_info_list_in_dir(dir_path);
 
             if (finder != null) {
                 finder_container.remove(finder.get_parent());
@@ -189,6 +185,8 @@ namespace Tatam {
             finder.valign = Align.START;
             finder_container.add(finder);
 
+            int i = 0;
+            
             foreach (Tatam.FileInfo file_info in this.file_info_list) {
                 if (file_info.name == "..") {
                     continue;
@@ -200,14 +198,14 @@ namespace Tatam {
 
                 if (file_info.file_type == Tatam.FileType.DIRECTORY) {
                     try {
-                        file_info.file_type = new DFileUtils(file_info.path).determine_file_type();
+                        file_info.file_type = Tatam.Files.get_file_type(file_info.path);
                     } catch (FileError e) {
                         stderr.printf(Text.ERROR_OPEN_FILE.printf(file_info.path));
                         break;
                     }
                 }
 
-                var item_widget = new FinderItem(ref file_info, size, use_popover);
+                var item_widget = new FinderItem(file_info, size, use_popover);
                 {
                     if (item_widget != null) {
                         switch (file_info.file_type) {
@@ -248,17 +246,19 @@ namespace Tatam {
                 
                 finder.add(item_widget);
 
-                double fraction = (double) i + 1 / (double) file_info_list.length();
+                double fraction = (double) i + 1 / (double) file_info_list.size;
                 progress.fraction = fraction;
 
                 finder_container.show_all();
-                for (int j = 0; j < file_info_list.length(); j++) {
+                for (int j = 0; j < file_info_list.size; j++) {
                     ((FinderItem)finder.get_child_at_index(j)).hide_buttons();
                     while_label.visible = false;
                 }
 
                 Idle.add(change_dir.callback);
                 yield;
+
+                i++;
             }
 
             change_cursor(Gdk.CursorType.LEFT_PTR);

@@ -18,6 +18,9 @@
  */
 
 namespace Tatam {
+    public delegate bool DirectoryFoundFunc(GLib.File directory);
+    public delegate bool FileFoundFunc(GLib.File file);
+
     public class DirectoryReader : Object {
         private string path;
         public signal bool directory_found(GLib.File directory);
@@ -35,7 +38,7 @@ namespace Tatam {
             this.path = path;
         }
 
-        public virtual void run() throws GLib.FileError {
+        public void run() throws GLib.FileError {
             string? name;
             GLib.Dir dir = Dir.open(this.path);
             while ((name = dir.read_name()) != null) {
@@ -54,30 +57,6 @@ namespace Tatam {
                 if (response == false) {
                     break;
                 }
-            }
-        }
-
-        public virtual async void run_async(bool is_async) throws GLib.FileError {
-            string? name;
-            GLib.Dir dir = Dir.open(this.path);
-            while ((name = dir.read_name()) != null) {
-                if (name == "." || name == "..") {
-                    continue;
-                }
-                string child_path = Path.build_path(Path.DIR_SEPARATOR_S, this.path, name);
-                GLib.File child_file = GLib.File.new_for_path(child_path);
-                GLib.FileType child_file_type = child_file.query_file_type(0);
-                bool response = true;
-                if (child_file_type == GLib.FileType.DIRECTORY) {
-                    response = directory_found(child_file);
-                } else if (child_file_type == GLib.FileType.REGULAR) {
-                    response = file_found(child_file);
-                }
-                if (response == false) {
-                    break;
-                }
-                Idle.add(run_async.callback);
-                yield;
             }
         }
     }

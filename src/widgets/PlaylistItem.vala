@@ -20,7 +20,7 @@
 using Gtk, Gdk;
 
 namespace Tatam {
-    public class PlaylistItem : ListBoxRow {
+    public class PlaylistItem : Gee.ListBoxRow {
         public int image_size { get; set; }
         private PlaylistItemStatus status;
         private PlaylistDrawingArea icon_area;

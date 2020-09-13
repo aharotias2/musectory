@@ -155,7 +155,7 @@ namespace Tatam {
 
                                 sidebar.bookmark_del_button_clicked.connect(() => {
                                         if (dirs.length() > 1) {
-                                            if (confirm(Text.CONFIRM_REMOVE_BOOKMARK)) {
+                                            if (Dialogs.confirm(Text.CONFIRM_REMOVE_BOOKMARK, this)) {
                                                 dirs.remove_link(dirs.nth(path.get_indices()[1]));
                                                 return true;
                                             }
@@ -178,7 +178,7 @@ namespace Tatam {
                                     });
 
                                 sidebar.playlist_del_button_clicked.connect((playlist_path) => {
-                                        if (confirm(Text.CONFIRM_REMOVE_PLAYLIST)) {
+                                        if (Dialogs.confirm(Text.CONFIRM_REMOVE_PLAYLIST, this)) {
                                             FileUtils.remove(playlist_path);
                                             return true;
                                         }
@@ -186,7 +186,7 @@ namespace Tatam {
                                     });
             
                                 sidebar.file_chooser_called.connect(() => {
-                                        string dir_name = choose_directory();
+                                        string dir_name = Dialogs.choose_directory(this);
                                         current_dir = dir_name;
                                         debug("selected file path: %s", current_dir);
                                         finder.change_dir.begin(current_dir);
@@ -195,7 +195,7 @@ namespace Tatam {
                                     });
 
                                 sidebar.bookmark_added.connect((file_path) => {
-                                        dirs.append(file_path);
+                                        dirs.add(file_path);
                                     });
                             }
 
@@ -287,7 +287,7 @@ namespace Tatam {
 
                                         finder.add_button_clicked.connect((file_path) => {
                                                 playlist.append_list_from_path(file_path);
-                                                List<string> file_list = playlist.get_file_path_list();
+                                                Gee.List<string> file_list = playlist.get_file_path_list();
                                                 playlist.changed(file_list);
                                             });
 
@@ -360,7 +360,7 @@ namespace Tatam {
                                         });
                 
                                     playlist.changed.connect((file_path_list) => {
-                                            List<string> list = file_path_list.copy_deep((src) => {
+                                            Gee.List<string> list = file_path_list.copy_deep((src) => {
                                                     return src.dup();
                                                 });
                                             if (list.length() > 0) {
@@ -587,7 +587,7 @@ namespace Tatam {
                 if (playlist.name == null) {
                     save_playlist(playlist.get_file_path_list());
                 } else if (playlist_exists(playlist.name)) {
-                    if (confirm(Text.CONFIRM_OVERWRITE.printf(playlist.name))) {
+                    if (Dialogs.confirm(Text.CONFIRM_OVERWRITE.printf(playlist.name), this)) {
                         overwrite_playlist_file(playlist.name, playlist.get_file_path_list());
                     } else {
                         save_playlist(playlist.get_file_path_list());
@@ -647,11 +647,11 @@ namespace Tatam {
             help_dialog.visible = true;
         }
 
-        void save_playlist(List<string> file_path_list) {
+        void save_playlist(Gee.List<string> file_path_list) {
             if (save_playlist_dialog == null) {
                 Entry playlist_name_entry;
 
-                List<string> copy_of_list = file_path_list.copy_deep((src) => {
+                Gee.List<string> copy_of_list = file_path_list.copy_deep((src) => {
                         return ((string)src).dup();
                     });
 
@@ -697,7 +697,7 @@ namespace Tatam {
             }
         }
 
-        void overwrite_playlist_file(string playlist_name, List<string> file_path_list) {
+        void overwrite_playlist_file(string playlist_name, Gee.List<string> file_path_list) {
             string playlist_file_path = get_playlist_path_from_name(playlist_name);
             string playlist_file_contents = "";
             foreach (string file_path in file_path_list) {
@@ -724,30 +724,6 @@ namespace Tatam {
             var file_path_list = playlist.get_file_path_list();
             music.start(ref file_path_list, options.ao_type);
             stack.show_playlist();
-        }
-
-        private void choose_directory() {
-            string? dir_name = null;
-            var file_chooser = new FileChooserDialog (Text.DIALOG_OPEN_FILE, this,
-                                                      FileChooserAction.SELECT_FOLDER,
-                                                      Text.DIALOG_CANCEL, ResponseType.CANCEL,
-                                                      Text.DIALOG_OPEN, ResponseType.ACCEPT);
-            if (file_chooser.run () == ResponseType.ACCEPT) {
-                dir_name = file_chooser.get_filename();
-            }
-            file_chooser.destroy ();
-            return dir_name;
-        }
-
-        private bool confirm(string message) {
-            Gtk.MessageDialog m = new Gtk.MessageDialog(this,
-                                                        DialogFlags.MODAL,
-                                                        MessageType.WARNING,
-                                                        ButtonsType.OK_CANCEL,
-                                                        message);
-            Gtk.ResponseType result = (ResponseType)m.run ();
-            m.close ();
-            return result == Gtk.ResponseType.OK;
         }
 
         private Gdk.Pixbuf? get_application_icon_at_size(uint width, uint height) {

@@ -36,7 +36,10 @@ namespace Tatam {
         public void* run() {
             debug("thread starts");
             try {
-                icon_pixbuf = new DFileUtils(file_path).load_first_artwork(max_icon_size);
+                icon_pixbuf = Files.load_first_artwork(file_path, icon_size);
+            } catch (Tatam.Error e) {
+                stderr.printf(@"Tatam.Error: $(e.message)\n");
+                return null;
             } catch (FileError e) {
                 Process.exit(1);
             }

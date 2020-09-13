@@ -16,7 +16,7 @@
  * 
  * Copyright 2020 Takayuki Tanaka
  */
-
+2
 public class TestMetadata : TestBase {
     private static Posix.FILE output;
 
@@ -27,32 +27,37 @@ public class TestMetadata : TestBase {
         GLib.MainLoop main_loop = new GLib.MainLoop();
         try {
             string file_path = choose_file("/var/run/media/ta/TOSHIBAEXT/Music4");
-            int return_status = 0;
+            int status = 0;
             run_test.begin(file_path, (res, obj) => {
-                    try {
-                        run_test.end(obj);
-                        return_status = 0;
-                    } catch (Tatam.Error e) {
-                        stderr.printf(@"Tatam.Error: %s\n", e.message);
-                        return_status = 2;
-                    } catch (GLib.Error e) {
-                        stderr.printf(@"GLib.Error: %s\n", e.message);
-                        return_status = 2;
-                    }
+                    status = run_test.end(obj);
                     main_loop.quit();
                 });
             main_loop.run();
-            return 0;
+            return status;
         } catch (GLib.Error e) {
             stderr.printf(@"Error: %s\n", e.message);
             return 1;
         }
     }
 
-    private static async void run_test(string file_path) throws Tatam.Error, GLib.Error {
-        Tatam.FileInfoAdapter file_info_adapter = new Tatam.FileInfoAdapter();
-        Tatam.FileInfo file_info = yield file_info_adapter.read_metadata_from_path(file_path);
-        Json.Node json = Json.from_string(file_info.to_string());
-        print("%s\n", Json.to_string(json, true));
+    private static async int run_test(string file_path) {
+        int status = 0;
+        new Thread<int>(null, () => {
+                try {
+                    Tatam.FileInfoAdapter file_info_adapter = new Tatam.FileInfoAdapter();
+                    Tatam.FileInfo file_info = file_info_adapter.read_metadata_from_path(file_path);
+                    print_file_info_pretty(file_info);
+                } catch (Tatam.Error e) {
+                    stderr.printf(@"Tatam.Error: %s\n", e.message);
+                    status = 2;
+                } catch (GLib.Error e) {
+                    stderr.printf(@"GLib.Error: %s\n", e.message);
+                    status = 2;
+                }
+                Idle.add(run_test.callback);
+                return 0;
+            });
+        yield;
+        return status;
     }
 }

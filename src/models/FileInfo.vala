@@ -60,8 +60,75 @@ namespace Tatam {
         }
 
         public string to_string() {
-            string empty = "(null)";
-            return @"{ \"dir\" : \"$(dir != null ? dir : empty)\", \"name\" : \"$(name != null ? name : empty)\", \"path\" : \"$(path != null ? path : empty)\", \"title\" : \"$(title != null ? title : empty)\", \"artist\" : \"$(artist != null ? artist : empty)\", \"album\" : \"$(album != null ? album : empty)\", \"genre\" : \"$(genre != null ? genre : empty)\", \"comment\" : \"$(comment != null ? comment : empty)\", \"copyright\" : \"$(copyright != null ? copyright : empty)\", \"disc_number\" : $(disc_number), \"disc_count\" : $(disc_count), \"track\" : $(track), \"track_count\" : $(track), \"date\" : $(date), \"time_length\" : \"$(time_length.to_string())\", \"file_type\" : \"$(file_type.get_name())\" }";
+            StringBuilder sb = new StringBuilder("{");
+            string empty = "null";
+            sb.append("\"dir\" : ");
+            if (dir != null) {
+                sb.append("\"").append(dir).append("\"");
+            } else {
+                sb.append(empty);
+            }
+            sb.append(", \"name\" : ");
+            if (name != null) {
+                sb.append("\"").append(name).append("\"");
+            } else {
+                sb.append(empty);
+            }
+            sb.append(", \"path\" : ");
+            if (path != null) {
+                sb.append("\"").append(path).append("\"");
+            } else {
+                sb.append(empty);
+            }
+            sb.append(", \"title\" : ");
+            if (title != null) {
+                sb.append("\"").append(title).append("\"");
+            } else {
+                sb.append(empty);
+            }
+            sb.append(", \"artist\" : ");
+            if (artist != null) {
+                sb.append("\"").append(artist).append("\"");
+            } else {
+                sb.append(empty);
+            }
+            sb.append(", \"album\" : ");
+            if (album != null) {
+                sb.append("\"").append(album).append("\"");
+            } else {
+                sb.append(empty);
+            }
+            sb.append(", \"genre\" : ");
+            if (genre != null) {
+                sb.append("\"").append(genre).append("\"");
+            } else {
+                sb.append(empty);
+            }
+            sb.append(", \"comment\" : ");
+            if (comment != null) {
+                sb.append("\"").append(comment).append("\"");
+            } else {
+                sb.append(empty);
+            }
+            sb.append(", \"copyright\" : ");
+            if (copyright != null) {
+                sb.append("\"").append(copyright).append("\"");
+            } else {
+                sb.append(empty);
+            }
+            sb.append(", \"disc_number\" : ").append(disc_number.to_string());
+            sb.append(", \"disc_count\" : ").append(disc_count.to_string());
+            sb.append(", \"track\" : ").append(track.to_string());
+            sb.append(", \"track_count\" : ").append(track.to_string());
+            sb.append(", \"date\" : ").append(date.to_string());
+            sb.append(", \"time_length\" : ");
+            if (time_length != null) {
+                sb.append("\"").append(time_length.to_string()).append("\"");
+            } else {
+                sb.append(empty);
+            }
+            sb.append(", \"file_type\" : \"").append(file_type.get_name()).append("\" }");
+            return sb.str;
         }
     }
 }

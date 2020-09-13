@@ -25,7 +25,7 @@ namespace Tatam {
         public const double BIG_STEP_MILLISECONDS = 10000.0;
         
         public enum PlayPauseButtonState {
-            PLAY, PAUSE
+            PLAY, PAUSE, FINISHED
         }
 
         private Button artwork_button;
@@ -33,13 +33,14 @@ namespace Tatam {
         private ToolButton play_pause_button;
         private ToolButton next_track_button;
         private ToolButton prev_track_button;
-        private Label music_title;
+        private Label music_title_label;
         private Scale time_bar;
         private Label time_label_current;
         private Label time_label_rest;
         private ToggleButton toggle_shuffle_button;
         private ToggleButton toggle_repeat_button;
-
+        private Scale volume_bar;
+        
         private PlayPauseButtonState play_pause_button_state_value;
         private SmallTime music_total_time_value;
         private SmallTime music_current_time_value;
@@ -63,18 +64,42 @@ namespace Tatam {
             }
 
             set {
-                switch (play_pause_button_state_value = value) {
+                play_pause_button_state_value = value;
+                switch (play_pause_button_state) {
                 case PlayPauseButtonState.PLAY:
-                    Image? icon = play_pause_button.icon_widget as Image;
-                    if (icon != null) {
-                        icon.icon_name = IconName.Symbolic.MEDIA_PLAYBACK_START;
-                    }
-                    break;
-                case PlayPauseButtonState.PAUSE:
+                    running = true;
                     Image? icon = play_pause_button.icon_widget as Image;
                     if (icon != null) {
                         icon.icon_name = IconName.Symbolic.MEDIA_PLAYBACK_PAUSE;
                     }
+                    Timeout.add(100, () => {
+                            if (running) {
+                                music_current_time += 100;
+                            }
+                            if (music_current_time_value.milliseconds
+                                >= music_total_time_value.milliseconds) {
+                                play_pause_button_state = PlayPauseButtonState.FINISHED;
+                            }
+                            return running;
+                        });
+                    debug("play_pause_button_state was set to PLAY");
+                    break;
+                case PlayPauseButtonState.PAUSE:
+                    running = false;
+                    Image? icon = play_pause_button.icon_widget as Image;
+                    if (icon != null) {
+                        icon.icon_name = IconName.Symbolic.MEDIA_PLAYBACK_START;
+                    }
+                    debug("play_pause_button_state was set to PAUSE");
+                    break;
+                case PlayPauseButtonState.FINISHED:
+                    running = false;
+                    Image? icon = play_pause_button.icon_widget as Image;
+                    if (icon != null) {
+                        icon.icon_name = IconName.Symbolic.MEDIA_PLAYBACK_START;
+                    }
+                    music_current_time = 0;
+                    debug("play_pause_button_state was set to FINISHED");
                     break;
                 }
             }
@@ -93,6 +118,7 @@ namespace Tatam {
                 time_bar.adjustment = new Adjustment(0.0, 0.0, (double) music_total_time_value.milliseconds,
                                                      SMALL_STEP_MILLISECONDS, BIG_STEP_MILLISECONDS,
                                                      100.0);
+                debug("music_total_time was set to %s", music_total_time_value.to_string());
             }
         }
         
@@ -101,10 +127,13 @@ namespace Tatam {
                 return music_current_time_value.milliseconds;
             }
             set {
+                if (value > music_total_time_value.milliseconds) {
+                    value = music_total_time_value.milliseconds;
+                }
                 music_current_time_value.milliseconds = value;
                 music_rest_time_value.milliseconds
-                    = music_total_time_value.milliseconds
-                    - music_current_time_value.milliseconds;
+                = music_total_time_value.milliseconds
+                - music_current_time_value.milliseconds;
                 time_label_current.label = music_current_time_value.to_string();
                 time_label_rest.label = music_rest_time_value.to_string();
                 if (value != (uint) time_bar.get_value()) {
@@ -113,6 +142,15 @@ namespace Tatam {
             }
         }
 
+        public string music_title {
+            get {
+                return music_title_label.label;
+            }
+            set {
+                music_title_label.label = value;
+            }
+        }
+        
         public uint artwork_size {
             get {
                 return artwork_size_value;
@@ -121,15 +159,24 @@ namespace Tatam {
                 artwork_size_value = value;
             }
         }
+
+        public double volume {
+            get {
+                return volume_bar.get_value();
+            }
+            set {
+                volume_bar.set_value(value);
+            }
+        }
         
         public void set_artwork(Gdk.Pixbuf pixbuf) {
-            Gdk.Pixbuf resized_pixbuf = PixbufUtils.scale_limited(pixbuf, (int) this.artwork_size);
+            Gdk.Pixbuf resized_pixbuf = Tatam.PixbufUtils.scale_limited(pixbuf, (int) this.artwork_size);
             artwork.pixbuf = resized_pixbuf;
         }
         
         public Controller() {
             this.artwork_size_value = 128;
-            this.play_pause_button_state = PlayPauseButtonState.PLAY;
+            this.play_pause_button_state = PlayPauseButtonState.FINISHED;
             this.music_total_time_value = new SmallTime(0);
             this.music_current_time_value = new SmallTime(0);
             this.music_rest_time_value = new SmallTime(0);
@@ -156,24 +203,20 @@ namespace Tatam {
                 {
                     play_pause_button = new ToolButton(
                         new Image.from_icon_name(IconName.Symbolic.MEDIA_PLAYBACK_START,
-                                                 IconSize.SMALL_TOOLBAR), null);
+                                                 IconSize.SMALL_TOOLBAR), null
+                        );
                     {
-                        play_pause_button.sensitive = false;
                         play_pause_button.clicked.connect(() => {
-                                if (play_pause_button_state == PlayPauseButtonState.PLAY) {
-                                    play_pause_button_state = PlayPauseButtonState.PAUSE;
-                                    running = true;
-                                    Timeout.add(100, () => {
-                                            if (running) {
-                                                music_current_time += 100;
-                                            }
-                                            return running;
-                                        });
-                                    play_button_clicked();
-                                } else {
+                                switch (play_pause_button_state) {
+                                case PlayPauseButtonState.FINISHED:
+                                case PlayPauseButtonState.PAUSE: {
                                     play_pause_button_state = PlayPauseButtonState.PLAY;
-                                    running = false;
+                                    play_button_clicked();
+                                } break;
+                                case PlayPauseButtonState.PLAY: {
+                                    play_pause_button_state = PlayPauseButtonState.PAUSE;
                                     pause_button_clicked();
+                                } break;
                                 }
                             });
                     }
@@ -209,16 +252,16 @@ namespace Tatam {
 
                 var time_bar_box = new Box(Orientation.VERTICAL, 2);
                 {
-                    music_title = new Label("");
+                    music_title_label = new Label("");
                     {
-                        music_title.justify = Justification.LEFT;
-                        music_title.single_line_mode = false;
-                        music_title.lines = 4;
-                        music_title.wrap = true;
-                        music_title.wrap_mode = Pango.WrapMode.WORD_CHAR;
-                        music_title.ellipsize = Pango.EllipsizeMode.END;
-                        music_title.margin_start = 5;
-                        music_title.margin_end = 5;
+                        music_title_label.justify = Justification.LEFT;
+                        music_title_label.single_line_mode = false;
+                        music_title_label.lines = 4;
+                        music_title_label.wrap = true;
+                        music_title_label.wrap_mode = Pango.WrapMode.WORD_CHAR;
+                        music_title_label.ellipsize = Pango.EllipsizeMode.END;
+                        music_title_label.margin_start = 5;
+                        music_title_label.margin_end = 5;
                     }
 
                     time_bar = new Scale.with_range(Orientation.HORIZONTAL, 0.0, 1000.0, 100.0);
@@ -228,12 +271,10 @@ namespace Tatam {
                         time_bar.has_origin = true;
                         time_bar.set_increments(SMALL_STEP_MILLISECONDS, BIG_STEP_MILLISECONDS);
                         time_bar.value_changed.connect(() => {
-                                debug("value_changed %u", (uint) time_bar.get_value());
                                 music_current_time = (uint) time_bar.get_value();
                             });
                         time_bar.change_value.connect((scroll_type, new_value) => {
                                 debug("change_value %f, %f", new_value, time_bar.get_value());
-                                
                                 time_position_changed(time_bar.get_value());
                                 return false;
                             });
@@ -254,7 +295,7 @@ namespace Tatam {
                     }
             
                     time_bar_box.valign = Align.CENTER;
-                    time_bar_box.pack_start(music_title, false, false);
+                    time_bar_box.pack_start(music_title_label, false, false);
                     time_bar_box.pack_start(time_bar, true, false);
                     time_bar_box.pack_start(time_label_box, true, false);
                 }
@@ -266,22 +307,22 @@ namespace Tatam {
                     {
                         var popover = new Popover(volume_button);
                         {
-                            var volume_bar = new Scale.with_range(Orientation.VERTICAL, 0, 100, -1);
+                            volume_bar = new Scale.with_range(Orientation.VERTICAL, 0.0, 1.0, 0.01);
                             {
-                                volume_bar.set_value(50);
+                                volume_bar.set_value(0.5);
                                 volume_bar.has_origin = true;
                                 volume_bar.set_inverted(true);
-                                volume_bar.draw_value = true;
+                                volume_bar.draw_value = false;
                                 volume_bar.value_pos = PositionType.BOTTOM;
                                 volume_bar.margin = 5;
                                 volume_bar.value_changed.connect(() => {
                                         volume_changed(volume_bar.get_value());
                                         var icon = ((Image) volume_button.icon_widget);
-                                        if (volume_bar.get_value() == 0) {
+                                        if (volume_bar.get_value() == 0.0) {
                                             icon.icon_name = IconName.Symbolic.AUDIO_VOLUME_MUTED;
-                                        } else if (volume_bar.get_value() < 35) {
+                                        } else if (volume_bar.get_value() < 0.35) {
                                             icon.icon_name = IconName.Symbolic.AUDIO_VOLUME_LOW;
-                                        } else if (volume_bar.get_value() < 75) {
+                                        } else if (volume_bar.get_value() < 0.75) {
                                             icon.icon_name = IconName.Symbolic.AUDIO_VOLUME_MEDIUM;
                                         } else {
                                             icon.icon_name = IconName.Symbolic.AUDIO_VOLUME_HIGH;
@@ -341,7 +382,7 @@ namespace Tatam {
             }
 
             add(main_box);
-            running = false;
+            deactivate_buttons();
         }
 
         public void show_buttons() {
