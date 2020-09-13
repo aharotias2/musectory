@@ -94,7 +94,16 @@ public class TestGstPlayer : TestBase {
                             }
                         });
                     controller.prev_button_clicked.connect(() => {
-                            debug("prev button was clicked");
+                            debug("controller.prev_button_clicked");
+                            if (controller.music_current_time > 1000) {
+                                controller.music_current_time = 0;
+                                gst_player.quit();
+                                gst_player.play(iter.get().path);
+                            } else if (iter.has_previous()) {
+                                iter.previous();
+                                set_controller_artwork();
+                                gst_player.play(iter.get().path);
+                            }
                         });
                     controller.time_position_changed.connect((new_value) => {
                             debug("controller.time_position_changed");
@@ -149,6 +158,8 @@ public class TestGstPlayer : TestBase {
                     gst_player.play(iter.get().path);
                 } else {
                     debug("playing all files is completed!");
+                    iter = playlist.bidir_list_iterator();
+                    iter.next();
                     playing = false;
                 }
             });
@@ -193,6 +204,7 @@ public class TestGstPlayer : TestBase {
                                   typeof(string)); // genre
         tree_view = new Gtk.TreeView.with_model(store);
         var track_renderer = new Gtk.CellRendererText();
+        track_renderer.alignment = Pango.Alignment.RIGHT;
         track_renderer.placeholder_text = "-1";
         var title_renderer = new Gtk.CellRendererText();
         var time_renderer = new Gtk.CellRendererText();
@@ -204,16 +216,21 @@ public class TestGstPlayer : TestBase {
         var genre_renderer = new Gtk.CellRendererText();
         genre_renderer.placeholder_text = "Unknown";
         var column_track = new Gtk.TreeViewColumn.with_attributes("No.", track_renderer, "text", 0);
+        column_track.alignment = (float) 0.5;
         var column_title = new Gtk.TreeViewColumn.with_attributes("Title", title_renderer, "text", 1);
         column_title.expand = true;
+        column_title.alignment = (float) 0.5;
         var column_time = new Gtk.TreeViewColumn.with_attributes("Time", time_renderer, "text", 2);
-        column_time.expand = true;
+        column_time.alignment = (float) 0.5;
         var column_artist = new Gtk.TreeViewColumn.with_attributes("Artist", artist_renderer, "text", 3);
         column_artist.expand = true;
+        column_artist.alignment = (float) 0.5;
         var column_album = new Gtk.TreeViewColumn.with_attributes("Album", album_renderer, "text", 4);
         column_album.expand = true;
+        column_album.alignment = (float) 0.5;
         var column_genre = new Gtk.TreeViewColumn.with_attributes("Genre", genre_renderer, "text", 5);
         column_genre.expand = true;
+        column_genre.alignment = (float) 0.5;
         tree_view.append_column(column_track);
         tree_view.append_column(column_title);
         tree_view.append_column(column_time);
@@ -248,6 +265,7 @@ public class TestGstPlayer : TestBase {
             print("iter ok. %d\n", iter.index());
             controller.activate_buttons(!iter.has_previous(), !iter.has_next());
 
+            store.clear();
             foreach (Tatam.FileInfo? item in playlist) {
                 Gtk.TreeIter iter;
                 store.append(out iter, null);

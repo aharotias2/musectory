@@ -64,43 +64,45 @@ namespace Tatam {
             }
 
             set {
-                play_pause_button_state_value = value;
-                switch (play_pause_button_state) {
-                case PlayPauseButtonState.PLAY:
-                    running = true;
-                    Image? icon = play_pause_button.icon_widget as Image;
-                    if (icon != null) {
-                        icon.icon_name = IconName.Symbolic.MEDIA_PLAYBACK_PAUSE;
+                if (play_pause_button_state_value != value) {
+                    play_pause_button_state_value = value;
+                    switch (play_pause_button_state) {
+                    case PlayPauseButtonState.PLAY:
+                        running = true;
+                        Image? icon = play_pause_button.icon_widget as Image;
+                        if (icon != null) {
+                            icon.icon_name = IconName.Symbolic.MEDIA_PLAYBACK_PAUSE;
+                        }
+                        Timeout.add(100, () => {
+                                if (running) {
+                                    music_current_time += 100;
+                                }
+                                if (music_current_time_value.milliseconds
+                                    >= music_total_time_value.milliseconds) {
+                                    play_pause_button_state = PlayPauseButtonState.FINISHED;
+                                }
+                                return running;
+                            });
+                        debug("play_pause_button_state was set to PLAY");
+                        break;
+                    case PlayPauseButtonState.PAUSE:
+                        running = false;
+                        Image? icon = play_pause_button.icon_widget as Image;
+                        if (icon != null) {
+                            icon.icon_name = IconName.Symbolic.MEDIA_PLAYBACK_START;
+                        }
+                        debug("play_pause_button_state was set to PAUSE");
+                        break;
+                    case PlayPauseButtonState.FINISHED:
+                        running = false;
+                        Image? icon = play_pause_button.icon_widget as Image;
+                        if (icon != null) {
+                            icon.icon_name = IconName.Symbolic.MEDIA_PLAYBACK_START;
+                        }
+                        music_current_time = 0;
+                        debug("play_pause_button_state was set to FINISHED");
+                        break;
                     }
-                    Timeout.add(100, () => {
-                            if (running) {
-                                music_current_time += 100;
-                            }
-                            if (music_current_time_value.milliseconds
-                                >= music_total_time_value.milliseconds) {
-                                play_pause_button_state = PlayPauseButtonState.FINISHED;
-                            }
-                            return running;
-                        });
-                    debug("play_pause_button_state was set to PLAY");
-                    break;
-                case PlayPauseButtonState.PAUSE:
-                    running = false;
-                    Image? icon = play_pause_button.icon_widget as Image;
-                    if (icon != null) {
-                        icon.icon_name = IconName.Symbolic.MEDIA_PLAYBACK_START;
-                    }
-                    debug("play_pause_button_state was set to PAUSE");
-                    break;
-                case PlayPauseButtonState.FINISHED:
-                    running = false;
-                    Image? icon = play_pause_button.icon_widget as Image;
-                    if (icon != null) {
-                        icon.icon_name = IconName.Symbolic.MEDIA_PLAYBACK_START;
-                    }
-                    music_current_time = 0;
-                    debug("play_pause_button_state was set to FINISHED");
-                    break;
                 }
             }
         }
