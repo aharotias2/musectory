@@ -11,6 +11,7 @@ public class TestFinder : Object {
     Window window;
     Tatam.Finder finder;
     Label footer_label;
+    Entry location;
     
     public TestFinder() {
         window = new Window();
@@ -19,15 +20,22 @@ public class TestFinder : Object {
             {
                 Box box_2 = new Box(Orientation.HORIZONTAL, 0);
                 {
-                    Entry location = new Entry();
-
-                    Button find_button = new Button.from_icon_name("file-open-symbolic");
+                    location = new Entry();
+                    {
+                        location.activate.connect(() => {
+                                if (GLib.FileUtils.test(location.text, FileTest.IS_DIR)) {
+                                    finder.change_dir.begin(location.text);
+                                }
+                            });
+                    }
+                    
+                    Button find_button = new Button.from_icon_name("folder-open");
                     {
                         find_button.clicked.connect(() => {
                                 string? dir_path = Tatam.Dialogs.choose_directory(window);
                                 if (dir_path != null) {
                                     location.text = dir_path;
-                                    finder.change_dir.begin(dir_path);
+                                    location.activate();
                                 }
                             });
                     }
@@ -42,6 +50,7 @@ public class TestFinder : Object {
                     {
                         finder.dir_changed.connect((dir_path) => {
                                 footer_label.label = @"Location was changed to $(dir_path)";
+                                location.text = dir_path;
                             });
 
                         finder.bookmark_button_clicked.connect((file_path) => {
@@ -77,6 +86,7 @@ public class TestFinder : Object {
             }
 
             window.add(box_1);
+            window.set_default_size(500, 400);
             window.destroy.connect(Gtk.main_quit);
             window.show_all();
         }

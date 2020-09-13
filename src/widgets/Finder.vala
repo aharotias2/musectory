@@ -166,9 +166,16 @@ namespace Tatam {
             progress.set_fraction(0.0);
             progress_revealer.reveal_child = true;
             debug("end timeout routine (change_dir) level 1");
-            
-            file_info_list = Tatam.Files.get_file_info_list_in_dir(dir_path);
 
+            var thread = new Thread<Gee.List<Tatam.FileInfo?>>(null, () => {
+                    Gee.List<Tatam.FileInfo?> result_list = Tatam.Files.get_file_info_list_in_dir(dir_path);
+                    debug("file info list was got");
+                    Idle.add(change_dir.callback);
+                    return result_list;
+                });
+            yield;
+            file_info_list = thread.join();
+            
             if (finder != null) {
                 finder_container.remove(finder.get_parent());
                 finder = null;

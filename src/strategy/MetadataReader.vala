@@ -21,6 +21,8 @@ using Gst;
 
 namespace Tatam {
     public class MetadataReader : GLib.Object {
+        private static uint count;
+        
         private Pipeline pipeline;
         private Element uridecoder;
         private Element fakesink;
@@ -28,7 +30,8 @@ namespace Tatam {
         public signal bool tag_found(string tag, GLib.Value? value);
         
         public MetadataReader() {
-            pipeline = new Pipeline("metadata-pipeline");
+            count++;
+            pipeline = new Pipeline("metadata-pipeline" + count.to_string());
             uridecoder = ElementFactory.make("uridecodebin", "uridecoder");
             pipeline.add(uridecoder);
             fakesink = ElementFactory.make("fakesink", "sink");
@@ -73,14 +76,23 @@ namespace Tatam {
             debug("pipeline state: PAUSED");
             Gst.Bus bus = pipeline.get_bus();
             bool terminated = false;
-
+            int try_count = 0;
             try {
                 while (!terminated) {
-                    MessageType flags = MessageType.ASYNC_DONE | MessageType.TAG | MessageType.ERROR;
+                    if (try_count++ >= 10) {
+                        stderr.printf("Tried over 10 times exit.\n");
+                        return;
+                    }
+                    MessageType flags = MessageType.ASYNC_DONE | MessageType.TAG | MessageType.ERROR | MessageType.EOS;
                     Message? message = bus.timed_pop_filtered(CLOCK_TIME_NONE, flags);
                     if (message != null) {
                         switch (message.type) {
 
+                        case MessageType.EOS:
+                            debug("Gst message (EOS)");
+                            terminated = true;
+                            break;
+                            
                         case MessageType.ASYNC_DONE:
                             debug("Gst message (ASYNC_DONE)");
                             terminated = true;
@@ -120,8 +132,6 @@ namespace Tatam {
                             break;
 
                         }
-                    } else {
-                        debug("Gst null message");
                     }
                 }
             } finally {

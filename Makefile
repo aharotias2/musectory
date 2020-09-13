@@ -32,7 +32,7 @@ test-gst-player: test/test-gst-player.vala src/widgets/Controller.vala src/adapt
 	valac --pkg=posix --pkg=gtk+-3.0 --pkg=gstreamer-1.0 -o build/test/test-gst-player $^
 
 
-test-finder: test/test-finder.vala src/widgets/Finder.vala src/widgets/FinderItem.vala src/widgets/ImageLoaderThreadData.vala src/models/FileInfo.vala src/consts/enums.vala src/atoms/SmallTime.vala src/consts/IconNames.vala src/consts/Text.vala src/consts/StyleClass.vala src/utils/Files.vala src/utils/PixbufUtils.vala src/strategy/DirectoryReader.vala src/strategy/MetadataReader.vala src/adapters/FileInfoAdapter.vala src/adapters/GstSampleAdapter.vala src/consts/Error.vala src/utils/Dialogs.vala src/consts/ProgramName.vala
+test-finder: test/test-finder.vala src/widgets/Finder.vala src/widgets/FinderItem.vala src/widgets/ImageLoaderThreadData.vala src/models/FileInfo.vala src/consts/enums.vala src/atoms/SmallTime.vala src/consts/IconNames.vala src/consts/Text.vala src/consts/StyleClass.vala src/utils/Files.vala src/utils/FilePathUtils.vala src/utils/PixbufUtils.vala src/strategy/DirectoryReader.vala src/strategy/MetadataReader.vala src/adapters/FileInfoAdapter.vala src/adapters/GstSampleAdapter.vala src/consts/Error.vala src/utils/Dialogs.vala src/consts/ProgramName.vala
 	valac --pkg=gee-0.8 --pkg=gtk+-3.0 --pkg=gstreamer-1.0 -o build/test/test-finder $^
 
 test-files: test/test-files.vala src/utils/Files.vala src/consts/enums.vala src/consts/Error.vala src/strategy/DirectoryReader.vala src/models/FileInfo.vala src/adapters/FileInfoAdapter.vala src/atoms/SmallTime.vala src/strategy/MetadataReader.vala src/adapters/GstSampleAdapter.vala src/utils/Dialogs.vala src/consts/Text.vala src/consts/IconNames.vala src/consts/ProgramName.vala

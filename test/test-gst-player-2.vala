@@ -57,7 +57,7 @@ public class TestGstPlayer : TestBase {
                             });
                     }
                     
-                    find_button = new Gtk.Button.from_icon_name("document-open-symbolic");
+                    find_button = new Gtk.Button.from_icon_name("folder-open-symbolic");
                     {
                         find_button.clicked.connect(() => {
                                 print("Call direcotry chooser\n");
@@ -255,6 +255,8 @@ public class TestGstPlayer : TestBase {
                 print("playlist is null then create it.\n");
                 playlist = new Gee.ArrayList<Tatam.FileInfo?>();
             }
+
+            playlist.clear();
             playlist.add_all(playlist_local);
             foreach (var info in playlist) {
                 print(info.path + "\n");

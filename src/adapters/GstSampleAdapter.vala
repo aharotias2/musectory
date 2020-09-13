@@ -89,7 +89,7 @@ namespace Tatam {
                 }
                 GLib.File dir = image_file.get_parent();
                 if (!dir.query_exists()) {
-                    DirUtils.create_with_parents(dir.get_path(), 755);
+                    DirUtils.create_with_parents(dir.get_path(), 0755);
                 }
                 output = image_file.create(0, null);
                 output.write(data, null);

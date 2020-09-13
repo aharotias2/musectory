@@ -154,7 +154,9 @@ namespace Tatam {
                             GLib.FileInfo g_info = file.query_info("standard::*", 0);
                             if (g_info.get_content_type().has_prefix("audio/")) {
                                 FileInfoAdapter freader = new FileInfoAdapter();
+                                print(@"file_found $(file.get_path())\n");
                                 Tatam.FileInfo? file_info = freader.read_metadata_from_path(file.get_path());
+                                print(@"file info was found $(file.get_path())\n");
                                 if (file_info != null) {
                                     file_list.add(file_info);
                                 }
