@@ -111,7 +111,7 @@ namespace Tatam {
                         if (mime_type.has_prefix("audio/")) {
                             FileInfoAdapter freader = new FileInfoAdapter();
                             Tatam.FileInfo? file_info = freader.read_metadata_from_path(file.get_path());
-                            if (file_info != null && file_info.file_type == Tatam.FileType.MUSIC) {
+                            if (file_info != null && file_info.type == Tatam.FileType.MUSIC) {
                                 file_list_local.add(file_info);
                             }
                         }
@@ -246,7 +246,7 @@ namespace Tatam {
             Tatam.FileInfo parent = new Tatam.FileInfo();
             parent.path = Path.get_dirname(dir_path);
             parent.name = "..";
-            parent.file_type = Tatam.FileType.PARENT;
+            parent.type = Tatam.FileType.PARENT;
             return parent;
         }
 
@@ -255,7 +255,7 @@ namespace Tatam {
             info.dir = dir_path.dup();
             info.path = subdir_path.dup();
             info.name = Path.get_basename(subdir_path);
-            info.file_type = Tatam.FileType.DIRECTORY;
+            info.type = Tatam.FileType.DIRECTORY;
             return info;
         }
     }

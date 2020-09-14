@@ -25,7 +25,7 @@ namespace Tatam {
             file_info.dir = file.get_parent().get_path();
             file_info.path = file.get_path();
             file_info.name = file.get_basename();
-            file_info.file_type = Tatam.FileType.MUSIC;
+            file_info.type = Tatam.FileType.MUSIC;
             try {
                 MetadataReader meta_reader = new Tatam.MetadataReader();
                 meta_reader.tag_found.connect((tag, value) => {

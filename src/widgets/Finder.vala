@@ -152,24 +152,17 @@ namespace Tatam {
         }
 
         public async void change_dir(string dir_path) {
-            debug("start change_dir (" + dir_path + ")");
             this.dir_path = dir_path;
             change_cursor(Gdk.CursorType.WATCH);
             while_label.visible = true;
             while_label.label = Text.FINDER_LOAD_FILES;
             int size = get_level_size();
             dir_changed(dir_path);
-
-            Timeout.add(100, change_dir.callback);
-            yield;
-
             progress.set_fraction(0.0);
             progress_revealer.reveal_child = true;
-            debug("end timeout routine (change_dir) level 1");
 
             var thread = new Thread<Gee.List<Tatam.FileInfo?>>(null, () => {
                     Gee.List<Tatam.FileInfo?> result_list = Tatam.Files.get_file_info_list_in_dir(dir_path);
-                    debug("file info list was got");
                     Idle.add(change_dir.callback);
                     return result_list;
                 });
@@ -203,9 +196,9 @@ namespace Tatam {
                     while_label.label = Text.FILE_LOADED.printf(file_info.name);
                 }
 
-                if (file_info.file_type == Tatam.FileType.DIRECTORY) {
+                if (file_info.type == Tatam.FileType.DIRECTORY) {
                     try {
-                        file_info.file_type = Tatam.Files.get_file_type(file_info.path);
+                        file_info.type = Tatam.Files.get_file_type(file_info.path);
                     } catch (FileError e) {
                         stderr.printf(Text.ERROR_OPEN_FILE.printf(file_info.path));
                         break;
@@ -214,32 +207,30 @@ namespace Tatam {
 
                 var item_widget = new FinderItem(file_info, size, use_popover);
                 {
-                    if (item_widget != null) {
-                        switch (file_info.file_type) {
-                        case Tatam.FileType.DIRECTORY:
-                        case Tatam.FileType.DISC:
-                            item_widget.icon_button.clicked.connect(() => {
-                                    change_dir.begin(file_info.path);
-                                    file_button_clicked(file_info.path);
-                                });
-                            item_widget.bookmark_button_clicked.connect((file_path) => {
-                                    bookmark_button_clicked(file_path);
-                                });
-                            break;
+                    switch (file_info.type) {
+                    case Tatam.FileType.DIRECTORY:
+                    case Tatam.FileType.DISC:
+                        item_widget.clicked.connect(() => {
+                                change_dir.begin(file_info.path);
+                                file_button_clicked(file_info.path);
+                            });
+                        item_widget.bookmark_button_clicked.connect((file_path) => {
+                                bookmark_button_clicked(file_path);
+                            });
+                        break;
 
-                        case Tatam.FileType.PARENT:
-                            item_widget.icon_button.clicked.connect(() => {
-                                    change_dir.begin(file_info.path);
-                                    file_button_clicked(file_info.path);
-                                });
-                            break;
+                    case Tatam.FileType.PARENT:
+                        item_widget.clicked.connect(() => {
+                                change_dir.begin(file_info.path);
+                                file_button_clicked(file_info.path);
+                            });
+                        break;
 
-                        case Tatam.FileType.FILE:
-                            item_widget.icon_button.clicked.connect(() => {
-                                    play_button_clicked(file_info.path);
-                                });
-                            break;
-                        }
+                    case Tatam.FileType.FILE:
+                        item_widget.clicked.connect(() => {
+                                play_button_clicked(file_info.path);
+                            });
+                        break;
                     }
 
                     item_widget.add_button_clicked.connect((file_path) => {
@@ -250,16 +241,18 @@ namespace Tatam {
                             play_button_clicked(file_path);
                         });
                 }
-                
-                finder.add(item_widget);
 
+                finder.add(item_widget);
+                
                 double fraction = (double) i + 1 / (double) file_info_list.size;
                 progress.fraction = fraction;
 
                 finder_container.show_all();
                 for (int j = 0; j < file_info_list.size; j++) {
-                    ((FinderItem)finder.get_child_at_index(j)).hide_buttons();
-                    while_label.visible = false;
+                    var finder_item = finder.get_child_at_index(j) as FinderItem;
+                    if (finder_item != null) {
+                        finder_item.hide_buttons();
+                    }
                 }
 
                 Idle.add(change_dir.callback);
@@ -269,6 +262,7 @@ namespace Tatam {
             }
 
             change_cursor(Gdk.CursorType.LEFT_PTR);
+            while_label.visible = false;
             progress_revealer.reveal_child = false;
         }
 

@@ -2,6 +2,7 @@ using Gtk;
 
 public class TestFinder : Object {
     public static int main(string[] args) {
+        Gst.init(ref args);
         Gtk.init(ref args);
         TestFinder tester = new TestFinder();
         Gtk.main();
@@ -20,6 +21,28 @@ public class TestFinder : Object {
             {
                 Box box_2 = new Box(Orientation.HORIZONTAL, 0);
                 {
+                    Button up_button = new Button.from_icon_name("go-up");
+                    {
+                        up_button.clicked.connect(() => {
+                                File current_dir = File.new_for_path(location.text);
+                                finder.change_dir.begin(current_dir.get_parent().get_path());
+                            });
+                    }
+
+                    Button zoom_in_button = new Button.from_icon_name("zoom-in");
+                    {
+                        zoom_in_button.clicked.connect(() => {
+                                finder.zoom_in();
+                            });
+                    }
+
+                    Button zoom_out_button = new Button.from_icon_name("zoom-out");
+                    {
+                        zoom_out_button.clicked.connect(() => {
+                                finder.zoom_out();
+                            });
+                    }
+                    
                     location = new Entry();
                     {
                         location.activate.connect(() => {
@@ -40,6 +63,9 @@ public class TestFinder : Object {
                             });
                     }
                     
+                    box_2.pack_start(up_button, false, false);
+                    box_2.pack_start(zoom_in_button, false, false);
+                    box_2.pack_start(zoom_out_button, false, false);
                     box_2.pack_start(location, true, true);
                     box_2.pack_start(find_button, false, false);
                 }
@@ -71,7 +97,6 @@ public class TestFinder : Object {
 
                         finder.file_button_clicked.connect((file_path) => {
                                 footer_label.label = @"File button was clicked at $(file_path)";
-                                finder.change_dir.begin(file_path);
                             });
                     }
 
@@ -91,7 +116,7 @@ public class TestFinder : Object {
             window.show_all();
         }
 
-        string css_path = "main.css";
+        string css_path = "tatam.css";
         if (GLib.FileUtils.test(css_path, FileTest.EXISTS)) {
             Gdk.Screen win_screen = window.get_screen();
             CssProvider css_provider = new CssProvider();

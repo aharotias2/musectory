@@ -34,7 +34,7 @@ namespace Tatam {
         public uint track_count;
         public uint date;
         public SmallTime time_length;
-        public Tatam.FileType file_type;
+        public Tatam.FileType type;
         public Gdk.Pixbuf artwork;
 
         public FileInfo copy() {
@@ -54,7 +54,7 @@ namespace Tatam {
             cp.track_count = this.track_count;
             cp.date = this.date;
             cp.time_length = this.time_length;
-            cp.file_type = this.file_type;
+            cp.type = this.type;
             cp.artwork = this.artwork;
             return cp;
         }
@@ -127,7 +127,7 @@ namespace Tatam {
             } else {
                 sb.append(empty);
             }
-            sb.append(", \"file_type\" : \"").append(file_type.get_name()).append("\" }");
+            sb.append(", \"type\" : \"").append(type.get_name()).append("\" }");
             return sb.str;
         }
     }
