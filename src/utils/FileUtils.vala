@@ -22,7 +22,7 @@ using Gdk;
 namespace Tatam {
     public class FileUtils {
         public static int compare_mtime(string file1_path, string file2_path) {
-            return MyUtils.TimeUtils.compare(get_file_mtime(file1_path), get_file_mtime(file2_path));
+            return TimeUtils.compare(get_file_mtime(file1_path), get_file_mtime(file2_path));
         }
 
         public static Time get_file_mtime(string file_path) {

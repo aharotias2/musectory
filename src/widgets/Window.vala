@@ -31,7 +31,7 @@ namespace Tatam {
         private Tatam.Stack stack;
         private Tatam.Sidebar sidebar;
         private Tatam.Finder finder;
-        private Tatam.PlaylistBox playlist;
+        private Tatam.PlaylistBox playlist_view;
         private Tatam.Controller controller;
 
         private Revealer bookmark_revealer;
@@ -46,6 +46,8 @@ namespace Tatam {
         private int saved_width;
         private int saved_height;
 
+        private Tatam.GstPlayer music;
+        
         private Dialog? help_dialog = null;
         private Dialog? save_playlist_dialog = null;
         
@@ -55,7 +57,8 @@ namespace Tatam {
         private uint default_width;
         
         private Tatam.Options options;
-
+        private Tatam.FileInfoAdapter file_info_reader;
+        
         public Window(Tatam.Options options) {
             this.options = options;
 
@@ -71,9 +74,11 @@ namespace Tatam {
             default_height = (int) (max_height * 0.7);
             default_width = int.min((int) (max_width * 0.5), (int) (window_default_height * 1.3));
 
-            artwork_max_size = int.min(max_width, max_height);
+            artwork_max_size = int.min((int) max_width, (int) max_height);
             
             IconTheme icon_theme = Gtk.IconTheme.get_default();
+
+            file_info_reader = new Tatam.FileInfoAdapter();
 
             try {
                 file_pixbuf = icon_theme.load_icon(IconName.AUDIO_FILE, 64, 0);
@@ -82,31 +87,34 @@ namespace Tatam {
                 if (folder_pixbuf == null) {
                     folder_pixbuf = icon_theme.load_icon(IconName.FOLDER, 64, 0);
                 }
-                parent_pixbuf = icon_theme.load_icon(IconName.GO_UP, 64, 0);
             } catch (Error e) {
                 stderr.printf(Text.ERROR_LOAD_ICON);
                 Process.exit(1);
             }
-            
+
+            construct_widgets();
+        }
+
+        private void construct_widgets() {
             header_bar = new Tatam.HeaderBar();
             {
                 header_bar.switch_button_clicked.connect((switch_button_state) => {
                         if (switch_button_state == Tatam.HeaderBar.SwitchButtonState.PLAYLIST) {
-                            Tatam.FileInfo file_info = playlist.track_data();
+                            Tatam.FileInfo file_info = playlist_view.track_data();
                             if (file_info.title != null) {
                                 header_bar.set_title(file_info.title);
                             } else {
                                 header_bar.set_title(file_info.name);
                             }
                             if (current_playing_artwork != null) {
-                                artwork_button.visible = true;
+                                controller.show_artwork();
                             }
                             music_view_artwork.visible = false;
                             stack.show_playlist();
                         } else {
                             header_bar.set_title(finder.dir_path);
                             if (current_playing_artwork != null) {
-                                artwork_button.visible = true;
+                                controller.show_artwork();
                             }
                             music_view_artwork.visible = false;
                             stack.show_finder();
@@ -119,28 +127,28 @@ namespace Tatam {
 
                 header_bar.fold_button_clicked.connect((fold_button_state) => {
                         if (fold_button_state == Tatam.HeaderBar.FoldButtonState.FOLDED) {
-                            main_win.resize(main_win.get_allocated_width(), saved_main_win_height);
+                            this.resize(this.get_allocated_width(), saved_this_height);
                             stack.show_stack();
                             controller.show_buttons();
                         } else {
-                            saved_main_win_width = main_win.get_allocated_width();
-                            saved_main_win_height = main_win.get_allocated_height();
-                            main_win.resize(saved_main_win_width, 1);
+                            saved_this_width = this.get_allocated_width();
+                            saved_this_height = this.get_allocated_height();
+                            this.resize(saved_this_width, 1);
                             stack.hide_stack();
                             controller.hide_buttons();
                         }
                     });
 
                 header_bar.about_button_clicked.connect(() => {
-                        show_about_dialog(main_win);
+                        show_about_dialog(this);
                     });
             }
-
+            
             var top_box = new Box(Orientation.VERTICAL, 0);
             {
                 var main_overlay = new Overlay();
                 {
-                    stack = new TatamStack();
+                    stack = new Tatam.Stack();
                     {
                         var finder_paned = new Paned(Orientation.HORIZONTAL);
                         {
@@ -198,10 +206,10 @@ namespace Tatam {
                                         dirs.add(file_path);
                                     });
                             }
-
+                            
                             var finder_box = new Box(Orientation.VERTICAL, 4);
                             {
-                                var finder_toolbar = new Box(Orientation.HORIZONTAL, 4);
+                                finder_toolbar = new FinderToolbar();
                                 {
                                     finder_toolbar.parent_button_clicked.connect(() => {
                                             string path = File.new_for_path(current_dir).get_parent().get_path();
@@ -231,10 +239,11 @@ namespace Tatam {
                                             playlist_save_action();
                                         });
                                 }
-            
+                                
                                 var finder_overlay = new Overlay();
                                 {
-                                    finder = new Tatam.Finder.Builder()
+                                    finder = new Tatam.Finder
+                                    .Builder()
                                     .file_pixbuf(file_pixbuf)
                                     .disc_pixbuf(cd_pixbuf)
                                     .folder_pixbuf(folder_pixbuf)
@@ -264,11 +273,11 @@ namespace Tatam {
                                                             return Source.CONTINUE;
                                                         } else {
                                                             debug("file_path: %s", file_path);
-                                                            playlist.new_list_from_path(file_path);
-                                                            var file_path_list = playlist.get_file_path_list();
+                                                            playlist_view.new_list_from_path(file_path);
+                                                            var file_path_list = playlist_view.get_file_path_list();
                                                             if (GLib.FileUtils.test(file_path, FileTest.IS_REGULAR)) {
                                                                 music.start(ref file_path_list, options.ao_type);
-                                                                int index = playlist.get_index_from_path(file_path);
+                                                                int index = playlist_view.get_index_from_path(file_path);
                                                                 if (index > 0) {
                                                                     music.play_next(index);
                                                                 }
@@ -286,9 +295,9 @@ namespace Tatam {
                                             });
 
                                         finder.add_button_clicked.connect((file_path) => {
-                                                playlist.append_list_from_path(file_path);
-                                                Gee.List<string> file_list = playlist.get_file_path_list();
-                                                playlist.changed(file_list);
+                                                playlist_view.append_list_from_path(file_path);
+                                                Gee.List<string> file_list = playlist_view.get_file_path_list();
+                                                playlist_view.changed(file_list);
                                             });
 
                                         finder.icon_image_resized.connect((icon_size) => {
@@ -304,16 +313,7 @@ namespace Tatam {
 
                                         finder.use_popover = false;
                                     }
-
-                                    var go_playlist_button = new Button.from_icon_name(IconName.GO_NEXT);
-                                    {
-                                        go_playlist_button.halign = Align.END;
-                                        go_playlist_button.valign = Align.CENTER;
-                                        go_playlist_button.clicked.connect(() => {
-                                                stack.show_playlist();
-                                            });
-                                    }
-
+                                    
                                     finder_overlay.add(finder);
                                 }
 
@@ -321,7 +321,7 @@ namespace Tatam {
                                 finder_box.pack_start(finder_overlay, true, true);
                             }
         
-                            finder_paned.pack1(bookmark_frame, false, true);
+                            finder_paned.pack1(sidebar, false, true);
                             finder_paned.pack2(finder_box, true, true);
                         }
                         
@@ -329,17 +329,17 @@ namespace Tatam {
                         {
                             var playlist_view_container = new ScrolledWindow(null, null);
                             {
-                                playlist = new PlaylistBox();
+                                playlist_view = new PlaylistBox();
                                 {
-                                    playlist.image_size = options.playlist_image_size;
-                                    playlist.list_box.row_activated.connect((row) => {
+                                    playlist_view.image_size = options.playlist_image_size;
+                                    playlist_view.list_box.row_activated.connect((row) => {
                                             int index = row.get_index();
                                             debug("playlist view was clicked (row_activated at %u).", index);
-                                            int step = ((int) index) - ((int) playlist.get_track());
+                                            int step = ((int) index) - ((int) playlist_view.get_track());
                         
                                             if (step == 0) {
-                                                music.pause();
-                                                playlist.toggle_status();
+                                                musi.cpause();
+                                                playlist_view.toggle_status();
                                                 var icon = ((Gtk.Image)play_pause_button.icon_widget);
                                                 if (music.paused) {
                                                     controller.play_pause_button_state = Tatam.Controller.PlayPauseButtonState.PLAY;
@@ -359,7 +359,7 @@ namespace Tatam {
                                             return;
                                         });
                 
-                                    playlist.changed.connect((file_path_list) => {
+                                    playlist_view.changed.connect((file_path_list) => {
                                             Gee.List<string> list = file_path_list.copy_deep((src) => {
                                                     return src.dup();
                                                 });
@@ -433,6 +433,83 @@ namespace Tatam {
 
                 controller = new Tatam.Controller();
                 {
+                    controller.play_button_clicked.connect(() => {
+                            debug("controller.play_button_clicked");
+                            if (!music.playing) {
+                                music.play(playlist_view.get_item().path);
+                            } else {
+                                music.unpause();
+                            }
+
+                            //-----------------------------------------
+
+                            finder.change_cursor(Gdk.CursorType.WATCH);
+                            Idle.add(() => {
+                                    debug("play-pause button was clicked. music is not playing. start it.");
+                                    if (stack.finder_is_visible()) {
+                                        playlist_view.new_list_from_path(finder.dir_path);
+                                    }
+                                    stack.show_playlist();
+                                    header_bar.enable_switch_button();
+                                    header_bar.switch_button_icon_name = IconName.GO_PREVIOUS;
+                                    var file_path_list = playlist_view.get_file_path_list();
+                                    music.start(ref file_path_list, options.ao_type);
+                                    finder.change_cursor(Gdk.CursorType.LEFT_PTR);
+                                    return Source.REMOVE;
+                                });
+                        });
+
+                    controller.pause_button_clicked.connect(() => {
+                            debug("controller.pause_button_clicked");
+                            music.pause();
+
+                            //-----------------------------------------
+
+                            debug("play-pause button was clicked. music is playing. pause it.");
+                            music.pause();
+                            playlist_view.toggle_status();
+                            var icon = ((Gtk.Image)play_pause_button.icon_widget);
+                            if (music.paused) {
+                                icon.icon_name = IconName.Symbolic.MEDIA_PLAYBACK_START;
+                            } else {
+                                icon.icon_name = IconName.Symbolic.MEDIA_PLAYBACK_PAUSE;
+                            }
+                        });
+
+                    controller.next_button_clicked.connect(() => {
+                            debug("controller.next_button_clicked");
+                            if (!playlist_view.track_is_last()) {
+                                playlist_view.move_to_next_track();
+                                set_controller_artwork();
+                                music.play(playlist_view.get_item().path);
+                            }
+                        });
+
+                    controller.prev_button_clicked.connect(() => {
+                            debug("controller.prev_button_clicked");
+                            if (music.playing) {
+                                if (controller.music_current_time > 1000) {
+                                    controller.music_current_time = 0;
+                                    music.quit();
+                                    music.play(playlist_view.get_item().path);
+                                } else if (!playlist_view.track_is_first()) {
+                                    playlist_view.move_to_prev_track();
+                                    set_controller_artwork();
+                                    music.play(playlist_view.get_item().path);
+                                }
+                            }
+                        });
+
+                    controller.time_position_changed.connect((new_value) => {
+                            debug("controller.time_position_changed");
+                            music.set_position(new Tatam.SmallTime.from_milliseconds((uint) new_value));
+                        });
+
+                    controller.volume_changed.connect((value) => {
+                            debug("controller.volume_changed");
+                            music.volume = value;
+                        });
+
                     controller.artwork_clicked.connect(() => {
                             header_bar.set_title(music_title.label);
                             music_view_overlay.visible = true;
@@ -444,58 +521,8 @@ namespace Tatam {
                                     music_view_artwork.pixbuf = MyUtils.PixbufUtils.scale(current_playing_artwork, size);
                                     music_view_artwork.visible = true;
                                     header_bar.disable_switch_button();
-                                    finder_add_button.sensitive = false;
                                     return Source.REMOVE;
                                 });
-                        });
-
-                    controller.play_button_clicked.connect(() => {
-                            finder.change_cursor(Gdk.CursorType.WATCH);
-                            Idle.add(() => {
-                                    debug("play-pause button was clicked. music is not playing. start it.");
-                                    if (stack.finder_is_visible()) {
-                                        playlist.new_list_from_path(finder.dir_path);
-                                    }
-                                    stack.show_playlist();
-                                    header_bar.enable_switch_button();
-                                    header_bar.switch_button_icon_name = IconName.GO_PREVIOUS;
-                                    var file_path_list = playlist.get_file_path_list();
-                                    music.start(ref file_path_list, options.ao_type);
-                                    finder.change_cursor(Gdk.CursorType.LEFT_PTR);
-                                    return Source.REMOVE;
-                                });
-                        });
-
-                    controller.pause_button_clicked.connect(() => {
-                            debug("play-pause button was clicked. music is playing. pause it.");
-                            music.pause();
-                            playlist.toggle_status();
-                            var icon = ((Gtk.Image)play_pause_button.icon_widget);
-                            if (music.paused) {
-                                icon.icon_name = IconName.Symbolic.MEDIA_PLAYBACK_START;
-                            } else {
-                                icon.icon_name = IconName.Symbolic.MEDIA_PLAYBACK_PAUSE;
-                            }
-                        });
-
-                    controller.next_button_clicked.connect(() => {
-                            playlist.move_to_next_track();
-                            music.play_next();
-                        });
-
-                    controller.prev_button_clicked.connect(() => {
-                            if (music.playing) {
-                                debug("prev playlist.track button was clicked. current time position is %.1f in seconds.",
-                                      music_time_position);
-                                if (playlist.get_track() == 0 || music_time_position > 1.0) {
-                                    music.move_pos(0);
-                                    music_time_position = 0;
-                                    time_bar.set_value(0.0);
-                                    time_label_set(0);
-                                } else {
-                                    music.play_prev();
-                                }
-                            }
                         });
 
                     controller.time_position_changed.connect((value) => {
@@ -503,19 +530,13 @@ namespace Tatam {
                             music.move_pos((int) (value * 100));
                         });
 
-                    controller.volume_changed.connect((volume_value) => {
-                            if (music.playing) {
-                                music.set_volume(volume_value);
-                            }
-                        });                
-
                     controller.shuffle_button_toggled((shuffle_on) => {
-                            playlist.toggle_shuffle();
+                            playlist_view.toggle_shuffle();
                             music.toggle_shuffle();
                         });                
 
                     controller.repeat_button_toggled((repeat_on) => {
-                            playlist.toggle_repeat();
+                            playlist_view.toggle_repeat();
                             music.toggle_repeat();
                         });
                 }
@@ -546,7 +567,7 @@ namespace Tatam {
             this.show_all();
 
             if (GLib.FileUtils.test(css_path, FileTest.EXISTS)) {
-                Gdk.Screen win_screen = main_win.get_screen();
+                Gdk.Screen win_screen = this.get_screen();
                 CssProvider css_provider = new CssProvider();
                 try {
                     css_provider.load_from_path(css_path);
@@ -560,7 +581,9 @@ namespace Tatam {
                                                          Gtk.STYLE_PROVIDER_PRIORITY_USER);
             }
 
-            artwork_button.visible = false;
+            controller.hide_artwork();
+            controller.deactivate_buttons();
+
             music_view_overlay.visible = false;
             music_view_artwork.visible = false;
             finder.hide_while_label();
@@ -569,9 +592,7 @@ namespace Tatam {
                 header_switch_button_icon.icon_name = IconName.Symbolic.VIEW_LIST;
             }
             header_switch_button.sensitive = false;
-            finder_add_button.sensitive = false;
-            finder_zoomout_button.sensitive = true;
-            finder_zoomin_button.sensitive = true;
+            finder_toolbar.activate_buttons();
             stack.show_finder();
             finder.change_dir.begin(current_dir);
             if (options.last_playlist_name != "") {
@@ -580,17 +601,75 @@ namespace Tatam {
             }
         }
 
+        private void setup_music() {
+            music = new Tatam.GstPlayer();
+            music.volume = 0.5;
+
+            music.started.connect(() => {
+                    debug("music.started was called");
+                    set_controller_artwork();
+                    controller.play_pause_button_state = Tatam.Controller.PlayPauseButtonState.PLAY;
+                    
+                    header_bar.set_title(music_title.label);
+                    playlist_view.set_track(track_number);
+
+                });
+
+            music.error_occured.connect((error) => {
+                    debug("music.error_occured was called");
+                    stderr.printf(@"Error: $(error.message)\n");
+                });
+
+            music.finished.connect(() => {
+                    debug("music.finished was called");
+                    if (!playlist_view.track_is_last()) {
+                        debug("playlist has next track");
+                        playlist_view.move_to_next_track();
+                        music.play(playlist_view.get_item().path);
+                    } else {
+                        debug("playing all files is completed!");
+                    }
+                });
+
+            music.unpaused.connect(() => {
+                    print("music.unpaused was called\n");
+                });
+
+            music.paused.connect(() => {
+                    print("music.paused was called\n");
+                });
+        }
+        
+        private void set_controller_artwork() {
+            Tatam.FileInfo? info = playlist_view.get_item();
+            if (info == null) {
+                return;
+            }
+            if (info.title != null) {
+                controller.music_title = info.title;
+            } else {
+                controller.music_title = info.name;
+            }
+            controller.music_total_time = info.time_length.milliseconds;
+            controller.activate_buttons(playlist_view.track_is_first(), playlist_view.track_is_last());
+            if (info.artwork != null) {
+                controller.set_artwork(info.artwork);
+            }
+            print_file_info_pretty(info);
+            debug("set_controller_artwork is completed");
+        }
+
         private void playlist_save_action() {
             if (stack.finder_is_visible()) {
                 add_bookmark(finder.dir_path);
             } else if (stack.playlist_is_visible()) {
-                if (playlist.name == null) {
-                    save_playlist(playlist.get_file_path_list());
-                } else if (playlist_exists(playlist.name)) {
-                    if (Dialogs.confirm(Text.CONFIRM_OVERWRITE.printf(playlist.name), this)) {
-                        overwrite_playlist_file(playlist.name, playlist.get_file_path_list());
+                if (playlist_view.name == null) {
+                    save_playlist(playlist_view.get_file_path_list());
+                } else if (playlist_exists(playlist_view.name)) {
+                    if (Dialogs.confirm(Text.CONFIRM_OVERWRITE.printf(playlist_view.name), this)) {
+                        overwrite_playlist_file(playlist_view.name, playlist_view.get_file_path_list());
                     } else {
-                        save_playlist(playlist.get_file_path_list());
+                        save_playlist(playlist_view.get_file_path_list());
                     }
                 }
             }
@@ -604,8 +683,8 @@ namespace Tatam {
             Idle.add(() => {
                     if (!music.playing) {
                         Gtk.main_quit();
-                        if (playlist.name != null) {
-                            options.last_playlist_name = playlist.name;
+                        if (playlist_view.name != null) {
+                            options.last_playlist_name = playlist_view.name;
                         }
                         return Source.REMOVE;
                     } else {
@@ -614,10 +693,10 @@ namespace Tatam {
                 });
         }
 
-        private void show_about_dialog(Window main_win) {
+        private void show_about_dialog() {
             if (help_dialog == null) {
                 help_dialog = new Dialog.with_buttons(PROGRAM_NAME + " info",
-                                                      main_win,
+                                                      this,
                                                       DialogFlags.MODAL | DialogFlags.DESTROY_WITH_PARENT,
                                                       "_OK",
                                                       ResponseType.NONE);
@@ -656,7 +735,7 @@ namespace Tatam {
                     });
 
                 save_playlist_dialog = new Dialog.with_buttons(PROGRAM_NAME + ": save playlist",
-                                                               main_win,
+                                                               this,
                                                                DialogFlags.MODAL | DialogFlags.DESTROY_WITH_PARENT,
                                                                Text.DIALOG_OK,
                                                                ResponseType.ACCEPT,
@@ -680,7 +759,7 @@ namespace Tatam {
                                 sidebar.add_playlist(playlist_name, playlist_path);
                                 debug("playlist name was saved: %s", playlist_name);
                                 overwrite_playlist_file(playlist_name, copy_of_list);
-                                playlist.name = playlist_name;
+                                playlist_view.name = playlist_name;
                             }
                             playlist_name_entry.text = Text.EMPTY;
                             save_playlist_dialog.visible = false;
@@ -697,7 +776,7 @@ namespace Tatam {
             }
         }
 
-        void overwrite_playlist_file(string playlist_name, Gee.List<string> file_path_list) {
+        private void overwrite_playlist_file(string playlist_name, Gee.List<string> file_path_list) {
             string playlist_file_path = get_playlist_path_from_name(playlist_name);
             string playlist_file_contents = "";
             foreach (string file_path in file_path_list) {
@@ -716,12 +795,12 @@ namespace Tatam {
             }
         }
 
-        void load_playlist_from_file(string playlist_name, string playlist_path) {
+        private void load_playlist_from_file(string playlist_name, string playlist_path) {
             header_switch_button.sensitive = true;
             finder_add_button.sensitive = true;
-            playlist.name = playlist_name;
-            playlist.load_list_from_file(playlist_path);
-            var file_path_list = playlist.get_file_path_list();
+            playlist_view.name = playlist_name;
+            playlist_view.load_list_from_file(playlist_path);
+            var file_path_list = playlist_view.get_file_path_list();
             music.start(ref file_path_list, options.ao_type);
             stack.show_playlist();
         }

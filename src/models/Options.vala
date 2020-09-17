@@ -17,11 +17,13 @@
  * Copyright 2018 Takayuki Tanaka
  */
 
-struct Tatam.Options {
-    public int icon_size;
-    public int thumbnail_size;
-    public ShowThumbsAt show_thumbs_at;
-    public int playlist_image_size;
-    public string? last_playlist_name;
-    public bool play_style;
+namespace Tatam {
+    public struct Options {
+        public int icon_size;
+        public int thumbnail_size;
+        public ShowThumbsAt show_thumbs_at;
+        public int playlist_image_size;
+        public string? last_playlist_name;
+        public bool play_style;
+    }
 }

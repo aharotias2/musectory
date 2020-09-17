@@ -1,5 +1,22 @@
+# This file is part of tatam.
+# 
+#     tatam is free software: you can redistribute it and/or modify
+#     it under the terms of the GNU General Public License as published by
+#     the Free Software Foundation, either version 3 of the License, or
+#     (at your option) any later version.
+# 
+#     tatam is distributed in the hope that it will be useful,
+#     but WITHOUT ANY WARRANTY; without even the implied warranty of
+#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#     GNU General Public License for more details.
+# 
+#     You should have received a copy of the GNU General Public License
+#     along with tatam.  If not, see <http://www.gnu.org/licenses/>.
+# 
+# Copyright 2018 Takayuki Tanaka
+
 TARGET = tatam
-VALAC_OPTS = --thread --pkg=posix --pkg=gtk+-3.0 --pkg=json-glib-1.0 -X -lm -X -O3
+VALAC_OPTS = --pkg=posix --pkg=gtk+-3.0 --pkg=json-glib-1.0 --pkg=gstreamer-1.0 --pkg=gee-0.8 --pkg=json-glib-1.0 -X -lm -X -O3
 SRC =  $(shell find src -name *.vala) 
 
 all: tatam
@@ -22,7 +39,7 @@ test-sidebar: test/test-sidebar.vala src/widgets/Sidebar.vala src/consts/enums.v
 test-small-time: test/test-small-time.vala src/atoms/SmallTime.vala
 	valac --pkg=glib-2.0 -o build/test/test-small-time $^
 
-test-metadata: test/test-base.vala test/test-metadata.vala src/strategy/MetadataReader.vala src/consts/Error.vala src/consts/Text.vala src/strategy/DirectoryReader.vala src/atoms/SmallTime.vala src/models/FileInfo.vala src/adapters/FileInfoAdapter.vala src/adapters/GstSampleAdapter.vala src/consts/enums.vala
+test-metadata: test/test-base.vala test/test-metadata.vala src/strategy/MetadataReader.vala src/consts/Error.vala src/consts/Text.vala src/strategy/DirectoryReader.vala src/atoms/SmallTime.vala src/models/FileInfo.vala src/adapters/FileInfoAdapter.vala src/adapters/GstSampleAdapter.vala src/consts/enums.vala src/utils/FilePathUtils.vala src/consts/ProgramName.vala
 	valac --pkg=gdk-3.0 --pkg=posix --pkg=json-glib-1.0 --pkg=gio-2.0 --pkg=glib-2.0 --pkg=gstreamer-1.0 --pkg=gee-0.8 -o build/test/test-metadata $^
 
 test-mimetype: test/test-base.vala test/test-mimetype.vala src/strategy/DirectoryReader.vala src/consts/Error.vala src/consts/Text.vala
@@ -48,3 +65,8 @@ test-file-path: test/test-base.vala test/test-file-path.vala src/strategy/Direct
 test-gst-player2: test/test-base.vala test/test-gst-player-2.vala src/widgets/Controller.vala src/adapters/FileInfoAdapter.vala src/adapters/GstSampleAdapter.vala src/models/FileInfo.vala src/strategy/MetadataReader.vala src/consts/enums.vala src/utils/Dialogs.vala src/utils/PixbufUtils.vala src/utils/FilePathUtils.vala src/consts/IconNames.vala src/consts/StyleClass.vala src/facade/GstPlayer.vala src/atoms/SmallTime.vala src/strategy/DirectoryReader.vala src/consts/Error.vala src/consts/Text.vala src/consts/ProgramName.vala src/utils/Files.vala
 	valac --pkg=posix --pkg=gtk+-3.0 --pkg=gee-0.8 --pkg=json-glib-1.0 --pkg=gstreamer-1.0 -o build/test/test-gst-player2 $^
 
+test-playlist: test/test-base.vala test/test-playlist.vala src/widgets/PlaylistBox.vala src/widgets/PlaylistItem.vala src/widgets/PlaylistDrawingArea.vala src/models/Tracker.vala src/models/FileInfo.vala src/atoms/SmallTime.vala src/consts/enums.vala src/strategy/DirectoryReader.vala src/consts/Error.vala src/consts/Text.vala src/utils/RGBAUtils.vala src/utils/Files.vala src/adapters/FileInfoAdapter.vala src/adapters/GstSampleAdapter.vala src/strategy/MetadataReader.vala src/utils/StringUtils.vala src/consts/StyleClass.vala src/utils/FilePathUtils.vala src/atoms/Hex.vala src/consts/ProgramName.vala src/consts/IconNames.vala src/utils/Dialogs.vala src/utils/PixbufUtils.vala
+	valac --pkg=posix --pkg=gtk+-3.0 --pkg=gee-0.8 --pkg=json-glib-1.0 --pkg=gstreamer-1.0 -X -lm -o build/test/test-playlist $^
+
+test-window: $(SRC)
+	valac $(VALAC_OPTS) -o build/test/test-window $^

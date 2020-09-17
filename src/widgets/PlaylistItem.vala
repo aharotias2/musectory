@@ -17,10 +17,10 @@
  * Copyright 2020 Takayuki Tanaka
  */
 
-using Gtk, Gdk;
+using Gtk, Gdk, Pango;
 
 namespace Tatam {
-    public class PlaylistItem : Gee.ListBoxRow {
+    public class PlaylistItem : ListBoxRow {
         public int image_size { get; set; }
         private PlaylistItemStatus status;
         private PlaylistDrawingArea icon_area;
@@ -48,9 +48,8 @@ namespace Tatam {
                         Gdk.InterpType bilinear = Gdk.InterpType.BILINEAR;
                         image_artwork = null;
                         if (file.artwork != null) {
-                            Gdk.Pixbuf scaled_artwork;
-                            scaled_artwork= file.artwork.scale_simple(image_size, image_size, bilinear);
-                            image_artwork = new Image.from_pixbuf(scaled_artwork);
+                            image_artwork = new Image.from_pixbuf(
+                                Tatam.PixbufUtils.scale_limited(file.artwork, image_size));
                             {
                                 image_artwork.set_size_request(image_size, image_size);
                                 image_artwork.halign = Align.CENTER;
@@ -91,8 +90,8 @@ namespace Tatam {
                         }
 
                         string album_year = file.album != null ? file.album : "Unkown Album";
-                        if (file.date != null) {
-                            album_year += " (" + file.date + ")";
+                        if (file.date != 0) {
+                            album_year += " (" + file.date.to_string() + ")";
                         }
                         
                         Label album = new Label(album_year);
@@ -124,7 +123,7 @@ namespace Tatam {
                         grid2.column_homogeneous = true;
                     }
             
-                    Label time = new Label(file.time_length);
+                    Label time = new Label(file.time_length.to_string());
 
                     button = new Gtk.MenuButton();
                     {
@@ -203,7 +202,7 @@ namespace Tatam {
                 (file.title != null ? file.title : (file.name != null ? file.name : "Unkown Track")),
                 (file.artist != null ? file.artist : "Unkown Artist"),
                 (file.album != null ? file.album : ""),
-                (file.date != null ? " (%s)".printf(file.date) : ""),
+                (file.date != 0 ? " (%u)".printf(file.date) : ""),
                 (file.genre != null ? " [%s]".printf(file.genre) : "")
                 );
             tooltip_image = file.artwork.scale_simple(image_size, image_size, Gdk.InterpType.BILINEAR);

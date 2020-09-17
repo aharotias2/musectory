@@ -30,7 +30,16 @@ namespace Tatam {
         public signal void finished();
         public signal void paused();
         public signal void unpaused();
-        
+
+        public bool playing {
+            private set {
+                playing_status = value ? State.PLAYING : State.PAUSED;
+            }
+            get {
+                return playing_status == State.PLAYING;
+            }
+        }
+                
         public GstPlayer() {
             volume_value = 0.5;
             init();

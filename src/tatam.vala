@@ -38,8 +38,6 @@ string current_dir = null;
 //--------------------------------------------------------------------------------------
 // global variable for playing music
 //--------------------------------------------------------------------------------------
-Music music;
-
 string music_total_time;
 double music_total_time_seconds;
 double music_time_position;
@@ -73,7 +71,7 @@ int main(string[] args) {
     string config_file_path = config_dir_path + "/settings.ini";
     string config_file_contents;
     debug("config_dir: %s", config_dir_path);
-
+    Tatam.Options options = new Tatam.Options();
     options.ao_type = "pulse";
     options.thumbnail_size = 80;
     options.show_thumbs_at = ShowThumbsAt.ALBUMS;
@@ -153,85 +151,12 @@ int main(string[] args) {
     }
         
     Gtk.init(ref args);
-
-    //----------------------------------------------------------------------------------
-    // Creating music player manager (control for MPlayer)
-    //----------------------------------------------------------------------------------
-    music = new Music();
-    {
-        music.on_quit.connect((pid, status) => {
-                time_bar.set_value(0.0);
-                time_label_set(0);
-
-                controller.play_pause_button_state = Tatam.Controller.PlayPauseButtonState.PLAY;
-            });
-    
-        music.on_start.connect((track_number, file_path) => {
-                debug("on start func start");
-
-                Tatam.FileInfo file_info = playlist.nth_track_data(track_number);
-
-                music_title.label = (file_info.title != null) ? file_info.title : file_info.name;
-                header_bar.set_title(music_title.label);
-                music_total_time = file_info.time_length;
-                SmallTime small_time = new SmallTime.from_string(music_total_time);
-                music_total_time_seconds = small_time.milliseconds / 1000;
-                music_time_position = 0.0;
-                controller.music_total_time_seconds = music_total_time_seconds;
-                Timeout.add(100, () => {
-                        if (track_number != music.get_current_track_number() || !music.playing) {
-                            return Source.REMOVE;
-                        }
-
-                        if (!music.paused) {
-                            music_time_position += 0.1;
-                            controller.set_time(music_time_position);
-                        }
-                        return Source.CONTINUE;
-                    });
-
-                controller.play_pause_button_state = Tatam.Controller.PlayPauseButtonState.PAUSE;
-
-                play_pause_button.sensitive = true;
-                next_track_button.sensitive = !playlist.track_is_last();
-                prev_track_button.sensitive = true;
-
-                playlist.set_track(track_number);
-                
-                debug("artwork_max_size: " + artwork_max_size.to_string());
-                current_playing_artwork = file_info.artwork;
-                if (current_playing_artwork != null) {
-                    artwork.set_from_pixbuf(MyUtils.PixbufUtils.scale(current_playing_artwork,
-                                                                              options.thumbnail_size));
-                    if (!music_view_artwork.visible) {
-                        artwork_button.visible = true;
-                        debug("make artwork button visible");
-                    }
-                    Idle.add(() => {
-                            debug("enter timeout artwork size");
-                            int size = int.min(music_view_container.get_allocated_width(),
-                                               music_view_container.get_allocated_height());
-                            music_view_artwork.pixbuf = MyUtils.PixbufUtils.scale(current_playing_artwork,
-                                                                                  size);
-                            debug("music view artwork size: " + size.to_string());
-                            return Source.REMOVE;
-                        });
-                } else {
-                    artwork_button.visible = false;
-                    music_view_artwork.set_from_icon_name(IconName.AUDIO_FILE, IconSize.LARGE_TOOLBAR);
-                }
-
-            });
-
-        music.on_end.connect((track_number, track_name) => {
-                // ???
-                //playlist.set_track(-1);
-            });
-    }
+    Gst.init(ref args);
     
     //----------------------------------------------------------------------------------
     // Creating the main window
-    //----------------------------------------------------------------------------------
+    //-----------------------------------------------------
+    -----------------------------
     main_win = new Tatam.Window(options);
 
     Gtk.main();

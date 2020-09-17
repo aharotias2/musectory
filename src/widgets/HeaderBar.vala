@@ -46,13 +46,18 @@ namespace Tatam {
             }
 
             set {
+                Image? image = this.switch_button.image as Image;
                 switch (switch_button_state_value = value) {
                 case SwitchButtonState.FINDER:
-                    (this.switch_button.image as Image).icon_name = IconName.Symbolic.VIEW_LIST;
+                    if (image != null) {
+                        image.icon_name = IconName.Symbolic.VIEW_LIST;
+                    }
                     this.switch_button.tooltip_text = Text.TOOLTIP_SHOW_PLAYLIST;
                     break;
                 case SwitchButtonState.PLAYLIST:
-                    (this.switch_button.image as Image).icon_name = IconName.Symbolic.GO_PREVIOUS;
+                    if (image != null) {
+                        image.icon_name = IconName.Symbolic.GO_PREVIOUS;
+                    }
                     this.switch_button.tooltip_text = Text.TOOLTIP_SHOW_FINDER;
                     break;
                 }
@@ -104,7 +109,9 @@ namespace Tatam {
                     this.add_button.get_style_context().add_class(StyleClass.TITLEBUTTON);
                     this.add_button.add(new Image.from_icon_name(IconName.Symbolic.BOOKMARK_NEW, IconSize.BUTTON));
                     this.add_button.tooltip_text = Text.TOOLTIP_SAVE_PLAYLIST;
-                    this.add_button.clicked.connect(this.add_button_clicked);
+                    this.add_button.clicked.connect(() => {
+                            this.add_button_clicked();
+                        });
                 }
 
                 header_box.add(this.switch_button);
@@ -132,7 +139,9 @@ namespace Tatam {
                 this.about_button.get_style_context().add_class(StyleClass.TITLEBUTTON);
                 this.about_button.add(new Image.from_icon_name(IconName.Symbolic.HELP_ABOUT, IconSize.BUTTON));
                 this.about_button.sensitive = true;
-                this.about_button.clicked.connect(this.about_button_clicked);
+                this.about_button.clicked.connect(() => {
+                        this.about_button_clicked();
+                    });
             }
             
             this.show_close_button = true;

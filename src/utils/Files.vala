@@ -61,8 +61,9 @@ namespace Tatam {
             return answer;
         }
 
-        public void find_dir_file_names(
-            string dir_path, out Gee.List<string> dir_list, out Gee.List<string> file_list)
+        public void find_dir_file_names(string dir_path,
+                                        out Gee.List<string> dir_list,
+                                        out Gee.List<string> file_list)
         {
             try {
                 Gee.List<string> dir_list_local = new Gee.ArrayList<string>();

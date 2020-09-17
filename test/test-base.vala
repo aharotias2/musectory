@@ -61,8 +61,12 @@ public class TestBase {
 
     protected void print_file_info_pretty(Tatam.FileInfo? file_info) {
         if (file_info != null) {
-            Json.Node json = Json.from_string(file_info.to_string());
-            print("%s\n", Json.to_string(json, true));
+            try {
+                Json.Node json = Json.from_string(file_info.to_string());
+                print("%s\n", Json.to_string(json, true));
+            } catch (GLib.Error e) {
+                stderr.printf(@"GLib.Error: $(e.message)\n");
+            }
         } else {
             stderr.printf("file_info is null\n");
         }

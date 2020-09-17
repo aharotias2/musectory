@@ -16,14 +16,19 @@
  * 
  * Copyright 2020 Takayuki Tanaka
  */
-2
+
 public class TestMetadata : TestBase {
     private static Posix.FILE output;
 
     public static int main(string[] args) {
+        Gst.init(ref args);
+        TestMetadata tester = new TestMetadata();
+        return tester.start();
+    }
+
+    public int start() {
         output = Posix.FILE.fdopen(1, "w");
         set_print_handler((text) => output.printf(text));
-        Gst.init(ref args);
         GLib.MainLoop main_loop = new GLib.MainLoop();
         try {
             string file_path = choose_file("/var/run/media/ta/TOSHIBAEXT/Music4");
@@ -40,7 +45,7 @@ public class TestMetadata : TestBase {
         }
     }
 
-    private static async int run_test(string file_path) {
+    private async int run_test(string file_path) {
         int status = 0;
         new Thread<int>(null, () => {
                 try {

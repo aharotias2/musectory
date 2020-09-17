@@ -108,5 +108,17 @@ namespace Tatam {
 
             add(box);
         }
+
+        public void deactivate_buttons() {
+            finder_add_button.sensitive = false;
+            finder_zoomout_button.sensitive = false;
+            finder_zoomin_button.sensitive = false;
+        }
+
+        public void activate_buttons() {
+            finder_add_button.sensitive = true;
+            finder_zoomout_button.sensitive = true;
+            finder_zoomin_button.sensitive = true;
+        }
     }
 }

@@ -24,7 +24,7 @@ namespace Tatam {
         public enum State {
             SHOW_FINDER, SHOW_PLAYLIST, HIDDEN
         }
-        private Stack stack;
+        private Gtk.Stack stack;
 
         public signal void finder_is_selected();
         public signal void playlist_is_selected();
