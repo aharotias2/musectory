@@ -71,8 +71,7 @@ int main(string[] args) {
     string config_file_path = config_dir_path + "/settings.ini";
     string config_file_contents;
     debug("config_dir: %s", config_dir_path);
-    Tatam.Options options = new Tatam.Options();
-    options.ao_type = "pulse";
+    Tatam.Options options = Tatam.Options();
     options.thumbnail_size = 80;
     options.show_thumbs_at = ShowThumbsAt.ALBUMS;
     options.playlist_image_size = 52;
@@ -122,7 +121,7 @@ int main(string[] args) {
             }
         }
 
-        if (dirs.length() == 0) {
+        if (dirs.size == 0) {
             dirs.add(Environment.get_home_dir() + "/" + Text.DIR_NAME_MUSIC);
         }
     } catch(GLib.Error e) {
@@ -147,16 +146,17 @@ int main(string[] args) {
     //----------------------------------------------------------------------------------
     string css_path = config_dir_path + "/main.css";
     if (!GLib.FileUtils.test(css_path, FileTest.EXISTS)) {
-        FileUtils.set_contents(css_path, DEFAULT_CSS);
+        GLib.FileUtils.set_contents(css_path, DEFAULT_CSS);
     }
-        
+
+    options.css_path = css_path;
+    
     Gtk.init(ref args);
     Gst.init(ref args);
     
     //----------------------------------------------------------------------------------
     // Creating the main window
     //-----------------------------------------------------
-    -----------------------------
     main_win = new Tatam.Window(options);
 
     Gtk.main();

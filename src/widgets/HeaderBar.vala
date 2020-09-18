@@ -148,8 +148,8 @@ namespace Tatam {
             this.title = PROGRAM_NAME;
             this.has_subtitle = false;
             this.pack_start(header_box);
-            this.pack_end(header_fold_button);
-            this.pack_end(header_about_button);
+            this.pack_end(fold_button);
+            this.pack_end(about_button);
         }
 
         public void disable_switch_button() {
@@ -160,7 +160,7 @@ namespace Tatam {
             this.switch_button.sensitive = true;
         }
 
-        public Image? switch_button_icon_name {
+        public string? switch_button_icon_name {
             get {
                 Image? icon = this.switch_button.image as Image;
                 if (icon != null) {

@@ -25,10 +25,9 @@ namespace Tatam {
         private PlaylistItemStatus status;
         private PlaylistDrawingArea icon_area;
         public string track_title { get; private set; }
-        private string tooltip_text;
         private Gdk.Pixbuf tooltip_image;
         private MenuButton button;
-        public Tatam.FileInfo file_info;
+        public Tatam.FileInfo file_info { get; set; }
 
         public signal void menu_activated(MenuType type, uint index);
 
@@ -45,7 +44,6 @@ namespace Tatam {
                 if (file != null) {
                     Overlay image_overlay = new Overlay();
                     {
-                        Gdk.InterpType bilinear = Gdk.InterpType.BILINEAR;
                         image_artwork = null;
                         if (file.artwork != null) {
                             image_artwork = new Image.from_pixbuf(
@@ -248,7 +246,7 @@ namespace Tatam {
             icon_area.status = status;
         }
 
-        public void on_click() {
+        public void clicked() {
             switch (status) {
             case PlaylistItemStatus.PLAYING:
                 set_status(PlaylistItemStatus.PAUSED);

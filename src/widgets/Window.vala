@@ -30,6 +30,7 @@ namespace Tatam {
         private Tatam.HeaderBar header_bar;
         private Tatam.Stack stack;
         private Tatam.Sidebar sidebar;
+        private Tatam.FinderToolbar finder_toolbar;
         private Tatam.Finder finder;
         private Tatam.PlaylistBox playlist_view;
         private Tatam.Controller controller;
@@ -37,7 +38,7 @@ namespace Tatam {
         private Revealer bookmark_revealer;
         private Button music_view_close_button;
         private TreeViewColumn bookmark_title_col;
-        private Gdk.Screen screen;
+        private Gdk.Screen default_screen;
 
         private Overlay music_view_overlay;
         private Image music_view_artwork;
@@ -53,29 +54,33 @@ namespace Tatam {
         
         private uint max_width;
         private uint max_height;
-        private uint default_height;
-        private uint default_width;
+        private uint this_default_height;
+        private uint this_default_width;
         
         private Tatam.Options options;
         private Tatam.FileInfoAdapter file_info_reader;
         
+        private Gdk.Pixbuf? file_pixbuf;
+        private Gdk.Pixbuf? cd_pixbuf;
+        private Gdk.Pixbuf? folder_pixbuf;
+
         public Window(Tatam.Options options) {
             this.options = options;
 
-            screen = Gdk.Screen.get_default();
-            debug("get screen: " + (screen != null ? "ok." : "failed"));
+            default_screen = Gdk.Screen.get_default();
+            debug("get screen: " + (default_screen != null ? "ok." : "failed"));
 
-            max_width = screen.get_width();
+            max_width = default_screen.get_width();
             debug("Max width of the display: " + max_width.to_string());
 
-            max_height = screen.get_height();
+            max_height = default_screen.get_height();
             debug("Max height of the display: " + max_height.to_string());
 
-            default_height = (int) (max_height * 0.7);
-            default_width = int.min((int) (max_width * 0.5), (int) (window_default_height * 1.3));
+            this_default_height = (int) (max_height * 0.7);
+            this_default_width = int.min((int) (max_width * 0.5), (int) (this_default_height * 1.3));
 
             artwork_max_size = int.min((int) max_width, (int) max_height);
-            
+
             IconTheme icon_theme = Gtk.IconTheme.get_default();
 
             file_info_reader = new Tatam.FileInfoAdapter();
@@ -131,8 +136,8 @@ namespace Tatam {
                             stack.show_stack();
                             controller.show_buttons();
                         } else {
-                            saved_this_width = this.get_allocated_width();
-                            saved_this_height = this.get_allocated_height();
+                            saved_width = this.get_allocated_width();
+                            saved_height = this.get_allocated_height();
                             this.resize(saved_this_width, 1);
                             stack.hide_stack();
                             controller.hide_buttons();
@@ -140,7 +145,7 @@ namespace Tatam {
                     });
 
                 header_bar.about_button_clicked.connect(() => {
-                        show_about_dialog(this);
+                        show_about_dialog();
                     });
             }
             
@@ -332,8 +337,7 @@ namespace Tatam {
                                 playlist_view = new PlaylistBox();
                                 {
                                     playlist_view.image_size = options.playlist_image_size;
-                                    playlist_view.list_box.row_activated.connect((row) => {
-                                            int index = row.get_index();
+                                    playlist_view.row_activated.connect((index, file_info) => {
                                             debug("playlist view was clicked (row_activated at %u).", index);
                                             int step = ((int) index) - ((int) playlist_view.get_track());
                         
@@ -518,16 +522,11 @@ namespace Tatam {
                                     debug("enter timeout artwork_button.clicked");
                                     int size = int.min(music_view_container.get_allocated_width(),
                                                        music_view_container.get_allocated_height());
-                                    music_view_artwork.pixbuf = MyUtils.PixbufUtils.scale(current_playing_artwork, size);
+                                    music_view_artwork.pixbuf = PixbufUtils.scale(current_playing_artwork, size);
                                     music_view_artwork.visible = true;
                                     header_bar.disable_switch_button();
                                     return Source.REMOVE;
                                 });
-                        });
-
-                    controller.time_position_changed.connect((value) => {
-                            music_time_position = music_total_time_seconds * value;
-                            music.move_pos((int) (value * 100));
                         });
 
                     controller.shuffle_button_toggled((shuffle_on) => {
@@ -551,14 +550,14 @@ namespace Tatam {
             this.window_position = WindowPosition.CENTER;
             this.resizable = true;
             this.has_resize_grip = true;
-            this.set_default_size(window_default_width, window_default_height);
+            this.set_default_size(this_default_width, this_default_height);
 
             this.destroy.connect(application_quit);
             this.configure_event.connect((cr) => {
                     if (music_view_overlay.visible && current_playing_artwork != null) {
                         int size = int.min(music_view_container.get_allocated_width(),
                                            music_view_container.get_allocated_height());
-                        music_view_artwork.pixbuf = MyUtils.PixbufUtils.scale(current_playing_artwork, size);
+                        music_view_artwork.pixbuf = PixbufUtils.scale(current_playing_artwork, size);
                     }
                     bookmark_title_col.max_width = this.get_allocated_width() / 4;
                     return false;
@@ -566,13 +565,13 @@ namespace Tatam {
 
             this.show_all();
 
-            if (GLib.FileUtils.test(css_path, FileTest.EXISTS)) {
+            if (GLib.FileUtils.test(options.css_path, FileTest.EXISTS)) {
                 Gdk.Screen win_screen = this.get_screen();
                 CssProvider css_provider = new CssProvider();
                 try {
-                    css_provider.load_from_path(css_path);
+                    css_provider.load_from_path(options.css_path);
                 } catch (Error e) {
-                    debug("ERROR: css_path: %s", css_path);
+                    debug("ERROR: css_path: %s", options.css_path);
                     stderr.printf(Text.ERROR_CREATE_WINDOW);
                     return 1;
                 }
@@ -661,7 +660,7 @@ namespace Tatam {
 
         private void playlist_save_action() {
             if (stack.finder_is_visible()) {
-                add_bookmark(finder.dir_path);
+                sidebar.add_bookmark(finder.dir_path);
             } else if (stack.playlist_is_visible()) {
                 if (playlist_view.name == null) {
                     save_playlist(playlist_view.get_file_path_list());
@@ -787,7 +786,7 @@ namespace Tatam {
             debug(playlist_file_contents);
             debug("End new saved playlist contents");
             try {
-                FileUtils.set_contents(playlist_file_path, playlist_file_contents);
+                GLib.FileUtils.set_contents(playlist_file_path, playlist_file_contents);
                 debug("playlist file has been saved");
             } catch (Error e) {
                 stderr.printf(Text.ERROR_WRITE_CONFIG);

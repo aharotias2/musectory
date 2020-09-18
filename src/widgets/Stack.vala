@@ -83,7 +83,7 @@ namespace Tatam {
         }
 
         public bool playlist_is_visible() {
-            return this.state = State.SHOW_PLAYLIST;
+            return this.state == State.SHOW_PLAYLIST;
         }
 
         public void show_finder() {
@@ -91,7 +91,7 @@ namespace Tatam {
          }
 
         public void show_playlist() {
-            this.state = State.PLAYLIST;
+            this.state = State.SHOW_PLAYLIST;
         }
     }
 }

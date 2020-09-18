@@ -25,5 +25,6 @@ namespace Tatam {
         public int playlist_image_size;
         public string? last_playlist_name;
         public bool play_style;
+        public string? css_path;
     }
 }

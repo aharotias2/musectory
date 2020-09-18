@@ -27,11 +27,12 @@ namespace Tatam {
         private ScrolledWindow? scrolled;
         private FileInfoAdapter freader;
         private Tracker tracker;
-        public ListBox? list_box { get; set; }
+        private ListBox? list_box;
         public int image_size { get; set; }
         public string? name { get; set; }
 
         public signal void changed(Gee.List<string> file_path_list);
+        public signal void row_activated(uint index, Tatam.FileInfo file_info);
         
         public PlaylistBox() {
             freader = new FileInfoAdapter();
@@ -45,14 +46,20 @@ namespace Tatam {
                     list_box.bind_model(store, create_list_item);
                     list_box.activate_on_single_click = true;
                     list_box.selection_mode = SelectionMode.SINGLE;
+                    list_box.row_activated.connect((row) => {
+                            PlaylistItem? item = row as PlaylistItem;
+                            if (item != null) {
+                                row_activated(row.get_index(), item.file_info);
+                            }
+                        });
                 }
                 scrolled.add(list_box);
             }
             add(scrolled);
         }
 
-        private PlaylistItem? get_item(int index = -1) {
-            PlaylistItem? item = (PlaylistItem?) list_box.get_row_at_index(index < 0 ? track.current : index);
+        public PlaylistItem? get_item(int index = -1) {
+            PlaylistItem? item = (PlaylistItem?) list_box.get_row_at_index(index < 0 ? (int) tracker.current : index);
             debug("PlaylistBox.get_item: index = %d, track title = %s", index, item != null ? item.track_title : "null");
             return item;
         }
@@ -61,7 +68,7 @@ namespace Tatam {
             set_track(index);
             var item = get_item(index);
             if (item != null) {
-                item.on_click();
+                item.clicked();
             }
         }
             
@@ -183,7 +190,7 @@ namespace Tatam {
                 if (item != null) {
                     if (i == index) {
                         if (i == tracker.current) {
-                            item.on_click();
+                            item.clicked();
                         } else {
                             item.set_status(PlaylistItemStatus.PLAYING);
                         }
@@ -199,7 +206,7 @@ namespace Tatam {
 
         public void toggle_status() {
             PlaylistItem? item = get_item((int) tracker.current);
-            item.on_click();
+            item.clicked();
             item.queue_draw();
         }
         
