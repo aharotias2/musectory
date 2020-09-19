@@ -93,7 +93,7 @@ namespace Tatam {
         
         private Finder(Builder builder) {
             debug("creating finder start");
-            zoom_level = 8;
+            zoom_level = 9;
             count = 0;
             activate_on_single_click = true;
             icon_theme = Gtk.IconTheme.get_default();
@@ -137,8 +137,8 @@ namespace Tatam {
                     while_label_box.pack_start(while_label);
                     while_label_box.hexpand = false;
                     while_label_box.vexpand = false;
-                    while_label_box.halign = Align.CENTER;
-                    while_label_box.valign = Align.CENTER;
+                    while_label_box.halign = Align.START;
+                    while_label_box.valign = Align.END;
                     while_label_box.get_style_context().add_class(StyleClass.WHILE_LABEL);
                 }
             
@@ -157,7 +157,6 @@ namespace Tatam {
             while_label.visible = true;
             while_label.label = Text.FINDER_LOAD_FILES;
             int size = get_level_size();
-            dir_changed(dir_path);
             progress.set_fraction(0.0);
             progress_revealer.reveal_child = true;
 
@@ -264,6 +263,7 @@ namespace Tatam {
             change_cursor(Gdk.CursorType.LEFT_PTR);
             while_label.visible = false;
             progress_revealer.reveal_child = false;
+            dir_changed(dir_path);
         }
 
         public void set_default_icon_size(int icon_size) {

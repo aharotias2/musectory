@@ -193,7 +193,7 @@ namespace Tatam {
                     }
 
                     artwork_button.margin = 0;
-                    artwork_button.relief = ReliefStyle.NORMAL;
+                    artwork_button.relief = ReliefStyle.NONE;
                     artwork_button.get_style_context().add_class(StyleClass.FLAT);
                     artwork_button.add(artwork);
                     artwork_button.clicked.connect(() => {

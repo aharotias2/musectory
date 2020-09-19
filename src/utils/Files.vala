@@ -68,23 +68,27 @@ namespace Tatam {
             try {
                 Gee.List<string> dir_list_local = new Gee.ArrayList<string>();
                 Gee.List<string> file_list_local = new Gee.ArrayList<string>();
-                DirectoryReader dreader = new DirectoryReader(dir_path);
-                dreader.directory_found.connect((dir) => {
-                        dir_list_local.add(dir.get_path());
-                        return true;
-                    });
-                dreader.file_found.connect((file) => {
-                        try {
-                            GLib.FileInfo info = file.query_info("standard::*", 0);
-                            if (info.get_content_type().has_prefix("audio/")) {
-                                file_list_local.add(file.get_path());
+                if (FileUtils.test(dir_path, FileTest.IS_REGULAR)) {
+                    file_list_local.add(dir_path);
+                } else {
+                    DirectoryReader dreader = new DirectoryReader(dir_path);
+                    dreader.directory_found.connect((dir) => {
+                            dir_list_local.add(dir.get_path());
+                            return true;
+                        });
+                    dreader.file_found.connect((file) => {
+                            try {
+                                GLib.FileInfo info = file.query_info("standard::*", 0);
+                                if (info.get_content_type().has_prefix("audio/")) {
+                                    file_list_local.add(file.get_path());
+                                }
+                            } catch (GLib.Error e) {
+                                stderr.printf(@"GLib.Error: $(e.message)\n");
                             }
-                        } catch (GLib.Error e) {
-                            stderr.printf(@"GLib.Error: $(e.message)\n");
-                        }
-                        return true;
-                    });
-                dreader.run();
+                            return true;
+                        });
+                    dreader.run();
+                }
                 dir_list = (owned) dir_list_local;
                 file_list = (owned) file_list_local;
             } catch (Tatam.Error e) {
@@ -98,30 +102,34 @@ namespace Tatam {
             string dir_path, out Gee.List<string> dir_list, out Gee.List<Tatam.FileInfo?> file_list
             ) throws Tatam.Error, FileError
         {
+            FileInfoAdapter freader = new FileInfoAdapter();
             Gee.List<string> dir_list_local = new Gee.ArrayList<string>();
             Gee.List<Tatam.FileInfo?> file_list_local = new Gee.ArrayList<Tatam.FileInfo?>();
-            DirectoryReader dreader = new DirectoryReader(dir_path);
-            dreader.directory_found.connect((dir) => {
-                    dir_list_local.add(dir.get_basename());
-                    return true;
-                });
-            dreader.file_found.connect((file) => {
-                    try {
-                        GLib.FileInfo fi = file.query_info("standard::*", 0);
-                        string mime_type = fi.get_content_type();
-                        if (mime_type.has_prefix("audio/")) {
-                            FileInfoAdapter freader = new FileInfoAdapter();
-                            Tatam.FileInfo? file_info = freader.read_metadata_from_path(file.get_path());
-                            if (file_info != null && file_info.type == Tatam.FileType.MUSIC) {
-                                file_list_local.add(file_info);
+            if (FileUtils.test(dir_path, FileTest.IS_REGULAR)) {
+                file_list_local.add(freader.read_metadata_from_path(dir_path));
+            } else {
+                DirectoryReader dreader = new DirectoryReader(dir_path);
+                dreader.directory_found.connect((dir) => {
+                        dir_list_local.add(dir.get_basename());
+                        return true;
+                    });
+                dreader.file_found.connect((file) => {
+                        try {
+                            GLib.FileInfo fi = file.query_info("standard::*", 0);
+                            string mime_type = fi.get_content_type();
+                            if (mime_type.has_prefix("audio/")) {
+                                Tatam.FileInfo? file_info = freader.read_metadata_from_path(file.get_path());
+                                if (file_info != null && file_info.type == Tatam.FileType.MUSIC) {
+                                    file_list_local.add(file_info);
+                                }
                             }
+                        } catch (GLib.Error e) {
+                            stderr.printf(@"GLib.Error: $(e.message)\n");
                         }
-                    } catch (GLib.Error e) {
-                        stderr.printf(@"GLib.Error: $(e.message)\n");
-                    }
-                    return true;
-                });
-            dreader.run();
+                        return true;
+                    });
+                dreader.run();
+            }
             dir_list = (owned) dir_list_local;
             file_list = (owned) file_list_local;
         }
@@ -179,6 +187,27 @@ namespace Tatam {
             return info_list;
         }
 
+        public Gee.List<GLib.File> get_children(string dir_path) throws Tatam.Error, FileError {
+            Gee.List<File> dir_list = new Gee.ArrayList<File>();
+            Gee.List<File> file_list = new Gee.ArrayList<File>();
+            DirectoryReader dreader = new DirectoryReader(dir_path);
+            dreader.directory_found.connect((directory) => {
+                    dir_list.add(directory);
+                    return true;
+                });
+            dreader.file_found.connect((file) => {
+                    file_list.add(file);
+                    return true;
+                });
+            dreader.run();
+            dir_list.sort((a, b) => a.get_basename().collate(b.get_basename()));
+            file_list.sort((a, b) => a.get_basename().collate(b.get_basename()));
+            Gee.List<File> result = new Gee.ArrayList<File>();
+            result.add_all(dir_list);
+            result.add_all(file_list);
+            return result;
+        }
+        
         public Gee.List<Tatam.FileInfo?> find_file_infos_recursively(string dir_path) throws FileError {
             if (!GLib.FileUtils.test(dir_path, FileTest.IS_DIR)) {
                 return new Gee.ArrayList<Tatam.FileInfo?>();

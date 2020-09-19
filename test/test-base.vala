@@ -71,4 +71,62 @@ public class TestBase {
             stderr.printf("file_info is null\n");
         }
     }
+
+    protected static Gee.Map<string, string> parse_args(ref unowned string[] args) throws Tatam.Error {
+        Gee.Map<string, string> map = new Gee.HashMap<string, string>();
+        {
+            for (int i = 0; i < args.length; i++) {
+                switch (args[i]) {
+                case "-c":
+                    File css_file = File.new_for_path(args[i + 1]);
+                    if (css_file.query_exists()) {
+                        map.set(args[i], css_file.get_path());
+                        i++;
+                    } else {
+                        throw new Tatam.Error.FILE_DOES_NOT_EXISTS(Tatam.Text.ERROR_FILE_DOES_NOT_EXISTS);
+                    }
+                    break;
+                case "-d":
+                    File directory = File.new_for_path(args[i + 1]);
+                    if (directory.query_exists()) {
+                        map.set(args[i], directory.get_path());
+                    } else {
+                        throw new Tatam.Error.FILE_DOES_NOT_EXISTS(Tatam.Text.ERROR_FILE_DOES_NOT_EXISTS);
+                    }
+                    i++;
+                    break;
+                }
+            }
+        }
+
+        if (!map.has_key("-c")) {
+            map.set("-c", File.new_for_path("./tatam.css").get_path());
+        }
+
+        if (!map.has_key("-d")) {
+            map.set("-d", File.new_for_path("~").get_path());
+        }
+        
+        return map;
+    }
+
+    protected void setup_css(Gtk.Window window, string css_path) {
+        if (GLib.FileUtils.test(css_path, FileTest.EXISTS)) {
+            debug("css exists at %s", css_path);
+            Gdk.Screen win_screen = window.get_screen();
+            Gtk.CssProvider css_provider = new Gtk.CssProvider();
+            try {
+                css_provider.load_from_path(css_path);
+            } catch (Error e) {
+                debug("ERROR: css_path: %s", css_path);
+                stderr.printf(Tatam.Text.ERROR_CREATE_WINDOW);
+                return;
+            }
+            Gtk.StyleContext.add_provider_for_screen(win_screen,
+                                                     css_provider,
+                                                     Gtk.STYLE_PROVIDER_PRIORITY_USER);
+        } else {
+            debug("css does not exists!");
+        }
+    }
 }

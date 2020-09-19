@@ -161,7 +161,7 @@ namespace Tatam {
         }
 
         public string? switch_button_icon_name {
-            get {
+            owned get {
                 Image? icon = this.switch_button.image as Image;
                 if (icon != null) {
                     return icon.icon_name;

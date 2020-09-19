@@ -70,3 +70,12 @@ test-playlist: test/test-base.vala test/test-playlist.vala src/widgets/PlaylistB
 
 test-window: $(SRC)
 	valac $(VALAC_OPTS) -o build/test/test-window $^
+
+
+test-gst-player3: test/test-base.vala test/test-gst-player3.vala src/widgets/Controller.vala src/adapters/FileInfoAdapter.vala src/adapters/GstSampleAdapter.vala src/models/FileInfo.vala src/strategy/MetadataReader.vala src/consts/enums.vala src/utils/Dialogs.vala src/utils/PixbufUtils.vala src/utils/FilePathUtils.vala src/consts/IconNames.vala src/consts/StyleClass.vala src/facade/GstPlayer.vala src/atoms/SmallTime.vala src/strategy/DirectoryReader.vala src/consts/Error.vala src/consts/Text.vala src/consts/ProgramName.vala src/utils/Files.vala src/widgets/PlaylistBox.vala src/widgets/PlaylistItem.vala src/widgets/PlaylistDrawingArea.vala src/models/Tracker.vala src/utils/RGBAUtils.vala src/atoms/Hex.vala src/utils/StringUtils.vala
+	valac --pkg=posix --pkg=gtk+-3.0 --pkg=gee-0.8 --pkg=json-glib-1.0 --pkg=gstreamer-1.0 -o build/test/test-gst-player3 -X -lm $^
+
+
+test-gst-player4: test/test-base.vala test/test-gst-player4.vala src/widgets/Controller.vala src/adapters/FileInfoAdapter.vala src/adapters/GstSampleAdapter.vala src/models/FileInfo.vala src/strategy/MetadataReader.vala src/consts/enums.vala src/utils/Dialogs.vala src/utils/PixbufUtils.vala src/utils/FilePathUtils.vala src/consts/IconNames.vala src/consts/StyleClass.vala src/facade/GstPlayer.vala src/atoms/SmallTime.vala src/strategy/DirectoryReader.vala src/consts/Error.vala src/consts/Text.vala src/consts/ProgramName.vala src/utils/Files.vala src/widgets/Finder.vala src/widgets/FinderItem.vala src/consts/Text.vala src/widgets/PlaylistBox.vala src/widgets/PlaylistItem.vala src/widgets/PlaylistDrawingArea.vala src/models/Tracker.vala src/utils/RGBAUtils.vala src/atoms/Hex.vala src/utils/StringUtils.vala
+	valac --pkg=posix --pkg=gtk+-3.0 --pkg=gee-0.8 --pkg=json-glib-1.0 --pkg=gstreamer-1.0 -X -lm -o build/test/test-gst-player4 $^
+

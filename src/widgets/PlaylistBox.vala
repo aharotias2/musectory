@@ -58,6 +58,10 @@ namespace Tatam {
             add(scrolled);
         }
 
+        public Tatam.FileInfo get_current_track_file_info() {
+            return get_item().file_info;
+        }
+        
         public PlaylistItem? get_item(int index = -1) {
             PlaylistItem? item = (PlaylistItem?) list_box.get_row_at_index(index < 0 ? (int) tracker.current : index);
             debug("PlaylistBox.get_item: index = %d, track title = %s", index, item != null ? item.track_title : "null");
@@ -81,6 +85,7 @@ namespace Tatam {
         public void add_item(Tatam.FileInfo? file_info) {
             if (file_info != null) {
                 store.append(file_info);
+                tracker.reset(get_list_size(), tracker.current);
             }
         }
 

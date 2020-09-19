@@ -1,35 +1,44 @@
 /*
- * This file is part of tatam.
+ * This file is part of dplayer.
  * 
- *     tatam is free software: you can redistribute it and/or modify
+ *     dplayer is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
  * 
- *     tatam is distributed in the hope that it will be useful,
+ *     dplayer is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
  * 
  *     You should have received a copy of the GNU General Public License
- *     along with tatam.  If not, see <http://www.gnu.org/licenses/>.
+ *     along with dplayer.  If not, see <http://www.gnu.org/licenses/>.
  * 
  * Copyright 2018 Takayuki Tanaka
  */
 
 /***********************************************************
- *                  tatam style sheet                    *
+ *                  dplayer style sheet                    *
  ***********************************************************/
-.title {
-    font-size: 17px;
-}
-
-.album {
+.playlist_title {
+    padding: 6px 0px 2px 0px;
     font-size: 12px;
 }
 
-.artist, .genre {
-    font-size: 12px;
+.playlist_album {
+    padding: 2px 0px 6px 0px;
+    font-size: 11px;
+}
+
+.playlist_artist {
+    padding: 6px 0px 2px 0px;
+    font-size: 9px;
+    font-style: italic;
+}
+
+.playlist_genre {
+    padding: 2px 0px 6px 0px;
+    font-size: 9px;
     font-style: italic;
 }
 
@@ -52,3 +61,19 @@
     background-color: rgba(9, 9, 9, 0.5);
 }
 
+.finder_icon {
+}
+
+.finder_item_label {
+    background-color: rgba(10, 10, 10, 0.5);
+    color: rgba(228, 228, 228, 1.0);
+}
+.finder_mini_icon {
+    background-color: rgba(128, 128, 128, 0.0);
+}
+.finder_button {
+}
+.while_label {
+    background-color: rgba(225, 225, 225, 1.0);
+    color: rgba(30, 30, 30, 1.0);
+}
