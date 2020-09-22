@@ -95,12 +95,12 @@ class Tracker {
         }
     }
 
-    public void toggle_repeat() {
-        repeat = !repeat;
+    public void set_repeating(bool repeat_on) {
+        repeat = repeat_on;
     }
 
-    public void toggle_shuffle() {
-        shuffle = ! shuffle;
+    public void set_shuffling(bool shuffle_on) {
+        shuffle = shuffle_on;
         if (seq != null) {
             if (shuffle) {
                 create_shuffle_seq();

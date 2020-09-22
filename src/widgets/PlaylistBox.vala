@@ -22,17 +22,42 @@ using Pango;
 using Tatam;
 
 namespace Tatam {
-    public class PlaylistBox : Bin {
+    public interface PlaylistBoxInterface {
+        public abstract string? playlist_name { get; set; }
+        public abstract uint image_size { get; set; }
+        public abstract uint get_list_size();
+        public abstract Tatam.FileInfo? get_file_info();
+        public abstract Tatam.FileInfo? get_file_info_at_index(uint index);
+        public abstract PlaylistItem? get_current_item();
+        public abstract PlaylistItem? get_item_at_index(uint index);
+        public abstract void add_item(Tatam.FileInfo? item);
+        public abstract void add_items_all(Gee.List<Tatam.FileInfo?> list);
+        public abstract void toggle_status();
+        public abstract void set_shuffling(bool shuffle_on);
+        public abstract void set_repeating(bool repeat_on);
+        public abstract uint get_index();
+        public abstract void set_index(uint index);
+        public abstract uint max_index();
+        public abstract bool has_previous();
+        public abstract bool has_next();
+        public abstract void next();
+        public abstract void previous();
+        public abstract void remove_item_at_index(uint index);
+        public abstract void remove_all();
+        public abstract void set_artwork_size(uint size);
+        public abstract void load_list_from_file(string m3u_file_path) throws FileError;
+        public signal void item_activated(uint index, Tatam.FileInfo item);
+        public signal void playlist_changed();
+    }
+    
+    public class PlaylistBox : Bin, PlaylistBoxInterface {
         private GLib.ListStore? store;
         private ScrolledWindow? scrolled;
         private FileInfoAdapter freader;
         private Tracker tracker;
         private ListBox? list_box;
-        public int image_size { get; set; }
-        public string? name { get; set; }
-
-        public signal void changed(Gee.List<string> file_path_list);
-        public signal void row_activated(uint index, Tatam.FileInfo file_info);
+        public string? playlist_name { get; set; }
+        public uint image_size { get; set; }
         
         public PlaylistBox() {
             freader = new FileInfoAdapter();
@@ -49,7 +74,8 @@ namespace Tatam {
                     list_box.row_activated.connect((row) => {
                             PlaylistItem? item = row as PlaylistItem;
                             if (item != null) {
-                                row_activated(row.get_index(), item.file_info);
+                                set_index(item.get_index());
+                                item_activated(tracker.current, item.file_info);
                             }
                         });
                 }
@@ -58,140 +84,70 @@ namespace Tatam {
             add(scrolled);
         }
 
-        public Tatam.FileInfo get_current_track_file_info() {
-            return get_item().file_info;
+        public uint get_list_size() {
+            return store.get_n_items();
+        }
+
+        public Tatam.FileInfo? get_file_info() {
+            return (Tatam.FileInfo?) store.get_item(tracker.current);
         }
         
-        public PlaylistItem? get_item(int index = -1) {
-            PlaylistItem? item = (PlaylistItem?) list_box.get_row_at_index(index < 0 ? (int) tracker.current : index);
-            debug("PlaylistBox.get_item: index = %d, track title = %s", index, item != null ? item.track_title : "null");
+        public Tatam.FileInfo? get_file_info_at_index(uint index) {
+            return (Tatam.FileInfo?) store.get_item(index);
+        }
+
+        public PlaylistItem? get_current_item() {
+            return get_item_at_index(tracker.current);
+        }
+
+        public PlaylistItem? get_item_at_index(uint index) {
+            PlaylistItem? item = (PlaylistItem?) list_box.get_row_at_index((int) index);
+            debug("PlaylistBox.get_item: index = %u, track title = %s", index, item != null ? item.track_title : "null");
             return item;
         }
         
-        public void on_click_at_index(int index) {
-            set_track(index);
-            var item = get_item(index);
-            if (item != null) {
-                item.clicked();
-            }
-        }
-            
-        public void append_list(Gee.List<Tatam.FileInfo?> file_list) {
-            foreach (Tatam.FileInfo? file_info in file_list) {
-                add_item(file_info);
-            }
-        }
-    
         public void add_item(Tatam.FileInfo? file_info) {
             if (file_info != null) {
                 store.append(file_info);
                 tracker.reset(get_list_size(), tracker.current);
+                playlist_changed();
             }
         }
 
-        public int get_index_from_path(string file_path) {
-            Tatam.FileInfo? file = null;
-            int i = 0;
-            do {
-                file = (Tatam.FileInfo?) store.get_item(i++);
-                if (file != null) {
-                    if (file_path.collate(file.path) == 0) {
-                        return --i;
-                    }
+        public void add_items_all(Gee.List<Tatam.FileInfo?> file_list) {
+            foreach (Tatam.FileInfo? file_info in file_list) {
+                if (file_info != null) {
+                    store.append(file_info);
                 }
-            } while (file != null);
-            return -1;
-        }
-
-        public Tatam.FileInfo? get_file_info_from_path(string path) {
-            Tatam.FileInfo? file = null;
-            int i = 0;
-            do {
-                file = (Tatam.FileInfo?) store.get_item(i++);
-                if (file != null) {
-                    if (path.collate(file.path) == 0) {
-                        return file;
-                    }
-                }
-            } while (file != null);
-            return null;
-        }
-
-        public Gee.List<string> get_file_path_list() {
-            var list = new Gee.ArrayList<string>();
-            Tatam.FileInfo? file = null;
-            int i = 0;
-            do {
-                file = (Tatam.FileInfo?) store.get_item(i++);
-                if (file != null) {
-                    list.add(file.path);
-                }
-            } while (file != null);
-
-            foreach (string a in list) {
-                debug("PlaylistBox.get_file_path_list: %s", a);
             }
-            
-            return list;
-        }
-
-        public void append_list_from_path(string file_path) {
-            Gee.List<Tatam.FileInfo?> new_playlist = new Gee.ArrayList<Tatam.FileInfo?>();
-
-            Tatam.FileType file_type;
-            try {
-                file_type = Tatam.Files.get_file_type(file_path);
-                switch (file_type) {
-                case Tatam.FileType.FILE:
-                    new_playlist.add(freader.read_metadata_from_path(file_path));
-                    break;
-                case Tatam.FileType.DISC:
-                case Tatam.FileType.DIRECTORY:
-                    new_playlist = Tatam.Files.find_file_infos_recursively(file_path);
-                    break;
-                case Tatam.FileType.PARENT:
-                default:
-                    return;
-                }
-            } catch (FileError e) {
-                stderr.printf("new playlist creation error.\n");
-                return;
-            }
-
-            if (new_playlist.size == 0) {
-                return;
-            }
-
-            append_list(new_playlist);
-
             tracker.reset(get_list_size(), tracker.current);
-            debug("playlist append list: current track = %u", tracker.current);
         }
 
-        public void delete_track_at_index(int n) {
+        public void remove_item_at_index(uint n) {
             store.remove(n);
             tracker.reset(get_list_size(), tracker.current < tracker.max ? tracker.current : tracker.max - 1);
+            playlist_changed();
         }
         
-        public uint get_max_track() {
+        public uint max_index() {
             return tracker.max;
         }
 
-        public bool track_is_last() {
-            return !tracker.has_next();
+        public bool has_next() {
+            return tracker.has_next();
         }
 
-        public bool track_is_first() {
-            return !tracker.has_prev();
+        public bool has_previous() {
+            return tracker.has_prev();
         }
 
-        public void set_track(int index) {
+        public void set_index(uint index) {
             PlaylistItem? item = null;
-            int size = (int) get_list_size();
-            debug("PlaylistBox.set_track: index = %d, size = %d, current track = %u", index, size, tracker.current);
-            int i = 0;
+            uint size = get_list_size();
+            debug("PlaylistBox.set_track: index = %u, size = %u, current track = %u", index, size, tracker.current);
+            uint i = 0;
             do {
-                item = get_item(i);
+                item = get_item_at_index(i);
                 if (item != null) {
                     if (i == index) {
                         if (i == tracker.current) {
@@ -210,61 +166,48 @@ namespace Tatam {
         }
 
         public void toggle_status() {
-            PlaylistItem? item = get_item((int) tracker.current);
+            PlaylistItem? item = get_current_item();
             item.clicked();
             item.queue_draw();
         }
         
-        public uint get_track() {
+        public uint get_index() {
             return tracker.current;
         }
 
-        public void toggle_shuffle() {
-            tracker.toggle_shuffle();
+        public void set_shuffling(bool shuffle_on) {
+            tracker.set_shuffling(shuffle_on);
         }
 
-        public void toggle_repeat() {
-            tracker.toggle_repeat();
+        public void set_repeating(bool repeat_on) {
+            tracker.set_repeating(repeat_on);
         }
 
-        public void move_to_next_track() {
-            move_cursor((int) tracker.inc());
-            set_track((int)tracker.current);
+        public void next() {
+            tracker.inc();
+            set_index(tracker.current);
         }
 
-        public void move_to_prev_track() {
-            move_cursor((int) tracker.dec());
-            set_track((int)tracker.current);
+        public void previous() {
+            tracker.dec();
+            set_index(tracker.current);
         }
 
-        public void move_cursor(int index) {
-            debug("playlist move cursor to %d", index);
-            list_box.select_row((ListBoxRow) get_item(index));
+        public void move_cursor(uint index) {
+            debug("playlist move cursor to %u", index);
+            list_box.select_row((ListBoxRow) get_item_at_index(index));
         }
 
-        public Tatam.FileInfo? nth_track_data(uint n) {
-            return (Tatam.FileInfo?) store.get_item(n);
-        }
-
-        public Tatam.FileInfo? track_data() {
-            debug(tracker.current.to_string() + "th data:");
-            if (tracker.current <= tracker.max) {
-                return nth_track_data(tracker.current);
-            } else {
-                return null;
-            }
-        }
-
-        public void clear() {
+        public void remove_all() {
             store.remove_all();
             tracker.reset(0, 0);
         }
 
-        public void resize_artworks(int size) {
+        public void set_artwork_size(uint size) {
             PlaylistItem? item = null;
             int i = 0;
             do {
-                item = get_item(i);
+                item = get_item_at_index(i);
                 if (item != null) {
                     item.resize_image(size);
                 }
@@ -272,74 +215,42 @@ namespace Tatam {
             } while (item != null);
             image_size = size;
         }
-        
-        public void new_list_from_path(string path) {
-            store.remove_all();
-            tracker.reset(0, 0);
-            append_list_from_path(path);
-        }
 
         public void load_list_from_file(string m3u_file_path) throws FileError {
             string contents;
             if (GLib.FileUtils.test(m3u_file_path, FileTest.EXISTS)) {
                 GLib.FileUtils.get_contents(m3u_file_path, out contents);
                 Gee.List<string> file_path_list = Tatam.StringUtils.array_to_list(contents.split("\n"));
-                store.remove_all();
+                remove_all();
                 foreach (string file_path in file_path_list) {
-                    store.append(freader.read_metadata_from_path(file_path));
+                    add_item(freader.read_metadata_from_path(file_path));
                 }
                 tracker.reset(0, 0);
+                playlist_changed();
             }
-        }
-        
-        private void create_from_directory (string dir, ref Gee.List<Tatam.FileInfo?> playlist, bool recursive)
-        throws GLib.Error {
-            Gee.List<string> dir_list;
-            Gee.List<Tatam.FileInfo?> file_list;
-
-            try {
-                Tatam.Files.find_dir_files(dir, out dir_list, out file_list);
-            } catch (FileError e) {
-                return;
-            }
-
-            if (file_list.size > 0) {
-                playlist.add_all((owned) file_list);
-            }
-
-            if (recursive) {
-                foreach (string sub_dir in dir_list) {
-                    create_from_directory(
-                        Path.build_path(Path.DIR_SEPARATOR_S, dir, sub_dir), ref playlist, recursive);
-                }
-            }
-        }
-
-        private int get_image_size_local() {
-            return image_size;
         }
         
         private Widget create_list_item(Object object) {
-            PlaylistItem list_item = new PlaylistItem((Tatam.FileInfo) object, get_image_size_local());
+            PlaylistItem list_item = new PlaylistItem((Tatam.FileInfo) object, image_size);
             {
                 list_item.set_index(get_list_size());
                 list_item.menu_activated.connect((type, index) => {
-                        Tatam.FileInfo file_info = get_item((int) index).file_info;
+                        Tatam.FileInfo file_info = get_file_info_at_index(index);
                         uint size = get_list_size();
                         if (type == MenuType.REMOVE) {
                             store.remove(index);
-                            changed(get_file_path_list());
+                            playlist_changed();
                         } else if (type == MenuType.MOVE_UP) {
                             if (index > 0) {
                                 store.insert(index - 1, file_info);
                                 store.remove(index + 1);
-                                changed(get_file_path_list());
+                                playlist_changed();
                             }
                         } else if (type == MenuType.MOVE_DOWN) {
                             if (index < size - 1) {
                                 store.insert(index + 2, file_info);
                                 store.remove(index);
-                                changed(get_file_path_list());
+                                playlist_changed();
                             }
                         }
                     });
@@ -347,12 +258,12 @@ namespace Tatam {
             return list_item;
         }
 
-        private uint get_list_size() {
-            uint i = 0;
-            while (store.get_item(i) != null) {
-                i++;
+        public void on_click_at_index(int index) {
+            set_index(index);
+            var item = get_item_at_index(index);
+            if (item != null) {
+                item.clicked();
             }
-            return i;
         }
     }
 }

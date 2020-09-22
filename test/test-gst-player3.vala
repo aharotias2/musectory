@@ -76,7 +76,7 @@ public class TestGstPlayer : TestBase {
                     controller.play_button_clicked.connect(() => {
                             debug("controller.play_button_clicked");
                             if (!playing) {
-                                gst_player.play(playlist_view.get_current_track_file_info().path);
+                                gst_player.play(playlist_view.get_file_info().path);
                                 playing = true;
                             } else {
                                 gst_player.unpause();
@@ -88,13 +88,13 @@ public class TestGstPlayer : TestBase {
                         });
                     controller.next_button_clicked.connect(() => {
                             debug("controller.next_button_clicked");
-                            if (!playlist_view.track_is_last()) {
+                            if (playlist_view.has_next()) {
                                 debug(">");
-                                playlist_view.move_to_next_track();
+                                playlist_view.next();
                                 debug(">");
                                 set_controller_artwork();
                                 debug(">");
-                                gst_player.play(playlist_view.get_current_track_file_info().path);
+                                gst_player.play(playlist_view.get_file_info().path);
                                 debug(">");
                             }
                         });
@@ -103,11 +103,11 @@ public class TestGstPlayer : TestBase {
                             if (controller.music_current_time > 1000) {
                                 controller.music_current_time = 0;
                                 gst_player.quit();
-                                gst_player.play(playlist_view.get_current_track_file_info().path);
-                            } else if (!playlist_view.track_is_first()) {
-                                playlist_view.move_to_prev_track();
+                                gst_player.play(playlist_view.get_file_info().path);
+                            } else if (playlist_view.has_previous()) {
+                                playlist_view.previous();
                                 set_controller_artwork();
-                                gst_player.play(playlist_view.get_current_track_file_info().path);
+                                gst_player.play(playlist_view.get_file_info().path);
                             }
                         });
                     controller.time_position_changed.connect((new_value) => {
@@ -128,7 +128,7 @@ public class TestGstPlayer : TestBase {
                         {
                             playlist_view.image_size = 48;
 
-                            playlist_view.row_activated.connect((index, file_info) => {
+                            playlist_view.item_activated.connect((index, file_info) => {
                                     
                                 });
                         }
@@ -165,11 +165,11 @@ public class TestGstPlayer : TestBase {
             });
         gst_player.finished.connect(() => {
                 debug("gst_player.finished was called");
-                if (!playlist_view.track_is_last()) {
+                if (playlist_view.has_next()) {
                     debug("playlist has next track");
-                    playlist_view.move_to_next_track();
+                    playlist_view.next();
                     debug("playlist moved to next track");
-                    string next_path = playlist_view.get_current_track_file_info().path;
+                    string next_path = playlist_view.get_file_info().path;
                     gst_player.play(next_path);
                 } else {
                     debug("playing all files is completed!");
@@ -185,7 +185,7 @@ public class TestGstPlayer : TestBase {
     }
 
     private void set_controller_artwork() {
-        Tatam.FileInfo? info = playlist_view.get_current_track_file_info();
+        Tatam.FileInfo? info = playlist_view.get_file_info();
         if (info == null) {
             return;
         }
@@ -195,7 +195,7 @@ public class TestGstPlayer : TestBase {
             controller.music_title = info.name;
         }
         controller.music_total_time = info.time_length.milliseconds;
-        controller.activate_buttons(playlist_view.track_is_first(), playlist_view.track_is_last());
+        controller.activate_buttons(!playlist_view.has_previous(), !playlist_view.has_next());
         if (info.artwork != null) {
             controller.set_artwork(info.artwork);
         }
@@ -226,12 +226,12 @@ public class TestGstPlayer : TestBase {
             }
             print("list is ok\n");
 
-            playlist_view.clear();
+            playlist_view.remove_all();
             foreach (Tatam.FileInfo? file_info in playlist) {
                 playlist_view.add_item(file_info);
             }
 
-            controller.activate_buttons(playlist_view.track_is_first(), playlist_view.track_is_last());
+            controller.activate_buttons(!playlist_view.has_previous(), !playlist_view.has_next());
         } catch (FileError e) {
             stderr.printf(@"FileError: $(e.message)\n");
         }

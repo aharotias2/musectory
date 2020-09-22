@@ -39,7 +39,16 @@ namespace Tatam {
                 return playing_status == State.PLAYING;
             }
         }
-                
+
+        public State status {
+            private set {
+                playing_status = value;
+            }
+            get {
+                return playing_status;
+            }
+        }
+        
         public GstPlayer() {
             volume_value = 0.5;
             init();

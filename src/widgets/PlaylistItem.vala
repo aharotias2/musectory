@@ -21,7 +21,7 @@ using Gtk, Gdk, Pango;
 
 namespace Tatam {
     public class PlaylistItem : ListBoxRow {
-        public int image_size { get; set; }
+        public uint image_size { get; set; }
         private PlaylistItemStatus status;
         private PlaylistDrawingArea icon_area;
         public string track_title { get; private set; }
@@ -33,10 +33,10 @@ namespace Tatam {
 
         private Image? image_artwork;
             
-        public PlaylistItem(Tatam.FileInfo file, int image_size) {
+        public PlaylistItem(Tatam.FileInfo file, uint image_size) {
             file_info = file;
             status = PlaylistItemStatus.NORMAL;
-            debug("PlaylistItem.image_size = %d", image_size);
+            debug("PlaylistItem.image_size = %u", image_size);
             this.image_size = image_size;
             EventBox ev_box = new EventBox();
             {
@@ -49,7 +49,7 @@ namespace Tatam {
                             image_artwork = new Image.from_pixbuf(
                                 Tatam.PixbufUtils.scale_limited(file.artwork, image_size));
                             {
-                                image_artwork.set_size_request(image_size, image_size);
+                                image_artwork.set_size_request((int) image_size, (int) image_size);
                                 image_artwork.halign = Align.CENTER;
                                 image_artwork.valign = Align.CENTER;
                             }
@@ -58,7 +58,7 @@ namespace Tatam {
                         icon_area = new PlaylistDrawingArea();
                         {
                             icon_area.status = PlaylistItemStatus.NORMAL;
-                            icon_area.set_area_size(image_size);
+                            icon_area.set_area_size((int) image_size);
                             icon_area.halign = Align.CENTER;
                             icon_area.valign = Align.CENTER;
                             icon_area.index = get_index();
@@ -203,7 +203,7 @@ namespace Tatam {
                 (file.date != 0 ? " (%u)".printf(file.date) : ""),
                 (file.genre != null ? " [%s]".printf(file.genre) : "")
                 );
-            tooltip_image = file.artwork.scale_simple(image_size, image_size, Gdk.InterpType.BILINEAR);
+            tooltip_image = PixbufUtils.scale_limited(file.artwork, image_size);
             query_tooltip.connect ((x, y, keyboard_tooltip, tooltip) => {
                     tooltip.set_icon(tooltip_image);
                     tooltip.set_text(tooltip_text);
@@ -258,11 +258,10 @@ namespace Tatam {
             }
         }
 
-        public void resize_image(int size) {
+        public void resize_image(uint size) {
             if (image_size != size) {
-                image_artwork.pixbuf = file_info.artwork.scale_simple(
-                    size, size, Gdk.InterpType.BILINEAR);
-                icon_area.set_area_size(size);
+                image_artwork.pixbuf = PixbufUtils.scale_limited(file_info.artwork, size);
+                icon_area.set_area_size((int) size);
                 image_size = size;
             }
         }

@@ -26,7 +26,7 @@ public class TestPlaylist : TestBase {
                         location_entry.activate.connect(() => {
                                 if (GLib.FileUtils.test(location_entry.text, FileTest.IS_DIR)) {
                                     var file_list = Tatam.Files.get_file_info_list_in_dir(location_entry.text);
-                                    playlist.append_list(file_list);
+                                    playlist.add_items_all(file_list);
                                 }
                             });
                     }

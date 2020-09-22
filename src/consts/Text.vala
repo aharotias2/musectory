@@ -61,6 +61,7 @@ namespace Tatam {
         public const string TOOLTIP_FINDER_ZOOMOUT = "Zoom out";
         public const string TOOLTIP_FINDER_GO_UP = "Go up";
         public const string TOOLTIP_REFRESH_FINDER = "Reload";
+        public const string TOOLTIP_SAVE_BUTTON = "Save this playlist";
         public const string ERROR_WRITE_CONFIG = "Error: can not write to config file.\n";
         public const string ERROR_NO_MPLAYER = "mplayer command does not exist.\n";
         public const string ERROR_UNKOWN_OPTION = "%s: Unknown command line options \"%s\"";

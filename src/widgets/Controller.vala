@@ -20,14 +20,38 @@
 using Gtk;
 
 namespace Tatam {
-    public class Controller : Bin {
+    public interface ControllerInterface {
         public const double SMALL_STEP_MILLISECONDS = 100.0;
         public const double BIG_STEP_MILLISECONDS = 10000.0;
-        
-        public enum PlayPauseButtonState {
-            PLAY, PAUSE, FINISHED
-        }
+        public signal void artwork_clicked();
+        public signal void play_button_clicked();
+        public signal void pause_button_clicked();
+        public signal void next_button_clicked();
+        public signal void prev_button_clicked();
+        public signal void time_position_changed(double value);
+        public signal void volume_changed(double value);
+        public signal void shuffle_button_toggled(bool shuffle_on);
+        public signal void repeat_button_toggled(bool repeat_on);
 
+        public abstract PlayPauseButtonState play_pause_button_state { get; set; }
+        public abstract uint music_total_time { get; set; }
+        public abstract uint music_current_time { get; set; }
+        public abstract string music_title { get; set; }
+        public abstract uint artwork_size { get; set; }
+        public abstract double volume { get; set; }
+
+        public abstract void set_artwork(Gdk.Pixbuf pixbuf);
+        public abstract void show_buttons();
+        public abstract void hide_buttons();
+        public abstract void show_artwork();
+        public abstract void hide_artwork();
+        public abstract void activate_buttons(bool track_is_first, bool track_is_last);
+        public abstract void deactivate_buttons();
+        public abstract void pause();
+        public abstract void unpause();
+    }
+
+    public class Controller : Bin, ControllerInterface {
         private Button artwork_button;
         private Image artwork;
         private ToolButton play_pause_button;
@@ -48,16 +72,6 @@ namespace Tatam {
         private uint artwork_size_value;
         private bool running;
         
-        public signal void artwork_clicked();
-        public signal void play_button_clicked();
-        public signal void pause_button_clicked();
-        public signal void next_button_clicked();
-        public signal void prev_button_clicked();
-        public signal void time_position_changed(double value);
-        public signal void volume_changed(double value);
-        public signal void shuffle_button_toggled(bool shuffle_on);
-        public signal void repeat_button_toggled(bool repeat_on);
-
         public PlayPauseButtonState play_pause_button_state {
             get {
                 return play_pause_button_state_value;
@@ -159,6 +173,7 @@ namespace Tatam {
             }
             set {
                 artwork_size_value = value;
+                artwork.pixbuf = PixbufUtils.scale_limited(original_pixbuf, artwork_size_value);
             }
         }
 
@@ -170,9 +185,12 @@ namespace Tatam {
                 volume_bar.set_value(value);
             }
         }
+
+        private Gdk.Pixbuf original_pixbuf;
         
         public void set_artwork(Gdk.Pixbuf pixbuf) {
-            Gdk.Pixbuf resized_pixbuf = Tatam.PixbufUtils.scale_limited(pixbuf, (int) this.artwork_size);
+            original_pixbuf = pixbuf;
+            Gdk.Pixbuf resized_pixbuf = Tatam.PixbufUtils.scale_limited(original_pixbuf, (int) this.artwork_size);
             artwork.pixbuf = resized_pixbuf;
         }
         
@@ -212,11 +230,11 @@ namespace Tatam {
                                 switch (play_pause_button_state) {
                                 case PlayPauseButtonState.FINISHED:
                                 case PlayPauseButtonState.PAUSE: {
-                                    play_pause_button_state = PlayPauseButtonState.PLAY;
+                                    unpause();
                                     play_button_clicked();
                                 } break;
                                 case PlayPauseButtonState.PLAY: {
-                                    play_pause_button_state = PlayPauseButtonState.PAUSE;
+                                    pause();
                                     pause_button_clicked();
                                 } break;
                                 }
@@ -421,6 +439,14 @@ namespace Tatam {
             play_pause_button.sensitive = false;
             prev_track_button.sensitive = false;
             next_track_button.sensitive = false;
+        }
+
+        public void pause() {
+            play_pause_button_state = PlayPauseButtonState.PAUSE;
+        }
+
+        public void unpause() {
+            play_pause_button_state = PlayPauseButtonState.PLAY;
         }
     }
 }

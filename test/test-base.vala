@@ -104,7 +104,7 @@ public class TestBase {
         }
 
         if (!map.has_key("-d")) {
-            map.set("-d", File.new_for_path("~").get_path());
+            map.set("-d", Environment.get_home_dir());
         }
         
         return map;

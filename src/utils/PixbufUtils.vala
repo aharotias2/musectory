@@ -21,13 +21,13 @@ using Gdk;
 
 namespace Tatam {
     class PixbufUtils {
-        public static Gdk.Pixbuf scale_limited(Gdk.Pixbuf pixbuf, int size) {
-            size = int.max(10, size);
+        public static Gdk.Pixbuf scale_limited(Gdk.Pixbuf pixbuf, uint size) {
+            size = uint.max(10, size);
             if (pixbuf.width >= pixbuf.height) {
                 if (size >= pixbuf.width) {
                     return pixbuf.copy();
                 } else {
-                    return pixbuf.scale_simple(size,
+                    return pixbuf.scale_simple((int) size,
                                                (int) (size * ((double) pixbuf.height / pixbuf.width)),
                                                Gdk.InterpType.BILINEAR);
                 }
@@ -35,22 +35,22 @@ namespace Tatam {
                 if (size >= pixbuf.height) {
                     return pixbuf.copy();
                 } else {
-                    return pixbuf.scale_simple((int) (size * ((double) pixbuf.width / pixbuf.height)),
-                                               size,
+                    return pixbuf.scale_simple((int) ((int) size * ((double) pixbuf.width / pixbuf.height)),
+                                               (int) size,
                                                Gdk.InterpType.BILINEAR);
                 }
             }
         }
 
-        public static Gdk.Pixbuf scale(Gdk.Pixbuf pixbuf, int size) {
-            size = int.max(10, size);
+        public static Gdk.Pixbuf scale(Gdk.Pixbuf pixbuf, uint size) {
+            size = uint.max(10, size);
             if (pixbuf.width >= pixbuf.height) {
-                return pixbuf.scale_simple(size,
+                return pixbuf.scale_simple((int) size,
                                            (int) (size * ((double) pixbuf.height / pixbuf.width)),
                                            Gdk.InterpType.BILINEAR);
             } else {
                 return pixbuf.scale_simple((int) (size * ((double) pixbuf.width / pixbuf.height)),
-                                           size,
+                                           (int) size,
                                            Gdk.InterpType.BILINEAR);
             }
         }

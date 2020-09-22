@@ -20,7 +20,22 @@
 using Gtk;
 
 namespace Tatam {
-    public class Finder : Bin {
+    public interface FinderInterface {
+        public abstract bool use_popover { get; set; }
+        public abstract string dir_path { get; set; }
+        public abstract bool activate_on_single_click { get; set; }
+        public signal void dir_changed(string dir_path);
+        public signal void bookmark_button_clicked(string file_path);
+        public signal void add_button_clicked(string file_path);
+        public signal void play_button_clicked(string file_path);
+        public signal void icon_image_resized(int icon_size);
+        public signal void file_button_clicked(string file_path);
+        public abstract async void change_dir(string dir_path);
+        public abstract void zoom_out();
+        public abstract void zoom_in();
+    }
+
+    public class Finder : Bin, FinderInterface {
         public class Builder {
             public Gdk.Pixbuf parent_pixbuf_value;
             public Gdk.Pixbuf folder_pixbuf_value;
@@ -68,13 +83,6 @@ namespace Tatam {
         public bool use_popover { get; set; }
         public string dir_path { get; set; }
         public bool activate_on_single_click { get; set; }
-
-        public signal void dir_changed(string dir_path);
-        public signal void bookmark_button_clicked(string file_path);
-        public signal void add_button_clicked(string file_path);
-        public signal void play_button_clicked(string file_path);
-        public signal void icon_image_resized(int icon_size);
-        public signal void file_button_clicked(string file_path);
 
         public static Finder create_default_instance() {
             try {
@@ -218,13 +226,6 @@ namespace Tatam {
                             });
                         break;
 
-                    case Tatam.FileType.PARENT:
-                        item_widget.clicked.connect(() => {
-                                change_dir.begin(file_info.path);
-                                file_button_clicked(file_info.path);
-                            });
-                        break;
-
                     case Tatam.FileType.FILE:
                         item_widget.clicked.connect(() => {
                                 play_button_clicked(file_info.path);
@@ -266,17 +267,13 @@ namespace Tatam {
             dir_changed(dir_path);
         }
 
-        public void set_default_icon_size(int icon_size) {
+        private void set_default_icon_size(int icon_size) {
             zoom_level = get_size_level(icon_size);
         }
         
-        public void change_cursor(Gdk.CursorType cursor_type) {
+        private void change_cursor(Gdk.CursorType cursor_type) {
             finder_container.get_parent_window().set_cursor(
                 new Gdk.Cursor.for_display(Gdk.Screen.get_default().get_display(), cursor_type));
-        }
-
-        public void hide_while_label() {
-            while_label.visible = false;
         }
 
         public void zoom_out() {

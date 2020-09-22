@@ -20,13 +20,12 @@
 using Gtk;
 
 namespace Tatam {
-    public class Sidebar : Frame {
-        private TreeView bookmark_tree;
-        private TreeViewColumn bookmark_title_col;
-        private TreeViewColumn bookmark_del_col;
-        private TreeStore bookmark_store;
-        private TreeIter playlist_root;
-        private TreeIter bookmark_root;
+    public interface SidebarInterface {
+        public abstract void add_bookmark(string file_path);
+        public abstract bool has_playlist(string playlist_name);
+        public abstract void add_playlist(string playlist_name, string playlist_path);
+        public abstract void remove_bookmark_all();
+        public abstract void remove_playlist_all();
 
         public signal void bookmark_directory_selected(string dir_path);
         public signal bool bookmark_del_button_clicked(string dir_path);
@@ -34,6 +33,15 @@ namespace Tatam {
         public signal bool playlist_del_button_clicked(string playlist_path);
         public signal void file_chooser_called();
         public signal void bookmark_added(string file_path);
+    }
+
+    public class Sidebar : Frame, SidebarInterface {
+        private TreeView bookmark_tree;
+        private TreeViewColumn bookmark_title_col;
+        private TreeViewColumn bookmark_del_col;
+        private TreeStore bookmark_store;
+        private TreeIter playlist_root;
+        private TreeIter bookmark_root;
         
         public Sidebar() {
             var frame = new Frame(null);
@@ -220,7 +228,7 @@ namespace Tatam {
                            4, Text.EMPTY);
         }
 
-        public bool playlist_exists() {
+        public bool has_playlist(string playlist_name) {
             TreeStore store = bookmark_tree.model as TreeStore;
             if(store.iter_has_child(playlist_root)) {
                 TreeIter iter;
@@ -229,7 +237,7 @@ namespace Tatam {
                     Value val;
                     store.get_value(iter, 1, out val);
                     string val_name = (string) val;
-                    if (val_name == name) {
+                    if (val_name == playlist_name) {
                         return true;
                     }
                 } while (store.iter_next(ref iter));

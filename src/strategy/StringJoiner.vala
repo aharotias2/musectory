@@ -35,23 +35,27 @@ namespace Tatam {
             parts_list.add(parts);
         }
 
+        public void add_all(Gee.List<string> string_list) {
+            foreach (string parts in string_list) {
+                parts_list.add(parts);
+            }
+        }
+        
         public string to_string() {
-            string result;
+            StringBuilder builder = new StringBuilder();
             if (prefix != null) {
-                result = prefix;
-            } else {
-                result = "";
+                builder.append(prefix);
             }
             for (int i = 0; i < parts_list.size; i++) {
-                result += parts_list[i];
+                builder.append(parts_list[i]);
                 if (delimitter != null && i < parts_list.size - 1) {
-                    result += delimitter;
+                    builder.append(delimitter);
                 }
             }
             if (postfix != null) {
-                result += postfix;
+                builder.append(postfix);
             }
-            return result;
+            return builder.str;
         }
     }
 }

@@ -20,7 +20,23 @@
 using Gtk;
 
 namespace Tatam {
-    public class HeaderBar : Gtk.HeaderBar {
+    public interface HeaderBarInterface {
+        public abstract SwitchButtonState switch_button_state { get; set; }
+        public abstract FoldButtonState fold_button_state { get; set; }
+        public abstract string? switch_button_icon_name { owned get; set; }
+
+        public signal void switch_button_clicked(SwitchButtonState switch_button_state);
+        public signal void add_button_clicked();
+        public signal void fold_button_clicked(FoldButtonState fold_button_state);
+        public signal void about_button_clicked();
+
+        public abstract void disable_switch_button();
+        public abstract void enable_switch_button();
+        public abstract void show_add_button();
+        public abstract void hide_add_button();
+    }
+
+    public class HeaderBar : Gtk.HeaderBar, HeaderBarInterface {
         public enum SwitchButtonState {
             FINDER, PLAYLIST
         }
@@ -32,11 +48,6 @@ namespace Tatam {
         private Button add_button;
         private ToggleButton fold_button;
         private Button about_button;
-        
-        public signal void switch_button_clicked(SwitchButtonState switch_button_state);
-        public signal void add_button_clicked();
-        public signal void fold_button_clicked(FoldButtonState fold_button_state);
-        public signal void about_button_clicked();
 
         private SwitchButtonState switch_button_state_value;
         

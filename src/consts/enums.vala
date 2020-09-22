@@ -85,6 +85,10 @@ namespace Tatam {
         CREATE
     }
     
+    public enum PlayPauseButtonState {
+        PLAY, PAUSE, FINISHED
+    }
+        
 /* オプション用のデータ型 */
     public enum FinderLayout {
         GRID,
