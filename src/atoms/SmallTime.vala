@@ -18,7 +18,21 @@
  */
 
 namespace Tatam {
-    public class SmallTime : GLib.Object {
+    public interface SmallTimeInterface {
+        public const string TIME_PATTERN = "^([0-9]*:)?([0-5]?[0-9]:)?[0-5]?[0-9](\\.[0-5])?$";
+        public const uint HOUR_IN_MILLISECONDS = 3600000;
+        public const uint MINUTE_IN_MILLISECONDS = 60000;
+        public const uint SECOND_IN_MILLISECONDS = 1000;
+        public const uint DECISECOND_IN_MILLISECONDS = 100;
+        public abstract uint milliseconds { get; set; }
+        public abstract double seconds { get; }
+        public abstract SmallTime minus(SmallTime subject);
+        public abstract string to_string();
+    }
+
+    public class SmallTime : GLib.Object, SmallTimeInterface {
+        public static Regex? time_regex;
+
         public enum FormatType {
             HOURS_MINUTES_SECONDS_DECISECONDS,
             MINUTES_SECONDS_DECISECONDS,
@@ -26,13 +40,6 @@ namespace Tatam {
             MINUMUM,
         }
         
-        public const string TIME_PATTERN = "^([0-9]*:)?([0-5]?[0-9]:)?[0-5]?[0-9](\\.[0-5])?$";
-        public const uint HOUR_IN_MILLISECONDS = 3600000;
-        public const uint MINUTE_IN_MILLISECONDS = 60000;
-        public const uint SECOND_IN_MILLISECONDS = 1000;
-        public const uint DECISECOND_IN_MILLISECONDS = 100;
-        public static Regex? time_regex = null;
-
         private uint hours_value;
         private uint minutes_value;
         private uint seconds_value;

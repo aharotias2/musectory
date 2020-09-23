@@ -195,12 +195,6 @@ namespace Tatam {
         }
         
         public Controller() {
-            this.artwork_size_value = 128;
-            this.play_pause_button_state = PlayPauseButtonState.FINISHED;
-            this.music_total_time_value = new SmallTime(0);
-            this.music_current_time_value = new SmallTime(0);
-            this.music_rest_time_value = new SmallTime(0);
-            
             Box main_box = new Box(Orientation.HORIZONTAL, 2);
             {
                 artwork_button = new Button();
@@ -402,6 +396,11 @@ namespace Tatam {
             }
 
             add(main_box);
+            artwork_size_value = 128;
+            music_total_time_value = new SmallTime(0);
+            music_current_time_value = new SmallTime(0);
+            music_rest_time_value = new SmallTime(0);
+            play_pause_button_state = PlayPauseButtonState.FINISHED;
             deactivate_buttons();
         }
 

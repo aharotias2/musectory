@@ -20,7 +20,18 @@
 using Gst;
 
 namespace Tatam {
-    public class GstPlayer : GLib.Object {
+    public interface MusicPlayerInterface {
+        public abstract State status { get; set; }
+        public abstract double volume { get; set; }
+        public abstract void play(string file_path);
+        public abstract void set_position(SmallTime small_time);
+        public abstract void pause();
+        public abstract void unpause();
+        public abstract void quit();
+        public abstract void destroy();
+    }
+    
+    public class GstPlayer : GLib.Object, MusicPlayerInterface {
         private Element playbin;
         private Gst.State playing_status;
         private double volume_value;
@@ -31,7 +42,7 @@ namespace Tatam {
         public signal void paused();
         public signal void unpaused();
 
-        public bool playing {
+        private bool playing {
             private set {
                 playing_status = value ? State.PLAYING : State.PAUSED;
             }

@@ -57,7 +57,7 @@ namespace Tatam {
         }
         
         public void parse_args(ref unowned string[] args) throws Tatam.Error {
-            for (int i = 0; i < args.length; i++) {
+            for (int i = 1; i < args.length; i++) {
                 OptionKey key;
                 try {
                     key = OptionKey.value_of(args[i]);

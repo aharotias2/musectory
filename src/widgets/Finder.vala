@@ -88,11 +88,11 @@ namespace Tatam {
             try {
                 IconTheme icon_theme = Gtk.IconTheme.get_default();
                 return new Finder.Builder()
-                .file_pixbuf(icon_theme.load_icon(IconName.AUDIO_FILE, max_icon_size, 0))
-                .disc_pixbuf(icon_theme.load_icon(IconName.MEDIA_OPTICAL, max_icon_size, 0))
-                .folder_pixbuf(icon_theme.load_icon(IconName.FOLDER_MUSIC, max_icon_size, 0))
-                .parent_pixbuf(icon_theme.load_icon(IconName.GO_UP, max_icon_size, 0))
-                .build();
+                                 .file_pixbuf(icon_theme.load_icon(IconName.AUDIO_FILE, max_icon_size, 0))
+                                 .disc_pixbuf(icon_theme.load_icon(IconName.MEDIA_OPTICAL, max_icon_size, 0))
+                                 .folder_pixbuf(icon_theme.load_icon(IconName.FOLDER_MUSIC, max_icon_size, 0))
+                                 .parent_pixbuf(icon_theme.load_icon(IconName.GO_UP, max_icon_size, 0))
+                                 .build();
             } catch (GLib.Error e) {
                 stderr.printf(Text.ERROR_LOAD_ICON);
                 Process.exit(1);
@@ -190,6 +190,7 @@ namespace Tatam {
             finder.selection_mode = SelectionMode.NONE;
             finder.halign = Align.START;
             finder.valign = Align.START;
+
             finder_container.add(finder);
 
             int i = 0;
