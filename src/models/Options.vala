@@ -48,7 +48,11 @@ namespace Tatam {
             }
         }
 
-        public void set(OptionKey key, string value) {
+        public void set(OptionKey key, string? value) {
+            if (value == null) {
+                debug("WARNING: Options.set requires arg value is not null");
+                return;
+            }
             config_map.get(key).add(value);
         }
 

@@ -71,6 +71,7 @@ namespace Tatam {
         private SmallTime music_rest_time_value;
         private uint artwork_size_value;
         private bool running;
+        private Gdk.Pixbuf? original_pixbuf;
         
         public PlayPauseButtonState play_pause_button_state {
             get {
@@ -173,7 +174,9 @@ namespace Tatam {
             }
             set {
                 artwork_size_value = value;
-                artwork.pixbuf = PixbufUtils.scale_limited(original_pixbuf, artwork_size_value);
+                if (original_pixbuf != null) {
+                    artwork.pixbuf = PixbufUtils.scale_limited(original_pixbuf, artwork_size_value);
+                }
             }
         }
 
@@ -185,8 +188,6 @@ namespace Tatam {
                 volume_bar.set_value(value);
             }
         }
-
-        private Gdk.Pixbuf original_pixbuf;
         
         public void set_artwork(Gdk.Pixbuf pixbuf) {
             original_pixbuf = pixbuf;

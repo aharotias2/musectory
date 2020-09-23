@@ -109,7 +109,8 @@ public class TatamApplication : AppBase, TatamApplicationInterface {
         } catch (Tatam.Error e) {
             stderr.printf(@"TatamError: $(e.message)\n");
         }
-        if (!FileUtils.test(options.get(Tatam.OptionKey.CONFIG_DIR), FileTest.IS_DIR)) {
+        config_dir = options.get(Tatam.OptionKey.CONFIG_DIR);
+        if (!FileUtils.test(config_dir, FileTest.IS_DIR)) {
             DirUtils.create_with_parents(options.get(Tatam.OptionKey.CONFIG_DIR), 0755);
         }
         if (!FileUtils.test(options.get(Tatam.OptionKey.CSS_PATH), FileTest.IS_REGULAR)) {

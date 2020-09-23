@@ -37,11 +37,8 @@ namespace Tatam {
 
     public class Sidebar : Frame, SidebarInterface {
         private TreeView bookmark_tree;
-        private TreeViewColumn bookmark_title_col;
-        private TreeViewColumn bookmark_del_col;
-        private TreeStore bookmark_store;
-        private TreeIter playlist_root;
-        private TreeIter bookmark_root;
+        private unowned TreeIter? playlist_root;
+        private unowned TreeIter? bookmark_root;
         
         public Sidebar() {
             var frame = new Frame(null);
@@ -50,34 +47,8 @@ namespace Tatam {
                 {
                     bookmark_tree = new TreeView();
                     {
-                        bookmark_title_col = new TreeViewColumn();
-                        {
-                            var bookmark_icon_cell = new CellRendererPixbuf();
-                            var bookmark_label_cell = new CellRendererText();
-                            {
-                                bookmark_label_cell.family = Text.FONT_FAMILY;
-                                bookmark_label_cell.language = Environ.get_variable(Environ.get(), "LANG");
-                            }
-
-                            bookmark_title_col.pack_start(bookmark_icon_cell, false);
-                            bookmark_title_col.pack_start(bookmark_label_cell, true);
-                            bookmark_title_col.add_attribute(bookmark_icon_cell, "icon-name", 0);
-                            bookmark_title_col.add_attribute(bookmark_label_cell, "text", 1);
-                            bookmark_title_col.set_title("label");
-                            bookmark_title_col.sizing = TreeViewColumnSizing.AUTOSIZE;
-                        }
-
-                        bookmark_del_col = new TreeViewColumn();
-                        {
-                            var bookmark_del_cell = new CellRendererPixbuf();
-
-                            bookmark_del_col.pack_start(bookmark_del_cell, false);
-                            bookmark_del_col.add_attribute(bookmark_del_cell, "icon-name", 4);
-                            bookmark_del_col.set_title("del");
-                        }
-
-                        bookmark_store = new TreeStore(5, typeof(string), typeof(string), typeof(string),
-                                                       typeof(MenuType), typeof(string));
+                        TreeStore bookmark_store = new TreeStore(5, typeof(string), typeof(string), typeof(string),
+                                                                 typeof(MenuType), typeof(string));
                         {
                             bookmark_store.append(out bookmark_root, null);
                             bookmark_store.set(bookmark_root,
@@ -97,6 +68,31 @@ namespace Tatam {
                                                2, null, 3, MenuType.CHOOSER, 4, "");
                         }
 
+                        TreeViewColumn bookmark_title_col = new TreeViewColumn();
+                        {
+                            var bookmark_icon_cell = new CellRendererPixbuf();
+                            var bookmark_label_cell = new CellRendererText();
+                            {
+                                bookmark_label_cell.family = Text.FONT_FAMILY;
+                                bookmark_label_cell.language = Environ.get_variable(Environ.get(), "LANG");
+                            }
+
+                            bookmark_title_col.pack_start(bookmark_icon_cell, false);
+                            bookmark_title_col.pack_start(bookmark_label_cell, true);
+                            bookmark_title_col.add_attribute(bookmark_icon_cell, "icon-name", 0);
+                            bookmark_title_col.add_attribute(bookmark_label_cell, "text", 1);
+                            bookmark_title_col.set_title("label");
+                            bookmark_title_col.sizing = TreeViewColumnSizing.AUTOSIZE;
+                        }
+
+                        TreeViewColumn bookmark_del_col = new TreeViewColumn();
+                        {
+                            var bookmark_del_cell = new CellRendererPixbuf();
+
+                            bookmark_del_col.pack_start(bookmark_del_cell, false);
+                            bookmark_del_col.add_attribute(bookmark_del_cell, "icon-name", 4);
+                            bookmark_del_col.set_title("del");
+                        }
 
                         bookmark_tree.activate_on_single_click = true;
                         bookmark_tree.headers_visible = false;
@@ -118,7 +114,7 @@ namespace Tatam {
 
                         bookmark_tree.get_selection().changed.connect(() => {
                                 TreeSelection bookmark_selection = bookmark_tree.get_selection();
-                                TreeStore? temp_store = (TreeStore) bookmark_tree.model;
+                                TreeStore? temp_store = bookmark_tree.model as TreeStore;
 
                                 temp_store.foreach((model, path, iter) => {
                                         Value type;
@@ -187,7 +183,10 @@ namespace Tatam {
                                         playlist_selected(playlist_name, playlist_path);
                                     } else {
                                         if (playlist_del_button_clicked(playlist_path)) {
-                                            ((TreeStore)bookmark_tree.model).remove(ref bm_iter);
+                                            TreeStore? temp_store = bookmark_tree.model as TreeStore;
+                                            if (temp_store != null) {
+                                                temp_store.remove(ref bm_iter);
+                                            }
                                         }
                                     }
                                     break;
@@ -259,6 +258,7 @@ namespace Tatam {
 
         public void remove_bookmark_all() {
             TreeIter bm_iter;
+            TreeStore? bookmark_store = (TreeStore) bookmark_tree.model;
             bookmark_store.iter_children(out bm_iter, bookmark_root);
 
             while (bookmark_store.iter_is_valid(bm_iter)) {
@@ -268,6 +268,7 @@ namespace Tatam {
 
         public void remove_playlist_all() {
             TreeIter bm_iter;
+            TreeStore? bookmark_store = (TreeStore) bookmark_tree.model;
             bookmark_store.iter_children(out bm_iter, playlist_root);
 
             while (bookmark_store.iter_is_valid(bm_iter)) {
