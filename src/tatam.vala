@@ -459,7 +459,8 @@ public class TatamApplication : AppBase, TatamApplicationInterface {
             Gee.List<string> copy_of_list = file_path_list;
             save_playlist_dialog = new Gtk.Dialog.with_buttons(Tatam.PROGRAM_NAME + ": save playlist",
                                                                window,
-                                                               Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT,
+                                                               Gtk.DialogFlags.MODAL
+                                                               | Gtk.DialogFlags.DESTROY_WITH_PARENT,
                                                                Tatam.Text.DIALOG_OK,
                                                                Gtk.ResponseType.ACCEPT,
                                                                Tatam.Text.DIALOG_CANCEL,
@@ -519,7 +520,9 @@ public class TatamApplication : AppBase, TatamApplicationInterface {
             Tatam.DirectoryReader dreader = new Tatam.DirectoryReader(config_dir);
             dreader.file_found.connect((file) => {
                     if (file.get_basename().has_suffix(".m3u")) {
-                        sidebar.add_playlist(remove_extension(file.get_basename()), file.get_path());
+                        string playlist_name = Tatam.FilePathUtils.remove_extension(file.get_basename());
+                        string playlist_path = file.get_path();
+                        sidebar.add_playlist(playlist_name, playlist_path);
                     }
                     return true;
                 });
@@ -533,10 +536,6 @@ public class TatamApplication : AppBase, TatamApplicationInterface {
     
     private string get_playlist_path_from_name(string playlist_name) {
         return config_dir + "/" + playlist_name + ".m3u";
-    }
-
-    private string remove_extension(string file_name) {
-        return file_name.substring(0, file_name.last_index_of_char('.'));
     }
 
     public static int main(string[] args) {
