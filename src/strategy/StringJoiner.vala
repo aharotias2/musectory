@@ -31,8 +31,9 @@ namespace Tatam {
             this.parts_list = new Gee.ArrayList<string>();
         }
 
-        public void add(string parts) {
+        public StringJoiner add(string parts) {
             parts_list.add(parts);
+            return this;
         }
 
         public void add_all(Gee.List<string> string_list) {

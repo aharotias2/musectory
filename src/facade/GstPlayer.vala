@@ -151,5 +151,9 @@ namespace Tatam {
                 playbin.set("volume", volume_value);
             }
         }
+
+        public void destroy() {
+            playbin = null;
+        }
     }
 }

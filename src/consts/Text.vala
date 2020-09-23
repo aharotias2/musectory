@@ -74,5 +74,6 @@ namespace Tatam {
         public const string ERROR_FILE_IS_NOT_A_DIRECTORY = "File is not a directory (%s)\n";
         public const string ERROR_FILE_IS_NOT_AN_AUDIO = "File is not an audio file (%s)\n";
         public const string ERROR_GST_MESSAGE = "Gstreamer messaging error\n";
+        public const string ERROR_INVALID_OPTION_KEY = "Invalid key was found\n";
     }
 }
