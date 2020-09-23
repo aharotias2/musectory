@@ -18,7 +18,9 @@
  */
 
 public interface TatamApplicationInterface {
-    public abstract void prepare();
+    public abstract void run();
+    public abstract void quit();
+    public abstract void save_config_file();
 }
 
 public class TatamApplication : AppBase, TatamApplicationInterface {
@@ -67,7 +69,7 @@ public class TatamApplication : AppBase, TatamApplicationInterface {
         finder.change_dir.begin(options.get(Tatam.OptionKey.LAST_VISITED_DIR));
     }
     
-    public void application_quit() {
+    public void quit() {
         gst_player.destroy();
         save_config_file();
         Gtk.main_quit();
@@ -391,7 +393,7 @@ public class TatamApplication : AppBase, TatamApplicationInterface {
             window.add(box_1);
             window.set_title(Tatam.PROGRAM_NAME);
             window.set_default_size(700, 500);
-            window.destroy.connect(application_quit);
+            window.destroy.connect(this.quit);
             window.show_all();
         }
     }
