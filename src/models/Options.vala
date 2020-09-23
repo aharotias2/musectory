@@ -20,12 +20,12 @@
 namespace Tatam {
     public class Options {
         private Gee.Map<Tatam.OptionKey, Gee.List<string>> config_map;
-
+        
         public Options() {
             config_map = new Gee.HashMap<Tatam.OptionKey, Gee.List<string>>();
             {
                 foreach (OptionKey key in OptionKey.values()) {
-                    config_map.set(key, new Gee.ArrayList<string?>());
+                    config_map.set(key, new Gee.ArrayList<string>());
                 }
                 string home_dir = Environment.get_home_dir();
                 string config_dir = @"$(home_dir)/.$(PROGRAM_NAME)";
@@ -33,14 +33,14 @@ namespace Tatam {
                 config_map.get(OptionKey.CONFIG_DIR).add(config_dir);
                 config_map.get(OptionKey.CSS_PATH).add(css_path);
                 config_map.get(OptionKey.LAST_VISITED_DIR).add(@"$(home_dir)/Music");
-                config_map.get(OptionKey.FINDER_ICON_SIZE).add(128.to_string());
-                config_map.get(OptionKey.PLAYLIST_THUMBNAIL_SIZE).add(48.to_string());
-                config_map.get(OptionKey.CONTROLLER_IMAGE_SIZE_MIN).add(64.to_string());
-                config_map.get(OptionKey.CONTROLLER_IMAGE_SIZE_MAX).add(127.to_string());
+                config_map.get(OptionKey.FINDER_ICON_SIZE).add(128);
+                config_map.get(OptionKey.PLAYLIST_THUMBNAIL_SIZE).add(48);
+                config_map.get(OptionKey.CONTROLLER_IMAGE_SIZE_MIN).add(64);
+                config_map.get(OptionKey.CONTROLLER_IMAGE_SIZE_MAX).add(127);
             }
         }
 
-        public string? get(OptionKey key) {
+        public string get(OptionKey key) {
             if (config_map.get(key).size > 0) {
                 return config_map.get(key).last();
             } else {
@@ -119,6 +119,9 @@ namespace Tatam {
                         break;
                     }
                 }
+            } catch (Tatam.Error e) {
+                stderr.printf(@"TatamError: $(e.message)\n");
+                throw e;
             } catch (GLib.IOError e) {
                 stderr.printf(@"IOError: $(e.message)\n");
             } catch (GLib.Error e) {

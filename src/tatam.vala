@@ -63,18 +63,36 @@ public class TatamApplication : AppBase, TatamApplicationInterface {
         init_playlists_of_sidebar();
     }
     
-    public void prepare() {
+    public void run() {
         finder.change_dir.begin(options.get(Tatam.OptionKey.LAST_VISITED_DIR));
     }
     
-    private void application_quit() {
-        debug("application_quit ...");
+    public void application_quit() {
         gst_player.destroy();
-        debug("application_quit ...");
         save_config_file();
-        debug("application_quit ...");
         Gtk.main_quit();
-        debug("application_quit ... finish");
+    }
+
+    public void save_config_file() {
+        options.set(Tatam.OptionKey.LAST_VISITED_DIR, location);
+        options.set(Tatam.OptionKey.LAST_PLAYLIST_NAME, playlist_view.playlist_name);
+        Tatam.StringJoiner config_file_contents = new Tatam.StringJoiner("\n", null, "\n");
+        foreach (Tatam.OptionKey key in options.keys()) {
+            if (key == Tatam.OptionKey.CSS_PATH || key == Tatam.OptionKey.CONFIG_DIR) {
+                continue;
+            }
+            config_file_contents.add(@"$(key.get_long_name())=$(options.get(key))");
+        }
+        try {
+            string config_dir = options.get(Tatam.OptionKey.CONFIG_DIR);
+            string config_file_path = @"$(config_dir)/$(Tatam.PROGRAM_NAME).conf";
+            debug(@"Save config data to $(config_file_path)");
+            string config_data = config_file_contents.to_string();
+            debug(@"Saved config data contents: $(config_data)");
+            FileUtils.set_contents(config_file_path, config_data);
+        } catch (FileError e) {
+            stderr.printf(@"FileError: $(e.message)\n");
+        }
     }
 
     private void setup_configs(ref unowned string[] args) {
@@ -101,30 +119,46 @@ public class TatamApplication : AppBase, TatamApplicationInterface {
         }
     }
 
-    private void save_config_file() {
-        options.set(Tatam.OptionKey.LAST_VISITED_DIR, location);
-        options.set(Tatam.OptionKey.LAST_PLAYLIST_NAME, playlist_view.playlist_name);
-        Tatam.StringJoiner config_file_contents = new Tatam.StringJoiner("\n", null, "\n");
-        foreach (Tatam.OptionKey key in options.keys()) {
-            if (key == Tatam.OptionKey.CSS_PATH || key == Tatam.OptionKey.CONFIG_DIR) {
-                continue;
-            }
-            config_file_contents.add(@"$(key.get_long_name())=$(options.get(key))");
-        }
-        try {
-            string config_dir = options.get(Tatam.OptionKey.CONFIG_DIR);
-            string config_file_path = @"$(config_dir)/$(Tatam.PROGRAM_NAME).conf";
-            debug(@"Save config data to $(config_file_path)");
-            string config_data = config_file_contents.to_string();
-            debug(@"Saved config data contents: $(config_data)");
-            FileUtils.set_contents(config_file_path, config_data);
-        } catch (FileError e) {
-            stderr.printf(@"FileError: $(e.message)\n");
-        }
+    private void setup_gst_player() {
+        gst_player = new Tatam.GstPlayer();
+        gst_player.volume = 0.5;
+        gst_player.started.connect(() => {
+                debug("gst_player.started was called");
+                set_controller_artwork();
+                controller.play_pause_button_state = Tatam.PlayPauseButtonState.PLAY;
+                current_music = playlist_view.get_file_info();
+            });
+        gst_player.error_occured.connect((error) => {
+                debug("gst_player.error_occured was called");
+                stderr.printf(@"Error: $(error.message)\n");
+            });
+        gst_player.finished.connect(() => {
+                debug("gst_player.finished was called");
+                if (playlist_view.has_next()) {
+                    debug("playlist has next track");
+                    playlist_view.next();
+                    debug("playlist moved to next track");
+                    string next_path = playlist_view.get_file_info().path;
+                    gst_player.play(next_path);
+                } else {
+                    debug("playing all files is completed!");
+                    playing = false;
+                    current_music = null;
+                }
+            });
+        gst_player.unpaused.connect(() => {
+                print("gst_player.unpaused was called\n");
+            });
+        gst_player.paused.connect(() => {
+                print("gst_player.paused was called\n");
+            });
+    }
+
+    private void setup_file_info_adapter() {
+        file_info_reader = new Tatam.FileInfoAdapter();
     }
 
     private void setup_window() {
-        playing = false;
         window = new Gtk.Window();
         {
             box_1 = new Gtk.Box(Gtk.Orientation.VERTICAL, 0);
@@ -156,16 +190,12 @@ public class TatamApplication : AppBase, TatamApplicationInterface {
                                     if (icon != null) {
                                         icon.icon_name = Tatam.IconName.Symbolic.WINDOW_CLOSE;
                                     }
-                                    controller.artwork_size = uint.parse(
-                                        options.get(Tatam.OptionKey.CONTROLLER_IMAGE_SIZE_MIN));
                                 } else {
                                     show_playlist();
                                     Gtk.Image? icon = find_button.image as Gtk.Image;
                                     if (icon != null) {
                                         icon.icon_name = Tatam.IconName.Symbolic.FOLDER_OPEN;
                                     }
-                                    controller.artwork_size = uint.parse(
-                                        options.get(Tatam.OptionKey.CONTROLLER_IMAGE_SIZE_MAX));
                                 }                                    
                             });
                     }
@@ -213,18 +243,15 @@ public class TatamApplication : AppBase, TatamApplicationInterface {
                             finder.dir_changed.connect((path) => {
                                     location_entry.text = path;
                                 });
-
                             finder.bookmark_button_clicked.connect((file_path) => {
                                     sidebar.add_bookmark(file_path);
                                 });
-                            
                             finder.play_button_clicked.connect((path) => {
                                     setup_playlist(path, false);
                                     playlist_view.set_index(0);
                                     show_playlist();
                                     gst_player.play(playlist_view.get_file_info().path);
                                 });
-
                             finder.add_button_clicked.connect((path) => {
                                     show_playlist();
                                     setup_playlist(path, true);
@@ -374,6 +401,7 @@ public class TatamApplication : AppBase, TatamApplicationInterface {
         box_1.set_child_packing(finder_revealer, true, true, 0, Gtk.PackType.START);
         playlist_revealer.reveal_child = false;
         box_1.set_child_packing(playlist_revealer, false, false, 0, Gtk.PackType.START);
+        controller.artwork_size = uint.parse(options.get(Tatam.OptionKey.CONTROLLER_IMAGE_SIZE_MIN));
     }
 
     private void show_playlist() {
@@ -381,43 +409,9 @@ public class TatamApplication : AppBase, TatamApplicationInterface {
         box_1.set_child_packing(finder_revealer, false, false, 0, Gtk.PackType.START);
         playlist_revealer.reveal_child = true;
         box_1.set_child_packing(playlist_revealer, true, true, 0, Gtk.PackType.START);
+        controller.artwork_size = uint.parse(options.get(Tatam.OptionKey.CONTROLLER_IMAGE_SIZE_MAX));
     }
     
-    private void setup_gst_player() {
-        gst_player = new Tatam.GstPlayer();
-        gst_player.volume = 0.5;
-        gst_player.started.connect(() => {
-                debug("gst_player.started was called");
-                set_controller_artwork();
-                controller.play_pause_button_state = Tatam.PlayPauseButtonState.PLAY;
-                current_music = playlist_view.get_file_info();
-            });
-        gst_player.error_occured.connect((error) => {
-                debug("gst_player.error_occured was called");
-                stderr.printf(@"Error: $(error.message)\n");
-            });
-        gst_player.finished.connect(() => {
-                debug("gst_player.finished was called");
-                if (playlist_view.has_next()) {
-                    debug("playlist has next track");
-                    playlist_view.next();
-                    debug("playlist moved to next track");
-                    string next_path = playlist_view.get_file_info().path;
-                    gst_player.play(next_path);
-                } else {
-                    debug("playing all files is completed!");
-                    playing = false;
-                    current_music = null;
-                }
-            });
-        gst_player.unpaused.connect(() => {
-                print("gst_player.unpaused was called\n");
-            });
-        gst_player.paused.connect(() => {
-                print("gst_player.paused was called\n");
-            });
-    }
-
     private void set_controller_artwork() {
         Tatam.FileInfo? info = playlist_view.get_file_info();
         if (info == null) {
@@ -430,16 +424,11 @@ public class TatamApplication : AppBase, TatamApplicationInterface {
         }
         controller.music_total_time = info.time_length.milliseconds;
         controller.activate_buttons(!playlist_view.has_previous(), !playlist_view.has_next());
-        controller.artwork_size = uint.parse(options.get(Tatam.OptionKey.CONTROLLER_IMAGE_SIZE_MAX));
         if (info.artwork != null) {
             controller.set_artwork(info.artwork);
         }
         print_file_info_pretty(info);
         debug("set_controller_artwork is completed");
-    }
-
-    private void setup_file_info_adapter() {
-        file_info_reader = new Tatam.FileInfoAdapter();
     }
 
     private void setup_playlist(string path, bool append_mode) {
@@ -483,7 +472,6 @@ public class TatamApplication : AppBase, TatamApplicationInterface {
                 }
             
                 save_playlist_dialog.get_content_area().add(save_playlist_dialog_hbox);
-
                 save_playlist_dialog.response.connect((response_id) => {
                         if (response_id == Gtk.ResponseType.ACCEPT) {
                             string playlist_name = playlist_name_entry.text;
@@ -491,16 +479,14 @@ public class TatamApplication : AppBase, TatamApplicationInterface {
                             sidebar.add_playlist(playlist_name, playlist_path);
                             debug("playlist name was saved: %s", playlist_name);
                             overwrite_playlist(playlist_name, copy_of_list);
-                            playlist_view.name = playlist_name;
+                            playlist_view.playlist_name = playlist_name;
                         }
                         playlist_name_entry.text = Tatam.Text.EMPTY;
                         save_playlist_dialog.visible = false;
                     });
-
                 save_playlist_dialog.destroy.connect(() => {
                         save_playlist_dialog = null;
                     });
-
                 save_playlist_dialog.show_all();
             }
         } else {
@@ -556,7 +542,7 @@ public class TatamApplication : AppBase, TatamApplicationInterface {
         Gst.init(ref args);
         Gtk.init(ref args);
         TatamApplication app = new TatamApplication(ref args);
-        app.prepare();
+        app.run();
         Gtk.main();
         return 0;
     }
