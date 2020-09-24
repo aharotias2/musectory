@@ -264,7 +264,7 @@ public class TatamApplication : AppBase, TatamApplicationInterface {
                         finder_paned.add1(sidebar);
                         finder_paned.add2(finder);
                         finder_paned.wide_handle = true;
-                        finder_paned.position = sidebar.get_window().get_width();
+                        finder_paned.position = 0;
                     }
                     
                     finder_revealer.child = finder_paned;

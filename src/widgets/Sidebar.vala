@@ -47,25 +47,42 @@ namespace Tatam {
                 {
                     bookmark_tree = new TreeView();
                     {
-                        TreeStore bookmark_store = new TreeStore(5, typeof(string), typeof(string), typeof(string),
-                                                                 typeof(MenuType), typeof(string));
+                        TreeStore bookmark_store = new TreeStore(5,
+                                                                 typeof(string),
+                                                                 typeof(string),
+                                                                 typeof(string),
+                                                                 typeof(MenuType),
+                                                                 typeof(string));
                         {
                             bookmark_store.append(out bookmark_root, null);
                             bookmark_store.set(bookmark_root,
-                                               0, IconName.Symbolic.USER_BOOKMARKS, 1, Text.MENU_BOOKMARK,
-                                               2, "", 3, MenuType.BOOKMARK, 4, "");
-
+                                               0, IconName.Symbolic.USER_BOOKMARKS,
+                                               1, Text.MENU_BOOKMARK,
+                                               2, "",
+                                               3, MenuType.BOOKMARK,
+                                               4, "");
                             TreeIter bm_iter;
                             bookmark_store.append(out playlist_root, null);
                             bookmark_store.set(playlist_root,
-                                               0, IconName.Symbolic.MEDIA_OPTICAL, 1, Text.MENU_PLAYLIST,
-                                               2, "", 3, MenuType.PLAYLIST_HEADER, 4, "");
+                                               0, IconName.Symbolic.MEDIA_OPTICAL,
+                                               1, Text.MENU_PLAYLIST,
+                                               2, "",
+                                               3, MenuType.PLAYLIST_HEADER,
+                                               4, "");
                             bookmark_store.append(out bm_iter, null);
-                            bookmark_store.set(bm_iter, 0, null, 1, null, 2, null,
-                                               3, MenuType.SEPARATOR, 4, "");
+                            bookmark_store.set(bm_iter,
+                                               0, null,
+                                               1, null,
+                                               2, null,
+                                               3, MenuType.SEPARATOR,
+                                               4, "");
                             bookmark_store.append(out bm_iter, null);
-                            bookmark_store.set(bm_iter, 0, IconName.Symbolic.FOLDER_OPEN, 1, Text.MENU_CHOOSE_DIR,
-                                               2, null, 3, MenuType.CHOOSER, 4, "");
+                            bookmark_store.set(bm_iter,
+                                               0, IconName.Symbolic.FOLDER_OPEN,
+                                               1, Text.MENU_CHOOSE_DIR,
+                                               2, null,
+                                               3, MenuType.CHOOSER,
+                                               4, "");
                         }
 
                         TreeViewColumn bookmark_title_col = new TreeViewColumn();
@@ -94,6 +111,10 @@ namespace Tatam {
                             bookmark_del_col.set_title("del");
                         }
 
+                        bookmark_tree.set_model(bookmark_store);
+                        bookmark_tree.insert_column(bookmark_del_col, 1);
+                        bookmark_tree.insert_column(bookmark_title_col, 0);
+
                         bookmark_tree.activate_on_single_click = true;
                         bookmark_tree.headers_visible = false;
                         bookmark_tree.hover_selection = true;
@@ -101,10 +122,6 @@ namespace Tatam {
                         bookmark_tree.show_expanders = true;
                         bookmark_tree.enable_tree_lines = false;
                         bookmark_tree.level_indentation = 0;
-
-                        bookmark_tree.set_model(bookmark_store);
-                        bookmark_tree.insert_column(bookmark_del_col, 1);
-                        bookmark_tree.insert_column(bookmark_title_col, 0);
 
                         bookmark_tree.set_row_separator_func((model, iter) => {
                                 Value menu_type;
@@ -199,14 +216,14 @@ namespace Tatam {
                         bookmark_tree.expand_all();
                     }
 
+                    bookmark_scrolled.add(bookmark_tree);
                     bookmark_scrolled.shadow_type = ShadowType.NONE;
                     bookmark_scrolled.hscrollbar_policy = PolicyType.NEVER;
-                    bookmark_scrolled.add(bookmark_tree);
                 }
 
+                frame.add(bookmark_scrolled);
                 frame.set_shadow_type(ShadowType.NONE);
                 frame.get_style_context().add_class(StyleClass.SIDEBAR);
-                frame.add(bookmark_scrolled);
             }
 
             add(frame);
