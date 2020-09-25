@@ -33,7 +33,7 @@ namespace Tatam {
         public signal void shuffle_button_toggled(bool shuffle_on);
         public signal void repeat_button_toggled(bool repeat_on);
 
-        public abstract PlayPauseButtonState play_pause_button_state { get; set; }
+        public abstract ControllerState play_pause_button_state { get; set; }
         public abstract uint music_total_time { get; set; }
         public abstract uint music_current_time { get; set; }
         public abstract string music_title { get; set; }
@@ -65,7 +65,7 @@ namespace Tatam {
         private ToggleButton toggle_repeat_button;
         private Scale volume_bar;
         
-        private PlayPauseButtonState play_pause_button_state_value;
+        private ControllerState play_pause_button_state_value;
         private SmallTime music_total_time_value;
         private SmallTime music_current_time_value;
         private SmallTime music_rest_time_value;
@@ -73,7 +73,7 @@ namespace Tatam {
         private bool running;
         private Gdk.Pixbuf? original_pixbuf;
         
-        public PlayPauseButtonState play_pause_button_state {
+        public ControllerState play_pause_button_state {
             get {
                 return play_pause_button_state_value;
             }
@@ -82,7 +82,7 @@ namespace Tatam {
                 if (play_pause_button_state_value != value) {
                     play_pause_button_state_value = value;
                     switch (play_pause_button_state) {
-                    case PlayPauseButtonState.PLAY:
+                    case ControllerState.PLAY:
                         running = true;
                         Image? icon = play_pause_button.icon_widget as Image;
                         if (icon != null) {
@@ -94,13 +94,13 @@ namespace Tatam {
                                 }
                                 if (music_current_time_value.milliseconds
                                     >= music_total_time_value.milliseconds) {
-                                    play_pause_button_state = PlayPauseButtonState.FINISHED;
+                                    play_pause_button_state = ControllerState.FINISHED;
                                 }
                                 return running;
                             });
                         debug("play_pause_button_state was set to PLAY");
                         break;
-                    case PlayPauseButtonState.PAUSE:
+                    case ControllerState.PAUSE:
                         running = false;
                         Image? icon = play_pause_button.icon_widget as Image;
                         if (icon != null) {
@@ -108,7 +108,7 @@ namespace Tatam {
                         }
                         debug("play_pause_button_state was set to PAUSE");
                         break;
-                    case PlayPauseButtonState.FINISHED:
+                    case ControllerState.FINISHED:
                         running = false;
                         Image? icon = play_pause_button.icon_widget as Image;
                         if (icon != null) {
@@ -223,12 +223,12 @@ namespace Tatam {
                     {
                         play_pause_button.clicked.connect(() => {
                                 switch (play_pause_button_state) {
-                                case PlayPauseButtonState.FINISHED:
-                                case PlayPauseButtonState.PAUSE: {
+                                case ControllerState.FINISHED:
+                                case ControllerState.PAUSE: {
                                     unpause();
                                     play_button_clicked();
                                 } break;
-                                case PlayPauseButtonState.PLAY: {
+                                case ControllerState.PLAY: {
                                     pause();
                                     pause_button_clicked();
                                 } break;
@@ -401,7 +401,7 @@ namespace Tatam {
             music_total_time_value = new SmallTime(0);
             music_current_time_value = new SmallTime(0);
             music_rest_time_value = new SmallTime(0);
-            play_pause_button_state = PlayPauseButtonState.FINISHED;
+            play_pause_button_state = ControllerState.FINISHED;
             deactivate_buttons();
         }
 
@@ -442,11 +442,11 @@ namespace Tatam {
         }
 
         public void pause() {
-            play_pause_button_state = PlayPauseButtonState.PAUSE;
+            play_pause_button_state = ControllerState.PAUSE;
         }
 
         public void unpause() {
-            play_pause_button_state = PlayPauseButtonState.PLAY;
+            play_pause_button_state = ControllerState.PLAY;
         }
     }
 }

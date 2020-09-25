@@ -19,6 +19,7 @@
 
 public class TestGstPlayer : TestBase {
     private static Posix.FILE output;
+    public static Gdk.Pixbuf icon_pixbuf;
     private Tatam.GstPlayer? gst_player;
     private Gtk.Window window;
     private Gtk.Entry location_entry;
@@ -144,7 +145,7 @@ public class TestGstPlayer : TestBase {
         gst_player.started.connect(() => {
                 debug("gst_player.started was called");
                 set_controller_artwork();
-                controller.play_pause_button_state = Tatam.Controller.PlayPauseButtonState.PLAY;
+                controller.play_pause_button_state = Tatam.ControllerState.PLAY;
             });
         gst_player.error_occured.connect((error) => {
                 debug("gst_player.error_occured was called");
@@ -195,42 +196,57 @@ public class TestGstPlayer : TestBase {
     }
 
     private void setup_tree_view() {
-        store = new Gtk.TreeStore(6,
+        store = new Gtk.TreeStore(7,
                                   typeof(uint),    // track
+                                  typeof(Gdk.Pixbuf),
                                   typeof(string),  // title
                                   typeof(string),  // time
                                   typeof(string),  // artist
                                   typeof(string),  // album
                                   typeof(string)); // genre
-        tree_view = new Gtk.TreeView.with_model(store);
+
         var track_renderer = new Gtk.CellRendererText();
         track_renderer.alignment = Pango.Alignment.RIGHT;
         track_renderer.placeholder_text = "-1";
-        var title_renderer = new Gtk.CellRendererText();
-        var time_renderer = new Gtk.CellRendererText();
-        time_renderer.alignment = Pango.Alignment.RIGHT;
-        var artist_renderer = new Gtk.CellRendererText();
-        artist_renderer.placeholder_text = "Unknown";
-        var album_renderer = new Gtk.CellRendererText();
-        album_renderer.placeholder_text = "Unknown";
-        var genre_renderer = new Gtk.CellRendererText();
-        genre_renderer.placeholder_text = "Unknown";
+
         var column_track = new Gtk.TreeViewColumn.with_attributes("No.", track_renderer, "text", 0);
         column_track.alignment = (float) 0.5;
-        var column_title = new Gtk.TreeViewColumn.with_attributes("Title", title_renderer, "text", 1);
+
+        var icon_renderer = new Gtk.CellRendererPixbuf();
+        var title_renderer = new Gtk.CellRendererText();
+        var column_title = new Gtk.TreeViewColumn();
+        column_title.pack_start(icon_renderer, false);
+        column_title.add_attribute(icon_renderer, "pixbuf", 1);
+        column_title.pack_start(title_renderer, false);
+        column_title.add_attribute(title_renderer, "text", 2);
         column_title.expand = true;
+        column_title.title = "Title";
         column_title.alignment = (float) 0.5;
-        var column_time = new Gtk.TreeViewColumn.with_attributes("Time", time_renderer, "text", 2);
+
+        var time_renderer = new Gtk.CellRendererText();
+        time_renderer.alignment = Pango.Alignment.RIGHT;
+        var column_time = new Gtk.TreeViewColumn.with_attributes("Time", time_renderer, "text", 3);
         column_time.alignment = (float) 0.5;
-        var column_artist = new Gtk.TreeViewColumn.with_attributes("Artist", artist_renderer, "text", 3);
+
+        var artist_renderer = new Gtk.CellRendererText();
+        artist_renderer.placeholder_text = "Unknown";
+        var column_artist = new Gtk.TreeViewColumn.with_attributes("Artist", artist_renderer, "text", 4);
         column_artist.expand = true;
         column_artist.alignment = (float) 0.5;
-        var column_album = new Gtk.TreeViewColumn.with_attributes("Album", album_renderer, "text", 4);
+
+        var album_renderer = new Gtk.CellRendererText();
+        album_renderer.placeholder_text = "Unknown";
+        var column_album = new Gtk.TreeViewColumn.with_attributes("Album", album_renderer, "text", 5);
         column_album.expand = true;
         column_album.alignment = (float) 0.5;
-        var column_genre = new Gtk.TreeViewColumn.with_attributes("Genre", genre_renderer, "text", 5);
+
+        var genre_renderer = new Gtk.CellRendererText();
+        genre_renderer.placeholder_text = "Unknown";
+        var column_genre = new Gtk.TreeViewColumn.with_attributes("Genre", genre_renderer, "text", 6);
         column_genre.expand = true;
         column_genre.alignment = (float) 0.5;
+
+        tree_view = new Gtk.TreeView.with_model(store);
         tree_view.append_column(column_track);
         tree_view.append_column(column_title);
         tree_view.append_column(column_time);
@@ -272,19 +288,20 @@ public class TestGstPlayer : TestBase {
                 Gtk.TreeIter iter;
                 store.append(out iter, null);
                 store.set(iter,
-                          0, item.track, 1, item.title, 2, item.time_length.to_string(),
-                          3, item.artist, 4, item.album, 5, item.genre);
+                          0, item.track, 1, icon_pixbuf, 2, item.title, 3, item.time_length.to_string(),
+                          4, item.artist, 5, item.album, 6, item.genre);
             }
         } catch (FileError e) {
             stderr.printf(@"FileError: $(e.message)\n");
         }
     }
-    
+
     public static int main(string[] args) {
         output = Posix.FILE.fdopen(1, "w");
         set_print_handler((text) => output.printf(text));
         Gst.init(ref args);
         Gtk.init(ref args);
+        icon_pixbuf = new Gtk.Image.from_icon_name("audio-x-generic", Gtk.IconSize.SMALL_TOOLBAR).pixbuf;
         TestGstPlayer tester = new TestGstPlayer();
         Gtk.main();
         return 0;

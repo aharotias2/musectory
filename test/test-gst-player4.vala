@@ -322,7 +322,7 @@ public class TestGstPlayer : TestBase {
         gst_player.started.connect(() => {
                 debug("gst_player.started was called");
                 set_controller_artwork();
-                controller.play_pause_button_state = Tatam.PlayPauseButtonState.PLAY;
+                controller.play_pause_button_state = Tatam.ControllerState.PLAY;
                 current_music = playlist_view.get_file_info();
             });
         gst_player.error_occured.connect((error) => {

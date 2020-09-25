@@ -18,7 +18,16 @@
  */
 
 namespace Tatam {
-    public class Options {
+    public interface OptionsInterface {
+        public abstract string? get(OptionKey key);
+        public abstract void set(OptionKey key, string? value);
+        public abstract Gee.List<string> get_all(OptionKey key);
+        public abstract Gee.Set<OptionKey> keys();
+        public abstract void parse_args(ref unowned string[] args) throws Tatam.Error;
+        public abstract void parse_conf() throws Tatam.Error;
+    }
+    
+    public class Options : OptionsInterface {
         private Gee.Map<Tatam.OptionKey, Gee.List<string>> config_map;
         
         public Options() {
@@ -48,6 +57,10 @@ namespace Tatam {
             }
         }
 
+        public Gee.List<string> get_all(OptionKey key) {
+            return config_map.get(key);
+        }
+        
         public void set(OptionKey key, string? value) {
             if (value == null) {
                 debug("WARNING: Options.set requires arg value is not null");

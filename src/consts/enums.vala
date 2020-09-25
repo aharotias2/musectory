@@ -85,7 +85,7 @@ namespace Tatam {
         CREATE
     }
     
-    public enum PlayPauseButtonState {
+    public enum ControllerState {
         PLAY, PAUSE, FINISHED
     }
         
@@ -98,6 +98,7 @@ namespace Tatam {
     private const string PLAYLIST_THUMBNAIL_SIZE_VALUE_SHORT = "-p";
     private const string CONTROLLER_IMAGE_SIZE_MIN_VALUE_SHORT = "-n";
     private const string CONTROLLER_IMAGE_SIZE_MAX_VALUE_SHORT = "-x";
+    private const string BOOKMARK_DIR_VALUE_SHORT = "-b";
     
     private const string CONFIG_DIR_VALUE_LONG = "config-dir";
     private const string CSS_PATH_VALUE_LONG = "css-path";
@@ -107,6 +108,7 @@ namespace Tatam {
     private const string PLAYLIST_THUMBNAIL_SIZE_VALUE_LONG = "playlist-image-size";
     private const string CONTROLLER_IMAGE_SIZE_MIN_VALUE_LONG = "controller-image-size-min";
     private const string CONTROLLER_IMAGE_SIZE_MAX_VALUE_LONG = "controller-image-size-max";
+    private const string BOOKMARK_DIR_VALUE_LONG = "bookmark";
 
     public enum OptionKey {
         CONFIG_DIR,
@@ -116,14 +118,15 @@ namespace Tatam {
         FINDER_ICON_SIZE,
         PLAYLIST_THUMBNAIL_SIZE,
         CONTROLLER_IMAGE_SIZE_MIN,
-        CONTROLLER_IMAGE_SIZE_MAX
+        CONTROLLER_IMAGE_SIZE_MAX,
+        BOOKMARK_DIR
         ;
 
         public static OptionKey[] values() {
             return {
                 CONFIG_DIR, CSS_PATH, LAST_VISITED_DIR, LAST_PLAYLIST_NAME,
                 FINDER_ICON_SIZE, PLAYLIST_THUMBNAIL_SIZE, CONTROLLER_IMAGE_SIZE_MIN,
-                CONTROLLER_IMAGE_SIZE_MAX
+                CONTROLLER_IMAGE_SIZE_MAX, BOOKMARK_DIR
             };
         }
         
@@ -161,6 +164,10 @@ namespace Tatam {
             case CONTROLLER_IMAGE_SIZE_MAX_VALUE_LONG:
                 return CONTROLLER_IMAGE_SIZE_MAX;
 
+            case BOOKMARK_DIR_VALUE_SHORT:
+            case BOOKMARK_DIR_VALUE_LONG:
+                return BOOKMARK_DIR;
+                
             default:
                 throw new Tatam.Error.OPTION_KEY_ERROR(Text.ERROR_INVALID_OPTION_KEY);
             }
@@ -176,6 +183,7 @@ namespace Tatam {
             case PLAYLIST_THUMBNAIL_SIZE: return PLAYLIST_THUMBNAIL_SIZE_VALUE_SHORT;
             case CONTROLLER_IMAGE_SIZE_MIN: return CONTROLLER_IMAGE_SIZE_MIN_VALUE_SHORT;
             case CONTROLLER_IMAGE_SIZE_MAX: return CONTROLLER_IMAGE_SIZE_MAX_VALUE_SHORT;
+            case BOOKMARK_DIR: return BOOKMARK_DIR_VALUE_SHORT;
             default: return "";
             }
         }
@@ -190,6 +198,7 @@ namespace Tatam {
             case PLAYLIST_THUMBNAIL_SIZE: return PLAYLIST_THUMBNAIL_SIZE_VALUE_LONG;
             case CONTROLLER_IMAGE_SIZE_MIN: return CONTROLLER_IMAGE_SIZE_MIN_VALUE_LONG;
             case CONTROLLER_IMAGE_SIZE_MAX: return CONTROLLER_IMAGE_SIZE_MAX_VALUE_LONG;
+            case BOOKMARK_DIR: return BOOKMARK_DIR_VALUE_LONG;
             default: return "";
             }
         }

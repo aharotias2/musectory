@@ -40,9 +40,9 @@ namespace Tatam {
                     Pad sinkpad = fakesink.get_static_pad("sink");
                     if (!sinkpad.is_linked()) {
                         if (pad.link(sinkpad) != PadLinkReturn.OK) {
-                            stderr.printf("Pad link failed\n");
+                            debug("Pad link failed\n");
                         } else {
-                            stdout.printf("Pad link succeeded\n");
+                            debug("Pad link succeeded\n");
                         }
                     }
                 });
