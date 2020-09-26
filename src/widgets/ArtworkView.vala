@@ -70,7 +70,7 @@ namespace Tatam {
             if (artwork != null) {
                 int width = artwork_container.get_allocated_width();
                 int height = artwork_container.get_allocated_height();
-                artwork_image.pixbuf = PixbufUtils.scale_limited(artwork, int.min(width, height));
+                artwork_image.pixbuf = PixbufUtils.scale(artwork, int.min(width, height));
             }
         }
 

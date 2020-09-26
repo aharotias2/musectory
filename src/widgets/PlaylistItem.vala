@@ -47,7 +47,7 @@ namespace Tatam {
                         image_artwork = null;
                         if (file.artwork != null) {
                             image_artwork = new Image.from_pixbuf(
-                                Tatam.PixbufUtils.scale_limited(file.artwork, image_size));
+                                Tatam.PixbufUtils.scale(file.artwork, image_size));
                             {
                                 image_artwork.set_size_request((int) image_size, (int) image_size);
                                 image_artwork.halign = Align.CENTER;
@@ -203,7 +203,7 @@ namespace Tatam {
                 (file.date != 0 ? " (%u)".printf(file.date) : ""),
                 (file.genre != null ? " [%s]".printf(file.genre) : "")
                 );
-            tooltip_image = PixbufUtils.scale_limited(file.artwork, image_size);
+            tooltip_image = PixbufUtils.scale(file.artwork, image_size);
             query_tooltip.connect ((x, y, keyboard_tooltip, tooltip) => {
                     tooltip.set_icon(tooltip_image);
                     tooltip.set_text(tooltip_text);
@@ -260,7 +260,7 @@ namespace Tatam {
 
         public void resize_image(uint size) {
             if (image_size != size) {
-                image_artwork.pixbuf = PixbufUtils.scale_limited(file_info.artwork, size);
+                image_artwork.pixbuf = PixbufUtils.scale(file_info.artwork, size);
                 icon_area.set_area_size((int) size);
                 image_size = size;
             }

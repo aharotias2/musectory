@@ -233,6 +233,7 @@ namespace Tatam {
                               3, MenuType.CHOOSER,
                               4, "");
             this.playlist_root = playlist_root;
+            sidebar_tree.expand_all();
         }
         
         public void add_bookmark(string file_path) {
@@ -247,6 +248,7 @@ namespace Tatam {
                               2, file_path,
                               3, MenuType.FOLDER,
                               4, Text.EMPTY);
+            sidebar_tree.expand_all();
         }
 
         public void remove_bookmark(string bookmark_path) {
@@ -324,6 +326,7 @@ namespace Tatam {
                               2, playlist_path,
                               3, MenuType.PLAYLIST_NAME,
                               4, Text.EMPTY);
+            sidebar_tree.expand_all();
         }
 
         public void remove_bookmark_all() {

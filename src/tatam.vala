@@ -30,7 +30,9 @@ public class TatamApplication : AppBase, TatamApplicationInterface {
     private Tatam.GstPlayer? gst_player;
     private Gtk.Window window;
     private Gtk.Entry location_entry;
+    private Gtk.Button menu_button;
     private Gtk.Button parent_button;
+    private Gtk.Button header_bookmark_button;
     private Gtk.Button find_button;
     private Gtk.Revealer sidebar_revealer;
     private Tatam.Sidebar sidebar;
@@ -183,10 +185,12 @@ public class TatamApplication : AppBase, TatamApplicationInterface {
                 }
             });
         gst_player.unpaused.connect(() => {
-                print("gst_player.unpaused was called\n");
+                debug("gst_player.unpaused was called");
+                playlist_view.toggle_status();
             });
         gst_player.paused.connect(() => {
-                print("gst_player.paused was called\n");
+                debug("gst_player.paused was called");
+                playlist_view.toggle_status();
             });
     }
 
@@ -199,7 +203,7 @@ public class TatamApplication : AppBase, TatamApplicationInterface {
         {
             var header_bar = new Gtk.HeaderBar();
             {
-                Gtk.Button menu_button = new Gtk.Button.from_icon_name(Tatam.IconName.Symbolic.OPEN_MENU);
+                menu_button = new Gtk.Button.from_icon_name(Tatam.IconName.Symbolic.OPEN_MENU);
                 {
                     menu_button.clicked.connect(() => {
                             if (finder_paned.position > 0) {
@@ -218,7 +222,7 @@ public class TatamApplication : AppBase, TatamApplicationInterface {
                         });
                 }
 
-                Gtk.Button header_bookmark_button = new Gtk.Button.from_icon_name(Tatam.IconName.Symbolic.BOOKMARK_NEW);
+                header_bookmark_button = new Gtk.Button.from_icon_name(Tatam.IconName.Symbolic.BOOKMARK_NEW);
                 {
                     header_bookmark_button.clicked.connect(() => {
                             if (!sidebar.has_bookmark(location)) {
@@ -486,6 +490,9 @@ public class TatamApplication : AppBase, TatamApplicationInterface {
     }
 
     private void show_finder() {
+        menu_button.sensitive = true;
+        parent_button.sensitive = true;
+        header_bookmark_button.sensitive = true;
         finder_revealer.reveal_child = true;
         box_1.set_child_packing(finder_revealer, true, true, 0, Gtk.PackType.START);
         playlist_revealer.reveal_child = false;
@@ -498,6 +505,9 @@ public class TatamApplication : AppBase, TatamApplicationInterface {
     }
 
     private void show_playlist() {
+        menu_button.sensitive = false;
+        parent_button.sensitive = false;
+        header_bookmark_button.sensitive = false;
         finder_revealer.reveal_child = false;
         box_1.set_child_packing(finder_revealer, false, false, 0, Gtk.PackType.START);
         playlist_revealer.reveal_child = true;
@@ -559,13 +569,18 @@ public class TatamApplication : AppBase, TatamApplicationInterface {
 
         try {
             debug(@"setup playlist of $(path)\n");
-            Gee.List<Tatam.FileInfo?> playlist = Tatam.Files.find_file_infos_recursively(path);
-            debug("playlist was loaded\n");
+            Gee.List<Tatam.FileInfo?> playlist;
+            var thread = new Thread<Gee.List<Tatam.FileInfo?>>(null, () => {
+                    Gee.List<Tatam.FileInfo?> playlist_internal = Tatam.Files.find_file_infos_recursively(path);
+                    debug("playlist was loaded\n");
+                    Idle.add(setup_playlist.callback);
+                    return playlist_internal;
+                });
+            yield;
+            playlist = thread.join();
 
             foreach (Tatam.FileInfo? file_info in playlist) {
                 playlist_view.add_item(file_info);
-                Idle.add(setup_playlist.callback);
-                yield;
             }
 
             controller.activate_buttons(!playlist_view.has_previous(), !playlist_view.has_next());

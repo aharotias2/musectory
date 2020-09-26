@@ -59,7 +59,7 @@ namespace Tatam {
                             icon_pixbuf = create_icon_pixbuf();
 
                             icon_image = new Image.from_pixbuf(
-                                Tatam.PixbufUtils.scale_limited(icon_pixbuf, this.icon_size)
+                                Tatam.PixbufUtils.scale(icon_pixbuf, this.icon_size)
                                 );
                             {
                                 icon_image.get_style_context().add_class(StyleClass.FINDER_ICON);
@@ -210,7 +210,7 @@ namespace Tatam {
 
         public void set_image_size(int size) {
             this.icon_size = size;
-            icon_image.pixbuf = Tatam.PixbufUtils.scale_limited(icon_pixbuf, this.icon_size);
+            icon_image.pixbuf = Tatam.PixbufUtils.scale(icon_pixbuf, this.icon_size);
         }
 
         private EventBox add_popover_to_button(Button button, string pop_text) {
@@ -249,7 +249,7 @@ namespace Tatam {
                         Gdk.Pixbuf? artwork_pixbuf = load_artwork_async.end(obj);
                         if (artwork_pixbuf != null) {
                             icon_pixbuf = artwork_pixbuf;
-                            icon_image.pixbuf = Tatam.PixbufUtils.scale_limited(icon_pixbuf, this.icon_size);
+                            icon_image.pixbuf = Tatam.PixbufUtils.scale(icon_pixbuf, this.icon_size);
                             if (mini_icon != null) {
                                 mini_icon.visible = true;
                             }

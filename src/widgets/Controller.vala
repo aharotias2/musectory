@@ -176,7 +176,7 @@ namespace Tatam {
             set {
                 artwork_size_value = value;
                 if (original_pixbuf != null) {
-                    artwork.pixbuf = PixbufUtils.scale_limited(original_pixbuf, artwork_size_value);
+                    artwork.pixbuf = PixbufUtils.scale(original_pixbuf, artwork_size_value);
                 }
             }
         }
@@ -192,7 +192,7 @@ namespace Tatam {
         
         public void set_artwork(Gdk.Pixbuf pixbuf) {
             original_pixbuf = pixbuf;
-            Gdk.Pixbuf resized_pixbuf = Tatam.PixbufUtils.scale_limited(original_pixbuf, (int) this.artwork_size);
+            Gdk.Pixbuf resized_pixbuf = Tatam.PixbufUtils.scale(original_pixbuf, (int) this.artwork_size);
             artwork.pixbuf = resized_pixbuf;
         }
         

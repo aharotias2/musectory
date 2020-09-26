@@ -138,7 +138,7 @@ namespace Tatam {
         }
 
         public bool has_previous() {
-            return tracker.has_prev();
+            return tracker.has_previous();
         }
 
         public void set_index(uint index) {
@@ -176,20 +176,20 @@ namespace Tatam {
         }
 
         public void set_shuffling(bool shuffle_on) {
-            tracker.set_shuffling(shuffle_on);
+            tracker.shuffling = shuffle_on;
         }
 
         public void set_repeating(bool repeat_on) {
-            tracker.set_repeating(repeat_on);
+            tracker.repeating = repeat_on;
         }
 
         public void next() {
-            tracker.inc();
+            tracker.next();
             set_index(tracker.current);
         }
 
         public void previous() {
-            tracker.dec();
+            tracker.previous();
             set_index(tracker.current);
         }
 
