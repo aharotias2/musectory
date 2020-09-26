@@ -110,7 +110,7 @@ namespace Tatam {
                                         if ((MenuType) type == MenuType.FOLDER || (MenuType) type == MenuType.PLAYLIST_NAME) {
                                             string icon_name = "";
                                             if (sidebar_selection.iter_is_selected(iter)) {
-                                                icon_name = IconName.Symbolic.LIST_REMOVE;
+                                                icon_name = IconName.LIST_REMOVE;
                                             } else {
                                                 icon_name = "";
                                             }
@@ -204,7 +204,7 @@ namespace Tatam {
             TreeIter playlist_root;
             sidebar_store.append(out bookmark_root, null);
             sidebar_store.set(bookmark_root,
-                              0, IconName.Symbolic.USER_BOOKMARKS,
+                              0, IconName.USER_BOOKMARKS,
                               1, Text.MENU_BOOKMARK,
                               2, "",
                               3, MenuType.BOOKMARK,
@@ -213,7 +213,7 @@ namespace Tatam {
             TreeIter bm_iter;
             sidebar_store.append(out playlist_root, null);
             sidebar_store.set(playlist_root,
-                              0, IconName.Symbolic.MEDIA_OPTICAL,
+                              0, IconName.MEDIA_OPTICAL,
                               1, Text.MENU_PLAYLIST,
                               2, "",
                               3, MenuType.PLAYLIST_HEADER,
@@ -227,7 +227,7 @@ namespace Tatam {
                               4, "");
             sidebar_store.append(out bm_iter, null);
             sidebar_store.set(bm_iter,
-                              0, IconName.Symbolic.FOLDER_OPEN,
+                              0, IconName.FOLDER_OPEN,
                               1, Text.MENU_CHOOSE_DIR,
                               2, null,
                               3, MenuType.CHOOSER,
@@ -243,7 +243,7 @@ namespace Tatam {
             TreeIter temp_iter;
             sidebar_store.append(out temp_iter, bookmark_root);
             sidebar_store.set(temp_iter,
-                              0, IconName.Symbolic.FOLDER,
+                              0, IconName.FOLDER,
                               1, file_name,
                               2, file_path,
                               3, MenuType.FOLDER,
@@ -321,7 +321,7 @@ namespace Tatam {
             TreeIter temp_iter;
             sidebar_store.append(out temp_iter, playlist_root);
             sidebar_store.set(temp_iter,
-                              0, IconName.Symbolic.AUDIO_FILE,
+                              0, IconName.AUDIO_FILE,
                               1, playlist_name,
                               2, playlist_path,
                               3, MenuType.PLAYLIST_NAME,

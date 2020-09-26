@@ -121,7 +121,7 @@ namespace Tatam {
                         grid2.column_homogeneous = true;
                     }
             
-                    Label time = new Label(file.time_length.to_string());
+                    Label time = new Label(file.time_length.to_string_without_deciseconds());
 
                     button = new Gtk.MenuButton();
                     {

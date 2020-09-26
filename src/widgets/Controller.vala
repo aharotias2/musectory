@@ -131,7 +131,7 @@ namespace Tatam {
                 music_total_time_value = new SmallTime.from_milliseconds(value);
                 music_current_time_value = new SmallTime(music_total_time_value.format_type);
                 music_rest_time_value = new SmallTime.from_milliseconds(value);
-                time_label_rest.label = music_rest_time_value.to_string();
+                time_label_rest.label = music_rest_time_value.to_string_without_deciseconds();
                 time_label_current.label = music_current_time_value.to_string();
                 time_bar.adjustment = new Adjustment(0.0, 0.0, (double) music_total_time_value.milliseconds,
                                                      SMALL_STEP_MILLISECONDS, BIG_STEP_MILLISECONDS,
@@ -153,7 +153,7 @@ namespace Tatam {
                 = music_total_time_value.milliseconds
                 - music_current_time_value.milliseconds;
                 time_label_current.label = music_current_time_value.to_string();
-                time_label_rest.label = music_rest_time_value.to_string();
+                time_label_rest.label = music_rest_time_value.to_string_without_deciseconds();
                 if (value != (uint) time_bar.get_value()) {
                     time_bar.set_value(value);
                 }

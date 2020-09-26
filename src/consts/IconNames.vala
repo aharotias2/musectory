@@ -65,5 +65,8 @@ namespace Tatam {
         public const string GO_NEXT = "go-next";
         public const string GO_PREVIOUS = "go-previous";
         public const string DOCUMENT_SAVE = "document-save";
+        public const string USER_BOOKMARKS = "user-bookmarks";
+        public const string FOLDER_OPEN = "folder-open";
+        public const string LIST_REMOVE = "list-remove";
     }
 }

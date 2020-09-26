@@ -28,6 +28,7 @@ namespace Tatam {
         public abstract double seconds { get; }
         public abstract SmallTime minus(SmallTime subject);
         public abstract string to_string();
+        public abstract string to_string_without_deciseconds();
     }
 
     public class SmallTime : GLib.Object, SmallTimeInterface {
@@ -44,11 +45,14 @@ namespace Tatam {
         private uint minutes_value;
         private uint seconds_value;
         private uint deciseconds_value;
-
+        private uint milliseconds_value;
+        private bool with_deciseconds_value;
+        private FormatType format_type_value;
+        
         private delegate string SmallTimeToStringFunc();
         private SmallTimeToStringFunc to_string_func;
-
-        private uint milliseconds_value;
+        private SmallTimeToStringFunc to_string_without_deciseconds_func;
+        
         public uint milliseconds {
             get {
                 return milliseconds_value;
@@ -68,7 +72,6 @@ namespace Tatam {
             }
         }
 
-        private FormatType format_type_value;
         public FormatType format_type {
             get {
                 return format_type_value;
@@ -91,6 +94,7 @@ namespace Tatam {
         }
         
         public SmallTime(FormatType format_type = FormatType.MINUMUM) {
+            this.with_deciseconds_value = true;
             this.format_type = format_type;
             init_time_regex();
             this.milliseconds_value = 0;
@@ -98,6 +102,7 @@ namespace Tatam {
         }
         
         public SmallTime.from_seconds(int seconds, FormatType format_type = FormatType.MINUMUM) {
+            this.with_deciseconds_value = true;
             this.format_type = format_type;
             init_time_regex();
             this.milliseconds = seconds * SECOND_IN_MILLISECONDS;
@@ -105,6 +110,7 @@ namespace Tatam {
         }
 
         public SmallTime.from_milliseconds(uint milliseconds, FormatType format_type = FormatType.MINUMUM) {
+            this.with_deciseconds_value = true;
             this.format_type = format_type;
             init_time_regex();
             this.milliseconds = milliseconds;
@@ -112,6 +118,7 @@ namespace Tatam {
         }
 
         public SmallTime.from_string(string time_string, FormatType format_type = FormatType.MINUMUM) {
+            this.with_deciseconds_value = true;
             this.format_type = format_type;
             init_time_regex();
             if (!time_regex.match(time_string)) {
@@ -159,37 +166,41 @@ namespace Tatam {
         public SmallTime minus(SmallTime subject) {
             return new SmallTime.from_milliseconds(this.milliseconds - subject.milliseconds, format_type);
         }
-
+        
         public string to_string() {
             return to_string_func();
         }
 
+        public string to_string_without_deciseconds() {
+            return to_string_without_deciseconds_func();
+        }
+            
         private void set_to_string_func(FormatType format_type = MINUMUM) {
             switch (format_type) {
             case FormatType.HOURS_MINUTES_SECONDS_DECISECONDS:
                 to_string_func = to_string_with_hours;
+                to_string_without_deciseconds_func = to_string_with_hours_without_deciseconds;
                 break;
             case FormatType.MINUTES_SECONDS_DECISECONDS:
                 to_string_func = to_string_without_hours;
+                to_string_without_deciseconds_func = to_string_without_hours_and_deciseconds;
                 break;
             case FormatType.SECONDS_DECISECONDS:
                 to_string_func = to_string_without_minutes;
+                to_string_without_deciseconds_func = to_string_without_minutes_and_deciseconds;
                 break;
             case FormatType.MINUMUM:
             default:
                 if (milliseconds_value > HOUR_IN_MILLISECONDS) {
                     this.format_type = FormatType.HOURS_MINUTES_SECONDS_DECISECONDS;
-                    to_string_func = to_string_with_hours;
                 } else if (milliseconds_value > MINUTE_IN_MILLISECONDS) {
                     this.format_type = FormatType.MINUTES_SECONDS_DECISECONDS;
-                    to_string_func = to_string_without_hours;
                 } else if (milliseconds_value > SECOND_IN_MILLISECONDS) {
                     this.format_type = FormatType.SECONDS_DECISECONDS;
-                    to_string_func = to_string_without_minutes;
                 } else {
                     this.format_type = FormatType.SECONDS_DECISECONDS;
-                    to_string_func = to_string_seconds;
                 }
+                set_to_string_func(this.format_type);
                 break;
             }
         }
@@ -198,16 +209,32 @@ namespace Tatam {
             return "%u:%02u:%02u.%u".printf(hours_value, minutes_value, seconds_value, deciseconds_value);
         }
 
+        private string to_string_with_hours_without_deciseconds() {
+            return "%u:%02u:%02u".printf(hours_value, minutes_value, seconds_value);
+        }
+
         private string to_string_without_hours() {
             return "%2u:%02u.%u".printf(minutes_value, seconds_value, deciseconds_value);
+        }
+
+        private string to_string_without_hours_and_deciseconds() {
+            return "%2u:%02u".printf(minutes_value, seconds_value);
         }
 
         private string to_string_without_minutes() {
             return "%2u.%u".printf(seconds_value, deciseconds_value);
         }
 
+        private string to_string_without_minutes_and_deciseconds() {
+            return "%2u".printf(seconds_value);
+        }
+
         private string to_string_seconds() {
             return "0.%u".printf(deciseconds_value);
+        }
+
+        private string to_string_seconds_without_deciseconds() {
+            return "0";
         }
     }
 }
