@@ -45,6 +45,7 @@ namespace Tatam {
         public abstract void hide_buttons();
         public abstract void show_artwork();
         public abstract void hide_artwork();
+        public abstract bool has_artwork();
         public abstract void activate_buttons(bool track_is_first, bool track_is_last);
         public abstract void deactivate_buttons();
         public abstract void pause();
@@ -429,6 +430,10 @@ namespace Tatam {
             this.artwork_button.visible = false;
         }
 
+        public bool has_artwork() {
+            return artwork.pixbuf != null;
+        }
+        
         public void activate_buttons(bool track_is_first, bool track_is_last) {
             play_pause_button.sensitive = true;
             prev_track_button.sensitive = !track_is_first;

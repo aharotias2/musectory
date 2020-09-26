@@ -18,11 +18,13 @@
  */
 
 public class AppBase {
-    private static Posix.FILE output;
+    protected static Posix.FILE output;
+    protected static bool debugging_on;
 
     public static void init() {
         output = Posix.FILE.fdopen(1, "w");
         set_print_handler((text) => output.printf(text));
+        debugging_on = Environment.get_variable("G_MESSAGES_DEBUG") == "all";
     }
     
     protected static string choose_file(string dir_path) throws GLib.Error, GLib.FileError {
