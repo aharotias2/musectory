@@ -22,6 +22,7 @@ namespace Tatam {
         public abstract string? get(OptionKey key);
         public abstract void set(OptionKey key, string? value);
         public abstract Gee.List<string> get_all(OptionKey key);
+        public abstract void remove_key(OptionKey key);
         public abstract Gee.Set<OptionKey> keys();
         public abstract void parse_args(ref unowned string[] args) throws Tatam.Error;
         public abstract void parse_conf() throws Tatam.Error;
@@ -60,11 +61,18 @@ namespace Tatam {
         public Gee.List<string> get_all(OptionKey key) {
             return config_map.get(key);
         }
+
+        public void remove_key(OptionKey key) {
+            config_map.get(key).clear();
+        }
         
         public void set(OptionKey key, string? value) {
             if (value == null) {
                 debug("WARNING: Options.set requires arg value is not null");
                 return;
+            }
+            if (!config_map.has_key(key)) {
+                config_map.set(key, new Gee.ArrayList<string>());
             }
             config_map.get(key).add(value);
         }

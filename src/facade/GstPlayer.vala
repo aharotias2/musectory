@@ -165,7 +165,7 @@ namespace Tatam {
 
         public void destroy() {
             playbin.set_state(State.NULL);
-            playbin = null;
+            Idle.add(() => { playbin = null; return false; });
         }
     }
 }

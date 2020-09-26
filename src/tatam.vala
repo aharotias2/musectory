@@ -34,7 +34,6 @@ public class TatamApplication : AppBase, TatamApplicationInterface {
     private Gtk.Button parent_button;
     private Gtk.Button header_bookmark_button;
     private Gtk.Button find_button;
-    private Gtk.Revealer sidebar_revealer;
     private Gtk.Popover sidebar_popover;
     private Tatam.Sidebar sidebar;
     private Tatam.Controller controller;
@@ -72,6 +71,7 @@ public class TatamApplication : AppBase, TatamApplicationInterface {
     }
     
     public void run() {
+        init_playlist.begin();
         finder.change_dir.begin(options.get(Tatam.OptionKey.LAST_VISITED_DIR));
     }
     
@@ -84,25 +84,30 @@ public class TatamApplication : AppBase, TatamApplicationInterface {
     public void save_config_file() {
         options.set(Tatam.OptionKey.LAST_VISITED_DIR, location);
         options.set(Tatam.OptionKey.LAST_PLAYLIST_NAME, playlist_view.playlist_name);
+        options.remove_key(Tatam.OptionKey.BOOKMARK_DIR);
         foreach (string bookmark_dir in sidebar.get_bookmarks()) {
             options.set(Tatam.OptionKey.BOOKMARK_DIR, bookmark_dir);
         }
+        options.remove_key(Tatam.OptionKey.PLAYLIST_ITEM);
+        for (uint i = 0; i < playlist_view.get_list_size(); i++) {
+            string playlist_item_path = playlist_view.get_file_info_at_index(i).path;
+            options.set(Tatam.OptionKey.PLAYLIST_ITEM, playlist_item_path);
+        }
         Tatam.StringJoiner config_file_contents = new Tatam.StringJoiner("\n", null, "\n");
         foreach (Tatam.OptionKey key in options.keys()) {
-            if (key == Tatam.OptionKey.CSS_PATH || key == Tatam.OptionKey.CONFIG_DIR) {
-                continue;
-            } else if (key == Tatam.OptionKey.BOOKMARK_DIR) {
-                Gee.List<string> bookmark_list = options.get_all(Tatam.OptionKey.BOOKMARK_DIR);
-                Gee.HashSet<string> bookmark_set = new Gee.HashSet<string>(Gee.Functions.get_hash_func_for(typeof(string)),
-                                                                           Gee.Functions.get_equal_func_for(typeof(string)));
-                foreach (string bookmark_dir in options.get_all(key)) {
-                    bookmark_set.add(bookmark_dir);
+            switch (key) {
+            case Tatam.OptionKey.CSS_PATH:
+            case Tatam.OptionKey.CONFIG_DIR:
+                break;
+            case Tatam.OptionKey.BOOKMARK_DIR:
+            case Tatam.OptionKey.PLAYLIST_ITEM:
+                foreach (string value in options.get_all(key)) {
+                    config_file_contents.add(@"$(key.get_long_name())=$(value)");
                 }
-                foreach (string bookmark_dir in bookmark_set) {
-                    config_file_contents.add(@"$(key.get_long_name())=$(bookmark_dir)");
-                }
-            } else {
+                break;
+            default:
                 config_file_contents.add(@"$(key.get_long_name())=$(options.get(key))");
+                break;
             }
         }
         try {
@@ -556,26 +561,26 @@ public class TatamApplication : AppBase, TatamApplicationInterface {
         if (!append_mode) {
             playlist_view.remove_all();
         }
-
-        try {
-            debug(@"setup playlist of $(path)\n");
-            Gee.List<Tatam.FileInfo?> playlist;
-            var thread = new Thread<Gee.List<Tatam.FileInfo?>>(null, () => {
-                    Gee.List<Tatam.FileInfo?> playlist_internal = Tatam.Files.find_file_infos_recursively(path);
+        debug(@"setup playlist of $(path)\n");
+        var setup_playlist_thread = new Thread<Gee.List<Tatam.FileInfo?>>(null, () => {
+                try {
+                    var playlist_internal = Tatam.Files.find_file_infos_recursively(path);
                     debug("playlist was loaded\n");
-                    Idle.add(setup_playlist.callback);
                     return playlist_internal;
-                });
-            yield;
-            playlist = thread.join();
-
-            foreach (Tatam.FileInfo? file_info in playlist) {
+                } catch (FileError e) {
+                    stderr.printf(@"FileError: $(e.message)\n");
+                    return new Gee.ArrayList<Tatam.FileInfo?>();
+                } finally {
+                    Idle.add(setup_playlist.callback);
+                }                    
+            });
+        yield;
+        var playlist = setup_playlist_thread.join();
+        if (playlist.size > 0) {
+            foreach (var file_info in playlist) {
                 playlist_view.add_item(file_info);
             }
-
             controller.activate_buttons(!playlist_view.has_previous(), !playlist_view.has_next());
-        } catch (FileError e) {
-            stderr.printf(@"FileError: $(e.message)\n");
         }
     }
 
@@ -666,6 +671,26 @@ public class TatamApplication : AppBase, TatamApplicationInterface {
         } catch (Tatam.Error e) {
             stderr.printf(@"FileError: $(e.message)\n");
         }
+    }
+
+    private async void init_playlist() {
+        new Thread<int>(null, () => {
+                try {
+                    Gee.List<string> last_playlist = options.get_all(Tatam.OptionKey.PLAYLIST_ITEM);
+                    if (last_playlist.size == 0) {
+                        return 0;
+                    }
+                    foreach (string item in last_playlist) {
+                        Tatam.FileInfo info = file_info_reader.read_metadata_from_path(item);
+                        playlist_view.add_item(info);
+                    }
+                    return 0;
+                } finally {
+                    Idle.add(init_playlist.callback);
+                }
+            });
+        yield;
+        controller.activate_buttons(!playlist_view.has_previous(), !playlist_view.has_next());
     }
     
     private string get_playlist_path_from_name(string playlist_name) {
