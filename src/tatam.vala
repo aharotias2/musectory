@@ -35,11 +35,11 @@ public class TatamApplication : AppBase, TatamApplicationInterface {
     private Gtk.Button header_bookmark_button;
     private Gtk.Button find_button;
     private Gtk.Revealer sidebar_revealer;
+    private Gtk.Popover sidebar_popover;
     private Tatam.Sidebar sidebar;
     private Tatam.Controller controller;
     private Tatam.PlaylistBox playlist_view;
     private Tatam.ArtworkView artwork_view;
-    private Gtk.Paned finder_paned;
     private Gtk.Revealer finder_revealer;
     private Gtk.Revealer playlist_revealer;
     private Tatam.Finder finder;
@@ -205,12 +205,57 @@ public class TatamApplication : AppBase, TatamApplicationInterface {
             {
                 menu_button = new Gtk.Button.from_icon_name(Tatam.IconName.Symbolic.OPEN_MENU);
                 {
+                    sidebar_popover = new Gtk.Popover(menu_button);
+                    {
+                        sidebar = new Tatam.Sidebar();
+                        {
+                            sidebar.bookmark_directory_selected.connect((dir_path) => {
+                                    sidebar_popover.visible = false;
+                                    location = dir_path;
+                                    if (!finder_revealer.child_revealed) {
+                                        show_finder();
+                                    }
+                                });
+                            sidebar.bookmark_del_button_clicked.connect((dir_path) => {
+                                    sidebar_popover.visible = false;
+                                    return Tatam.Dialogs.confirm(Tatam.Text.CONFIRM_REMOVE_BOOKMARK, window);
+                                });
+                            sidebar.playlist_selected.connect((playlist_name, playlist_path) => {
+                                    sidebar_popover.visible = false;
+                                    try {
+                                        playlist_view.load_list_from_file(playlist_path);
+                                        controller.activate_buttons(!playlist_view.has_previous(),
+                                                                    !playlist_view.has_next());
+                                        if (!playlist_revealer.child_revealed) {
+                                            show_playlist();
+                                        }
+                                    } catch (FileError e) {
+                                        stderr.printf(@"FileError: $(e.message)\n");
+                                    }
+                                });
+                            sidebar.playlist_del_button_clicked.connect((playlist_path) => {
+                                    sidebar_popover.visible = false;
+                                    return Tatam.Dialogs.confirm(Tatam.Text.CONFIRM_REMOVE_PLAYLIST, window);
+                                });
+                            sidebar.file_chooser_called.connect(() => {
+                                    sidebar_popover.visible = false;
+                                    string? dir_path = Tatam.Dialogs.choose_directory(window);
+                                    if (dir_path != null) {
+                                        location = dir_path;
+                                    }
+                                });
+                            sidebar.bookmark_added.connect((file_path) => {
+
+                                });
+                            sidebar.show_all();
+                        }
+
+                        sidebar_popover.add(sidebar);
+                        sidebar_popover.modal = true;
+                    }
+            
                     menu_button.clicked.connect(() => {
-                            if (finder_paned.position > 0) {
-                                hide_sidebar();
-                            } else {
-                                show_sidebar();
-                            }
+                            sidebar_popover.visible = !sidebar_popover.visible;
                         });
                 }
                 
@@ -259,74 +304,37 @@ public class TatamApplication : AppBase, TatamApplicationInterface {
                 header_bar.pack_end(find_button);
                 header_bar.show_close_button = true;
             }
-            
+
             box_1 = new Gtk.Box(Gtk.Orientation.VERTICAL, 0);
             {
                 finder_revealer = new Gtk.Revealer();
                 {
-                    finder_paned = new Gtk.Paned(Gtk.Orientation.HORIZONTAL);
+                    finder = Tatam.Finder.create_default_instance();
                     {
-                        sidebar = new Tatam.Sidebar();
-                        {
-                            sidebar.bookmark_directory_selected.connect((dir_path) => {
-                                    location = dir_path;
-                                });
-                            sidebar.bookmark_del_button_clicked.connect((dir_path) => {
-                                    return Tatam.Dialogs.confirm(Tatam.Text.CONFIRM_REMOVE_BOOKMARK, window);
-                                });
-                            sidebar.playlist_selected.connect((playlist_name, playlist_path) => {
-                                    try {
-                                        playlist_view.load_list_from_file(playlist_path);
-                                    } catch (FileError e) {
-                                        stderr.printf(@"FileError: $(e.message)\n");
-                                    }
-                                });
-                            sidebar.playlist_del_button_clicked.connect((playlist_path) => {
-                                    return Tatam.Dialogs.confirm(Tatam.Text.CONFIRM_REMOVE_PLAYLIST, window);
-                                });
-                            sidebar.file_chooser_called.connect(() => {
-                                    string? dir_path = Tatam.Dialogs.choose_directory(window);
-                                    if (dir_path != null) {
-                                        location = dir_path;
-                                    }
-                                });
-                            sidebar.bookmark_added.connect((file_path) => {
-
-                                });
-                        }
-                        
-                        finder = Tatam.Finder.create_default_instance();
-                        {
-                            finder.dir_changed.connect((path) => {
-                                    location_entry.text = path;
-                                });
-                            finder.bookmark_button_clicked.connect((file_path) => {
-                                    if (!sidebar.has_bookmark(file_path)) {
-                                        sidebar.add_bookmark(file_path);
-                                    } else if (Tatam.Dialogs.confirm(Tatam.Text.CONFIRM_REMOVE_BOOKMARK, window)) {
-                                        sidebar.remove_bookmark(file_path);
-                                    }
-                                });
-                            finder.play_button_clicked.connect((path) => {
-                                    setup_playlist.begin(path, false, (res, obj) => {
-                                            playlist_view.set_index(0);
-                                            gst_player.play(playlist_view.get_file_info().path);
-                                        });
-                                    show_playlist();
-                                });
-                            finder.add_button_clicked.connect((path) => {
-                                    show_playlist();
-                                    setup_playlist.begin(path, true);
-                                });
-                        }
-
-                        finder_paned.add1(sidebar);
-                        finder_paned.add2(finder);
-                        finder_paned.wide_handle = false;
-                        finder_paned.position = 0;
+                        finder.dir_changed.connect((path) => {
+                                location_entry.text = path;
+                            });
+                        finder.bookmark_button_clicked.connect((file_path) => {
+                                if (!sidebar.has_bookmark(file_path)) {
+                                    sidebar.add_bookmark(file_path);
+                                } else if (Tatam.Dialogs.confirm(Tatam.Text.CONFIRM_REMOVE_BOOKMARK, window)) {
+                                    sidebar.remove_bookmark(file_path);
+                                }
+                            });
+                        finder.play_button_clicked.connect((path) => {
+                                setup_playlist.begin(path, false, (res, obj) => {
+                                        playlist_view.set_index(0);
+                                        gst_player.play(playlist_view.get_file_info().path);
+                                    });
+                                show_playlist();
+                            });
+                        finder.add_button_clicked.connect((path) => {
+                                show_playlist();
+                                setup_playlist.begin(path, true);
+                            });
                     }
                     
-                    finder_revealer.child = finder_paned;
+                    finder_revealer.child = finder;
                     finder_revealer.reveal_child = true;
                     finder_revealer.transition_type = Gtk.RevealerTransitionType.SLIDE_DOWN;
                 }
@@ -481,6 +489,12 @@ public class TatamApplication : AppBase, TatamApplicationInterface {
                     if (artwork_view.visible && controller.has_artwork()) {
                         artwork_view.fit_image();
                     }
+                    sidebar.max_width = window.get_allocated_width();
+                    sidebar.max_height = window.get_allocated_height();
+                    sidebar.min_width = 200;
+                    sidebar.min_height = 200;
+                    sidebar_popover.width_request = sidebar.max_width * 1 / 2;
+                    sidebar_popover.height_request = sidebar.max_height * 2 / 3;
                     return false;
                 });
             window.destroy.connect(this.quit);
@@ -490,7 +504,6 @@ public class TatamApplication : AppBase, TatamApplicationInterface {
     }
 
     private void show_finder() {
-        menu_button.sensitive = true;
         parent_button.sensitive = true;
         header_bookmark_button.sensitive = true;
         finder_revealer.reveal_child = true;
@@ -505,7 +518,6 @@ public class TatamApplication : AppBase, TatamApplicationInterface {
     }
 
     private void show_playlist() {
-        menu_button.sensitive = false;
         parent_button.sensitive = false;
         header_bookmark_button.sensitive = false;
         finder_revealer.reveal_child = false;
@@ -519,28 +531,6 @@ public class TatamApplication : AppBase, TatamApplicationInterface {
         }
     }
     
-    private void show_sidebar() {
-        Timeout.add(6, () => {
-                if (finder_paned.position <= 200) {
-                    finder_paned.position += 10;
-                    return true;
-                } else {
-                    return false;
-                }
-            });
-    }
-
-    private void hide_sidebar() {
-        Timeout.add(6, () => {
-                if (finder_paned.position > 0) {
-                    finder_paned.position -= 10;
-                    return true;
-                } else {
-                    return false;
-                }
-            });
-    }
-
     private void set_controller_artwork() {
         Tatam.FileInfo? info = playlist_view.get_file_info();
         if (info == null) {

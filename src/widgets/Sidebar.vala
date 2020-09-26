@@ -21,6 +21,10 @@ using Gtk;
 
 namespace Tatam {
     public interface SidebarInterface {
+        public abstract int max_width { get; set; }
+        public abstract int min_width { get; set; }
+        public abstract int max_height { get; set; }
+        public abstract int min_height { get; set; }
         public abstract void add_bookmark(string file_path);
         public abstract bool has_bookmark(string bookmark_path);
         public abstract void remove_bookmark(string bookmark_path);
@@ -38,164 +42,209 @@ namespace Tatam {
     }
 
     public class Sidebar : Frame, SidebarInterface {
+        private ScrolledWindow sidebar_scroll;
         private TreeView sidebar_tree;
         private TreeStore sidebar_store;
         private TreeIter? playlist_root;
         private TreeIter? bookmark_root;
+
+        public int max_width {
+            get {
+                return sidebar_scroll.max_content_width;
+            }
+            set {
+                sidebar_scroll.max_content_width = value;
+            }
+        }
+        
+        public int min_width {
+            get {
+                return sidebar_scroll.min_content_width;
+            }
+            set {
+                int w1 = value;
+                int w2, w3;
+                sidebar_tree.get_preferred_width(out w2, out w3);
+                if (w1 < w3) {
+                    sidebar_scroll.min_content_width = w1;
+                } else {
+                    sidebar_scroll.min_content_width = w3;
+                }
+            }
+        }
+        
+        public int max_height {
+            get {
+                return sidebar_scroll.max_content_height;
+            }
+            set {
+                sidebar_scroll.max_content_height = value;
+            }
+        }
+        
+        public int min_height {
+            get {
+                return sidebar_scroll.min_content_height;
+            }
+            set {
+                int w1 = value;
+                int w2, w3;
+                sidebar_tree.get_preferred_height(out w2, out w3);
+                if (w1 < w3) {
+                    sidebar_scroll.min_content_height = w1;
+                } else {
+                    sidebar_scroll.min_content_height = w3;
+                }
+            }
+        }
         
         public Sidebar() {
-            var frame = new Frame(null);
+            sidebar_scroll = new ScrolledWindow(null, null);
             {
-                var sidebar_scrolled = new ScrolledWindow(null, null);
+                sidebar_tree = new TreeView();
                 {
-                    sidebar_tree = new TreeView();
+                    sidebar_store = new TreeStore(5,
+                                                  typeof(string),
+                                                  typeof(string),
+                                                  typeof(string),
+                                                  typeof(MenuType),
+                                                  typeof(string));
+
+                    var sidebar_title_col = new TreeViewColumn();
                     {
-                        sidebar_store = new TreeStore(5,
-                                                      typeof(string),
-                                                      typeof(string),
-                                                      typeof(string),
-                                                      typeof(MenuType),
-                                                      typeof(string));
-
-                        var sidebar_title_col = new TreeViewColumn();
+                        var sidebar_icon_cell = new CellRendererPixbuf();
+                        var sidebar_label_cell = new CellRendererText();
                         {
-                            var sidebar_icon_cell = new CellRendererPixbuf();
-                            var sidebar_label_cell = new CellRendererText();
-                            {
-                                sidebar_label_cell.family = Text.FONT_FAMILY;
-                                sidebar_label_cell.language = Environ.get_variable(Environ.get(), "LANG");
-                            }
-
-                            sidebar_title_col.pack_start(sidebar_icon_cell, false);
-                            sidebar_title_col.add_attribute(sidebar_icon_cell, "icon-name", 0);
-
-                            sidebar_title_col.pack_start(sidebar_label_cell, true);
-                            sidebar_title_col.add_attribute(sidebar_label_cell, "text", 1);
-
-                            sidebar_title_col.set_title("label");
-                            sidebar_title_col.sizing = TreeViewColumnSizing.AUTOSIZE;
+                            sidebar_label_cell.family = Text.FONT_FAMILY;
+                            sidebar_label_cell.language = Environ.get_variable(Environ.get(), "LANG");
                         }
 
-                        var sidebar_del_col = new TreeViewColumn();
-                        {
-                            var sidebar_del_cell = new CellRendererPixbuf();
+                        sidebar_title_col.pack_start(sidebar_icon_cell, false);
+                        sidebar_title_col.add_attribute(sidebar_icon_cell, "icon-name", 0);
 
-                            sidebar_del_col.pack_start(sidebar_del_cell, false);
-                            sidebar_del_col.add_attribute(sidebar_del_cell, "icon-name", 4);
-                            sidebar_del_col.set_title("del");
-                        }
+                        sidebar_title_col.pack_start(sidebar_label_cell, true);
+                        sidebar_title_col.add_attribute(sidebar_label_cell, "text", 1);
 
-                        sidebar_tree.set_model(sidebar_store);
-                        sidebar_tree.append_column(sidebar_title_col);
-                        sidebar_tree.append_column(sidebar_del_col);
-                        sidebar_tree.activate_on_single_click = true;
-                        sidebar_tree.headers_visible = false;
-                        sidebar_tree.hover_selection = true;
-                        sidebar_tree.reorderable = false;
-                        sidebar_tree.show_expanders = true;
-                        sidebar_tree.enable_tree_lines = false;
-                        sidebar_tree.level_indentation = 0;
+                        sidebar_title_col.set_title("label");
+                        sidebar_title_col.sizing = TreeViewColumnSizing.AUTOSIZE;
+                    }
 
-                        sidebar_tree.set_row_separator_func((model, iter) => {
-                                Value menu_type;
-                                model.get_value(iter, 3, out menu_type);
-                                return ((MenuType) menu_type == MenuType.SEPARATOR);
-                            });
+                    var sidebar_del_col = new TreeViewColumn();
+                    {
+                        var sidebar_del_cell = new CellRendererPixbuf();
 
-                        sidebar_tree.get_selection().changed.connect(() => {
-                                TreeSelection sidebar_selection = sidebar_tree.get_selection();
-                                sidebar_store.foreach((model, path, iter) => {
-                                        Value type;
-                                        sidebar_store.get_value(iter, 3, out type);
-                                        if ((MenuType) type == MenuType.FOLDER || (MenuType) type == MenuType.PLAYLIST_NAME) {
-                                            string icon_name = "";
-                                            if (sidebar_selection.iter_is_selected(iter)) {
-                                                icon_name = IconName.LIST_REMOVE;
-                                            } else {
-                                                icon_name = "";
-                                            }
-                                            sidebar_store.set_value(iter, 4, icon_name);
+                        sidebar_del_col.pack_start(sidebar_del_cell, false);
+                        sidebar_del_col.add_attribute(sidebar_del_cell, "icon-name", 4);
+                        sidebar_del_col.set_title("del");
+                    }
+
+                    sidebar_tree.set_model(sidebar_store);
+                    sidebar_tree.append_column(sidebar_title_col);
+                    sidebar_tree.append_column(sidebar_del_col);
+                    sidebar_tree.activate_on_single_click = true;
+                    sidebar_tree.headers_visible = false;
+                    sidebar_tree.hover_selection = true;
+                    sidebar_tree.reorderable = false;
+                    sidebar_tree.show_expanders = true;
+                    sidebar_tree.enable_tree_lines = false;
+                    sidebar_tree.level_indentation = 0;
+
+                    sidebar_tree.set_row_separator_func((model, iter) => {
+                            Value menu_type;
+                            model.get_value(iter, 3, out menu_type);
+                            return ((MenuType) menu_type == MenuType.SEPARATOR);
+                        });
+
+                    sidebar_tree.get_selection().changed.connect(() => {
+                            TreeSelection sidebar_selection = sidebar_tree.get_selection();
+                            sidebar_store.foreach((model, path, iter) => {
+                                    Value type;
+                                    sidebar_store.get_value(iter, 3, out type);
+                                    if ((MenuType) type == MenuType.FOLDER || (MenuType) type == MenuType.PLAYLIST_NAME) {
+                                        string icon_name = "";
+                                        if (sidebar_selection.iter_is_selected(iter)) {
+                                            icon_name = IconName.LIST_REMOVE;
+                                        } else {
+                                            icon_name = "";
                                         }
-                                        return false;
-                                    });
-                            });
-
-                        sidebar_tree.row_activated.connect((path, column) => {
-                                Value dir_path;
-                                Value sidebar_name;
-                                TreeIter bm_iter;
-
-                                debug("sidebar_tree_row_activated.");
-                                sidebar_tree.model.get_iter(out bm_iter, path);
-                                sidebar_tree.model.get_value(bm_iter, 3, out sidebar_name);
-
-                                switch ((MenuType) sidebar_name) {
-                                case MenuType.BOOKMARK:
-                                    if (sidebar_tree.is_row_expanded(path)) {
-                                        sidebar_tree.collapse_row(path);
-                                    } else {
-                                        sidebar_tree.expand_row(path, false);
+                                        sidebar_store.set_value(iter, 4, icon_name);
                                     }
-                                    break;
+                                    return false;
+                                });
+                        });
+
+                    sidebar_tree.row_activated.connect((path, column) => {
+                            Value dir_path;
+                            Value sidebar_name;
+                            TreeIter bm_iter;
+
+                            debug("sidebar_tree_row_activated.");
+                            sidebar_tree.model.get_iter(out bm_iter, path);
+                            sidebar_tree.model.get_value(bm_iter, 3, out sidebar_name);
+
+                            switch ((MenuType) sidebar_name) {
+                            case MenuType.BOOKMARK:
+                                if (sidebar_tree.is_row_expanded(path)) {
+                                    sidebar_tree.collapse_row(path);
+                                } else {
+                                    sidebar_tree.expand_row(path, false);
+                                }
+                                break;
                                 
-                                case MenuType.FOLDER:
-                                    sidebar_tree.model.get_value(bm_iter, 2, out dir_path);
+                            case MenuType.FOLDER:
+                                sidebar_tree.model.get_value(bm_iter, 2, out dir_path);
 
-                                    if (column.get_title() != "del") {
-                                        bookmark_directory_selected((string) dir_path);
-                                    } else {
-                                        if (bookmark_del_button_clicked((string) dir_path)) {
-                                            if (sidebar_store != null) {
-                                                sidebar_store.remove(ref bm_iter);
-                                            }
-                                        }
-                                    }
-                                    break;
-
-                                case MenuType.PLAYLIST_HEADER:
-                                    if (sidebar_tree.is_row_expanded(path)) {
-                                        sidebar_tree.collapse_row(path);
-                                    } else {
-                                        sidebar_tree.expand_row(path, false);
-                                    }
-                                    break;
-
-                                case MenuType.PLAYLIST_NAME:
-                                    Value val1;
-                                    Value val2;
-                                    sidebar_tree.model.get_value(bm_iter, 1, out val1);
-                                    sidebar_tree.model.get_value(bm_iter, 2, out val2);
-                                    string playlist_name = (string) val1;
-                                    string playlist_path = (string) val2;
-
-                                    if (column.get_title() != "del") {
-                                        playlist_selected(playlist_name, playlist_path);
-                                    } else {
-                                        if (playlist_del_button_clicked(playlist_path)) {
+                                if (column.get_title() != "del") {
+                                    bookmark_directory_selected((string) dir_path);
+                                } else {
+                                    if (bookmark_del_button_clicked((string) dir_path)) {
+                                        if (sidebar_store != null) {
                                             sidebar_store.remove(ref bm_iter);
                                         }
                                     }
-                                    break;
-
-                                case MenuType.CHOOSER:
-                                    file_chooser_called();
-                                    break;
                                 }
-                            });
+                                break;
 
-                        sidebar_tree.expand_all();
-                    }
+                            case MenuType.PLAYLIST_HEADER:
+                                if (sidebar_tree.is_row_expanded(path)) {
+                                    sidebar_tree.collapse_row(path);
+                                } else {
+                                    sidebar_tree.expand_row(path, false);
+                                }
+                                break;
 
-                    sidebar_scrolled.add(sidebar_tree);
-                    sidebar_scrolled.shadow_type = ShadowType.NONE;
+                            case MenuType.PLAYLIST_NAME:
+                                Value val1;
+                                Value val2;
+                                sidebar_tree.model.get_value(bm_iter, 1, out val1);
+                                sidebar_tree.model.get_value(bm_iter, 2, out val2);
+                                string playlist_name = (string) val1;
+                                string playlist_path = (string) val2;
+
+                                if (column.get_title() != "del") {
+                                    playlist_selected(playlist_name, playlist_path);
+                                } else {
+                                    if (playlist_del_button_clicked(playlist_path)) {
+                                        sidebar_store.remove(ref bm_iter);
+                                    }
+                                }
+                                break;
+
+                            case MenuType.CHOOSER:
+                                file_chooser_called();
+                                break;
+                            }
+                        });
+
+                    sidebar_tree.expand_all();
                 }
 
-                frame.add(sidebar_scrolled);
-                frame.set_shadow_type(ShadowType.NONE);
-                frame.get_style_context().add_class(StyleClass.SIDEBAR);
+                sidebar_scroll.add(sidebar_tree);
+                sidebar_scroll.hscrollbar_policy = PolicyType.AUTOMATIC;
+                sidebar_scroll.vscrollbar_policy = PolicyType.AUTOMATIC;
             }
-
-            add(frame);
+            
+            add(sidebar_scroll);
             init_store();
         }
 
