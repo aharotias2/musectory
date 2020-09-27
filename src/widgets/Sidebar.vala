@@ -240,12 +240,14 @@ namespace Tatam {
                 }
 
                 sidebar_scroll.add(sidebar_tree);
+                sidebar_scroll.shadow_type = ShadowType.NONE;
                 sidebar_scroll.hscrollbar_policy = PolicyType.AUTOMATIC;
                 sidebar_scroll.vscrollbar_policy = PolicyType.AUTOMATIC;
             }
-            
+
             add(sidebar_scroll);
             init_store();
+            init_tree_path();
         }
 
         public void init_store() {
@@ -283,6 +285,13 @@ namespace Tatam {
                               4, "");
             this.playlist_root = playlist_root;
             sidebar_tree.expand_all();
+        }
+
+        private void init_tree_path() {
+            TreePath tree_path = new TreePath.first();
+            TreeViewColumn tree_view_column = sidebar_tree.get_column(0);
+            bool start_editing = false;
+            sidebar_tree.set_cursor(tree_path, tree_view_column, start_editing);
         }
         
         public void add_bookmark(string file_path) {

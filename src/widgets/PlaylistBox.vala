@@ -223,9 +223,13 @@ namespace Tatam {
                 Gee.List<string> file_path_list = Tatam.StringUtils.array_to_list(contents.split("\n"));
                 remove_all();
                 foreach (string file_path in file_path_list) {
-                    add_item(freader.read_metadata_from_path(file_path));
+                    if (file_path.length > 0 && Files.mimetype_is_audio(file_path)) {
+                        Tatam.FileInfo file_info = freader.read_metadata_from_path(file_path);
+                        add_item(file_info);
+                        debug("load_list_from_file: added %s", file_path);
+                    }
                 }
-                tracker.reset(0, 0);
+                tracker.reset(file_path_list.size, 0);
                 playlist_changed();
             }
         }

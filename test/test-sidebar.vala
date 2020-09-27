@@ -32,6 +32,7 @@ class TestWindow : Gtk.Window {
         }
 
         add(sidebar);
+        set_default_size(250, 400);
         destroy.connect(Gtk.main_quit);
         show_all();
     }

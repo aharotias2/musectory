@@ -674,23 +674,25 @@ public class TatamApplication : AppBase, TatamApplicationInterface {
     }
 
     private async void init_playlist() {
-        new Thread<int>(null, () => {
+        menu_button.sensitive = false;
+        new Thread<bool>(null, () => {
                 try {
                     Gee.List<string> last_playlist = options.get_all(Tatam.OptionKey.PLAYLIST_ITEM);
                     if (last_playlist.size == 0) {
-                        return 0;
+                        return true;
                     }
                     foreach (string item in last_playlist) {
                         Tatam.FileInfo info = file_info_reader.read_metadata_from_path(item);
                         playlist_view.add_item(info);
                     }
-                    return 0;
+                    return true;
                 } finally {
                     Idle.add(init_playlist.callback);
                 }
             });
         yield;
         controller.activate_buttons(!playlist_view.has_previous(), !playlist_view.has_next());
+        menu_button.sensitive = true;
     }
     
     private string get_playlist_path_from_name(string playlist_name) {

@@ -33,8 +33,8 @@ namespace Tatam {
     }
 
     public class Tracker : TrackerInterface {
-        bool repeat;
-        bool shuffle;
+        bool repeating_value;
+        bool shuffling_value;
         uint[] seq;
         uint current_index;
 
@@ -53,7 +53,7 @@ namespace Tatam {
                         break;
                     }
                 }
-                if (shuffle) {
+                if (shuffling_value) {
                     create_shuffle_seq();
                 }
             }
@@ -87,18 +87,18 @@ namespace Tatam {
 
         public bool repeating {
             set {
-                repeat = value;
+                repeating_value = value;
             }
             get {
-                return repeat;
+                return repeating_value;
             }
         }
 
         public bool shuffling {
             set {
-                shuffle = value;
+                shuffling_value = value;
                 if (seq != null) {
-                    if (shuffle) {
+                    if (shuffling_value) {
                         create_shuffle_seq();
                     } else {
                         uint tmp = seq[current_index];
@@ -112,18 +112,19 @@ namespace Tatam {
                 }
             }
             get {
-                return shuffle;
+                return shuffling_value;
             }
         }
 
         public Tracker() {
             seq = null;
-            shuffle = false;
-            repeat = false;
+            shuffling_value = false;
+            repeating_value = false;
             current_index = 0;
         }
 
         public void reset(uint length, uint index) {
+            debug("Tracker resest length = %u, index = %u", length, index);
             if (length == 0) {
                 seq = null;
             } else {
@@ -142,7 +143,7 @@ namespace Tatam {
         }
 
         public bool has_next() {
-            if (repeat) {
+            if (repeating_value) {
                 return true;
             } else if (current_index == seq.length - 1) {
                 return false;
@@ -152,7 +153,7 @@ namespace Tatam {
         }
 
         public bool has_previous() {
-            if (shuffle) {
+            if (shuffling_value) {
                 return true;
             } else if (current_index == 0) {
                 return false;
@@ -163,8 +164,8 @@ namespace Tatam {
 
         public uint next() {
             if (current_index == seq.length - 1) {
-                if (repeat) {
-                    if (shuffle) {
+                if (repeating_value) {
+                    if (shuffling_value) {
                         create_shuffle_seq();
                         next();
                         create_shuffle_seq();
@@ -182,7 +183,7 @@ namespace Tatam {
 
         public uint previous() {
             if (current_index == 0) {
-                if (shuffle) {
+                if (shuffling_value) {
                     create_shuffle_seq();
                     return seq[current_index];
                 }

@@ -26,6 +26,7 @@ namespace Tatam {
         public const uint DECISECOND_IN_MILLISECONDS = 100;
         public abstract uint milliseconds { get; set; }
         public abstract double seconds { get; }
+//        public abstract FormatType format_type { get; set; }
         public abstract SmallTime minus(SmallTime subject);
         public abstract string to_string();
         public abstract string to_string_without_deciseconds();

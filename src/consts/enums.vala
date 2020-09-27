@@ -18,14 +18,12 @@
  */
 
 namespace Tatam {
-
     [Flags]
     public enum FileType {
         DIRECTORY,
         DISC,
         FILE,
         MUSIC,
-        PARENT,
         UNKNOWN,
         ALL;
         public string get_name() {
@@ -34,59 +32,25 @@ namespace Tatam {
             case DISC: return "DISC";
             case FILE: return "FILE";
             case MUSIC: return "MUSIC";
-            case PARENT: return "PARENT";
             case UNKNOWN: return "UNKNOWN";
             case ALL: default: return "ALL";
             }
         }
     }
 
-    public enum MusicViewIconType {
-        STOPPED,
-        PAUSED,
-        PLAYING
-    }
-
     public enum MenuType {
         BOOKMARK,
         FOLDER,
-        FINDER,
         PLAYLIST_HEADER,
         PLAYLIST_NAME,
         CHOOSER,
-        CONFIG,
-        ABOUT,
-        QUIT,
         REMOVE,
         MOVE_UP,
         MOVE_DOWN,
         SEPARATOR
     }
-
-    public enum DnDTarget {
-        STRING
-    }
-
-    public enum Column {
-        TITLE,
-        LENGTH,
-        ALBUM,
-        ARTIST,
-        COMPOSER,
-        GENRE,
-        TRACK,
-        DISC,
-        DATE,
-        COMMENT
-    }
-
-    public enum SaveMode {
-        OVERWRITE,
-        CREATE
-    }
     
     public enum ControllerState {
         PLAY, PAUSE, FINISHED
     }
-        
 }

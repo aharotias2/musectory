@@ -152,30 +152,28 @@ namespace Tatam {
 
                         button_box.halign = Align.CENTER;
                         button_box.valign = Align.CENTER;
-                        if (file_info.type != Tatam.FileType.PARENT) {
-                            if (use_popover) {
-                                if (file_info.type == Tatam.FileType.DIRECTORY
-                                    || file_info.type == Tatam.FileType.DISC)
-                                {
-                                    button_box.pack_start(
-                                        add_popover_to_button(bookmark_button, "Add to bookmark list"),
-                                        false, false);
-                                }
+                        if (use_popover) {
+                            if (file_info.type == Tatam.FileType.DIRECTORY
+                                || file_info.type == Tatam.FileType.DISC)
+                            {
                                 button_box.pack_start(
-                                    add_popover_to_button(play_button, "Play it"),
+                                    add_popover_to_button(bookmark_button, "Add to bookmark list"),
                                     false, false);
-                                button_box.pack_start(
-                                    add_popover_to_button(add_button, "Add to playlist"),
-                                    false, false);
-                            } else {
-                                if (file_info.type == Tatam.FileType.DIRECTORY
-                                    || file_info.type == Tatam.FileType.DISC)
-                                {
-                                    button_box.pack_start(bookmark_button, false, false);
-                                }
-                                button_box.pack_start(play_button, false, false);
-                                button_box.pack_start(add_button, false, false);
                             }
+                            button_box.pack_start(
+                                add_popover_to_button(play_button, "Play it"),
+                                false, false);
+                            button_box.pack_start(
+                                add_popover_to_button(add_button, "Add to playlist"),
+                                false, false);
+                        } else {
+                            if (file_info.type == Tatam.FileType.DIRECTORY
+                                || file_info.type == Tatam.FileType.DISC)
+                            {
+                                button_box.pack_start(bookmark_button, false, false);
+                            }
+                            button_box.pack_start(play_button, false, false);
+                            button_box.pack_start(add_button, false, false);
                         }
                     }
 
@@ -260,10 +258,6 @@ namespace Tatam {
             case Tatam.FileType.DIRECTORY:
                 debug("file_info.type: directory");
                 return folder_pixbuf;
-
-            case Tatam.FileType.PARENT:
-                debug("file_info.type: parent");
-                return parent_pixbuf;
 
             case Tatam.FileType.FILE:
             default:

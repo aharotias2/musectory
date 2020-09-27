@@ -19,6 +19,15 @@
 
 namespace Tatam {
     namespace Files {
+        public bool mimetype_is_audio(string file_path) {
+            File file = File.new_for_path(file_path);
+            if (file.query_exists()) {
+                return file.query_info("standard::*", 0).get_content_type().has_prefix("audio/");
+            } else {
+                return false;
+            }
+        }
+        
         public Tatam.FileType get_file_type(string file_path) throws FileError {
             Tatam.FileType answer = Tatam.FileType.UNKNOWN;
             GLib.File dir_file = GLib.File.new_for_path(file_path);
@@ -30,9 +39,6 @@ namespace Tatam {
                 }
 
                 if (file_type == GLib.FileType.DIRECTORY) {
-                    if (file_path.slice(file_path.last_index_of_char('/'), file_path.length) == "/..") {
-                        return Tatam.FileType.PARENT;
-                    }
                     answer = Tatam.FileType.DIRECTORY;
                     DirectoryReader dreader = new DirectoryReader(file_path);
                     dreader.directory_found.connect((dir) => {
@@ -270,14 +276,6 @@ namespace Tatam {
                 });
             dreader.run();
             return result;
-        }
-
-        public Tatam.FileInfo make_parent_file_info(string dir_path) {
-            Tatam.FileInfo parent = new Tatam.FileInfo();
-            parent.path = Path.get_dirname(dir_path);
-            parent.name = "..";
-            parent.type = Tatam.FileType.PARENT;
-            return parent;
         }
 
         public Tatam.FileInfo make_subdir_info(string dir_path, string subdir_path) {

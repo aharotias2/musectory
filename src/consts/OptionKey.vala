@@ -38,7 +38,7 @@ namespace Tatam {
     private const string CONTROLLER_IMAGE_SIZE_MIN_VALUE_LONG = "controller-image-size-min";
     private const string CONTROLLER_IMAGE_SIZE_MAX_VALUE_LONG = "controller-image-size-max";
     private const string BOOKMARK_DIR_VALUE_LONG = "bookmark";
-    private const string PLAYLIST_ITEM_VALUE_LONG = "--playlist-item";
+    private const string PLAYLIST_ITEM_VALUE_LONG = "playlist-item";
 
     public enum OptionKey {
         CONFIG_DIR,
