@@ -1,19 +1,19 @@
 /*
  * This file is part of tatam.
- * 
+ *
  *     tatam is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
- * 
+ *
  *     tatam is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
- * 
+ *
  *     You should have received a copy of the GNU General Public License
  *     along with tatam.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * Copyright 2018 Takayuki Tanaka
  */
 
@@ -27,7 +27,7 @@ namespace Tatam {
                 return false;
             }
         }
-        
+
         public Tatam.FileType get_file_type(string file_path) throws FileError {
             Tatam.FileType answer = Tatam.FileType.UNKNOWN;
             GLib.File dir_file = GLib.File.new_for_path(file_path);
@@ -42,23 +42,23 @@ namespace Tatam {
                     answer = Tatam.FileType.DIRECTORY;
                     DirectoryReader dreader = new DirectoryReader(file_path);
                     dreader.directory_found.connect((dir) => {
-                            answer = Tatam.FileType.DIRECTORY;
-                            return false;
-                        });
+                        answer = Tatam.FileType.DIRECTORY;
+                        return false;
+                    });
                     dreader.file_found.connect((file) => {
-                            try {
-                                GLib.FileInfo finfo = file.query_info("standard::*", 0);
-                                if (finfo.get_content_type().has_prefix("audio/")) {
-                                    answer = Tatam.FileType.DISC;
-                                    return false;
-                                } else {
-                                    return true;
-                                }
-                            } catch (GLib.Error e) {
-                                stderr.printf(@"Error: $(e.message)\n");
+                        try {
+                            GLib.FileInfo finfo = file.query_info("standard::*", 0);
+                            if (finfo.get_content_type().has_prefix("audio/")) {
+                                answer = Tatam.FileType.DISC;
+                                return false;
+                            } else {
                                 return true;
                             }
-                        });
+                        } catch (GLib.Error e) {
+                            stderr.printf(@"Error: $(e.message)\n");
+                            return true;
+                        }
+                    });
                     dreader.run();
                 }
             } catch (GLib.Error e) {
@@ -79,20 +79,20 @@ namespace Tatam {
                 } else {
                     DirectoryReader dreader = new DirectoryReader(dir_path);
                     dreader.directory_found.connect((dir) => {
-                            dir_list_local.add(dir.get_path());
-                            return true;
-                        });
+                        dir_list_local.add(dir.get_path());
+                        return true;
+                    });
                     dreader.file_found.connect((file) => {
-                            try {
-                                GLib.FileInfo info = file.query_info("standard::*", 0);
-                                if (info.get_content_type().has_prefix("audio/")) {
-                                    file_list_local.add(file.get_path());
-                                }
-                            } catch (GLib.Error e) {
-                                stderr.printf(@"GLib.Error: $(e.message)\n");
+                        try {
+                            GLib.FileInfo info = file.query_info("standard::*", 0);
+                            if (info.get_content_type().has_prefix("audio/")) {
+                                file_list_local.add(file.get_path());
                             }
-                            return true;
-                        });
+                        } catch (GLib.Error e) {
+                            stderr.printf(@"GLib.Error: $(e.message)\n");
+                        }
+                        return true;
+                    });
                     dreader.run();
                 }
                 dir_list = (owned) dir_list_local;
@@ -103,7 +103,7 @@ namespace Tatam {
                 stderr.printf(@"GLib.Error: $(e.message)\n");
             }
         }
-        
+
         public void find_dir_files(
             string dir_path, out Gee.List<string> dir_list, out Gee.List<Tatam.FileInfo?> file_list
             ) throws Tatam.Error, FileError
@@ -116,24 +116,24 @@ namespace Tatam {
             } else {
                 DirectoryReader dreader = new DirectoryReader(dir_path);
                 dreader.directory_found.connect((dir) => {
-                        dir_list_local.add(dir.get_basename());
-                        return true;
-                    });
+                    dir_list_local.add(dir.get_basename());
+                    return true;
+                });
                 dreader.file_found.connect((file) => {
-                        try {
-                            GLib.FileInfo fi = file.query_info("standard::*", 0);
-                            string mime_type = fi.get_content_type();
-                            if (mime_type.has_prefix("audio/")) {
-                                Tatam.FileInfo? file_info = freader.read_metadata_from_path(file.get_path());
-                                if (file_info != null && file_info.type == Tatam.FileType.MUSIC) {
-                                    file_list_local.add(file_info);
-                                }
+                    try {
+                        GLib.FileInfo fi = file.query_info("standard::*", 0);
+                        string mime_type = fi.get_content_type();
+                        if (mime_type.has_prefix("audio/")) {
+                            Tatam.FileInfo? file_info = freader.read_metadata_from_path(file.get_path());
+                            if (file_info != null && file_info.type == Tatam.FileType.MUSIC) {
+                                file_list_local.add(file_info);
                             }
-                        } catch (GLib.Error e) {
-                            stderr.printf(@"GLib.Error: $(e.message)\n");
                         }
-                        return true;
-                    });
+                    } catch (GLib.Error e) {
+                        stderr.printf(@"GLib.Error: $(e.message)\n");
+                    }
+                    return true;
+                });
                 dreader.run();
             }
             dir_list = (owned) dir_list_local;
@@ -161,26 +161,26 @@ namespace Tatam {
             try {
                 DirectoryReader dreader = new DirectoryReader(dir_path);
                 dreader.directory_found.connect((directory) => {
-                        info_list.add(make_subdir_info(dir_path, directory.get_path()));
-                        return true;
-                    });
+                    info_list.add(make_subdir_info(dir_path, directory.get_path()));
+                    return true;
+                });
                 dreader.file_found.connect((file) => {
-                        try {
-                            GLib.FileInfo g_info = file.query_info("standard::*", 0);
-                            if (g_info.get_content_type().has_prefix("audio/")) {
-                                FileInfoAdapter freader = new FileInfoAdapter();
-                                print(@"file_found $(file.get_path())\n");
-                                Tatam.FileInfo? file_info = freader.read_metadata_from_path(file.get_path());
-                                print(@"file info was found $(file.get_path())\n");
-                                if (file_info != null) {
-                                    file_list.add(file_info);
-                                }
+                    try {
+                        GLib.FileInfo g_info = file.query_info("standard::*", 0);
+                        if (g_info.get_content_type().has_prefix("audio/")) {
+                            FileInfoAdapter freader = new FileInfoAdapter();
+                            print(@"file_found $(file.get_path())\n");
+                            Tatam.FileInfo? file_info = freader.read_metadata_from_path(file.get_path());
+                            print(@"file info was found $(file.get_path())\n");
+                            if (file_info != null) {
+                                file_list.add(file_info);
                             }
-                        } catch (GLib.Error e) {
-                            stderr.printf(@"GLib.Error: $(e.message)\n");
                         }
-                        return true;
-                    });
+                    } catch (GLib.Error e) {
+                        stderr.printf(@"GLib.Error: $(e.message)\n");
+                    }
+                    return true;
+                });
                 dreader.run();
                 info_list.sort((a, b) => a.name.collate(b.name));
                 file_list.sort((a, b) => a.name.collate(b.name));
@@ -198,13 +198,13 @@ namespace Tatam {
             Gee.List<File> file_list = new Gee.ArrayList<File>();
             DirectoryReader dreader = new DirectoryReader(dir_path);
             dreader.directory_found.connect((directory) => {
-                    dir_list.add(directory);
-                    return true;
-                });
+                dir_list.add(directory);
+                return true;
+            });
             dreader.file_found.connect((file) => {
-                    file_list.add(file);
-                    return true;
-                });
+                file_list.add(file);
+                return true;
+            });
             dreader.run();
             dir_list.sort((a, b) => a.get_basename().collate(b.get_basename()));
             file_list.sort((a, b) => a.get_basename().collate(b.get_basename()));
@@ -213,7 +213,7 @@ namespace Tatam {
             result.add_all(file_list);
             return result;
         }
-        
+
         public Gee.List<Tatam.FileInfo?> find_file_infos_recursively(string dir_path) throws FileError {
             if (!GLib.FileUtils.test(dir_path, FileTest.IS_DIR)) {
                 return new Gee.ArrayList<Tatam.FileInfo?>();
@@ -236,13 +236,13 @@ namespace Tatam {
             DirectoryReader dreader = new DirectoryReader(dir_path);
             FileInfoAdapter mreader = new FileInfoAdapter();
             dreader.file_found.connect((file) => {
-                    Tatam.FileInfo? file_info = mreader.read_metadata_from_path(file.get_path());
-                    if (file_info != null && file_info.artwork != null) {
-                        pixbuf = file_info.artwork;
-                        return false;
-                    }
-                    return true;
-                });
+                Tatam.FileInfo? file_info = mreader.read_metadata_from_path(file.get_path());
+                if (file_info != null && file_info.artwork != null) {
+                    pixbuf = file_info.artwork;
+                    return false;
+                }
+                return true;
+            });
             dreader.run();
             return pixbuf;
         }
@@ -250,30 +250,30 @@ namespace Tatam {
         public string extension(string file_path) {
             return file_path.substring(file_path.last_index_of_char('.') + 1, file_path.length);
         }
-        
+
         public string create_dir_artwork_path(string dir_path, string extension) {
             string dirname = Path.get_basename(Path.get_dirname(dir_path));
             string basename = Path.get_basename(dir_path);
             return "/tmp/" + PROGRAM_NAME + "/" + dirname + "_" + basename + (extension != "" ? "." + extension : "");
         }
-        
+
         public bool contains_music(string dir_path, int max_depth = 0, int depth = 0)
         throws Tatam.Error, FileError
         {
             bool result = false;
             DirectoryReader dreader = new DirectoryReader(dir_path);
             dreader.file_found.connect((file) => {
-                    try {
-                        GLib.FileInfo file_info = file.query_info("standard::*", 0);
-                        if (file_info.get_content_type().has_prefix("audio/")) {
-                            result = true;
-                            return false;
-                        }
-                    } catch (GLib.Error e) {
-                        stderr.printf(@"Error: $(e.message)\n");
+                try {
+                    GLib.FileInfo file_info = file.query_info("standard::*", 0);
+                    if (file_info.get_content_type().has_prefix("audio/")) {
+                        result = true;
+                        return false;
                     }
-                    return true;
-                });
+                } catch (GLib.Error e) {
+                    stderr.printf(@"Error: $(e.message)\n");
+                }
+                return true;
+            });
             dreader.run();
             return result;
         }

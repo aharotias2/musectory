@@ -1,19 +1,19 @@
 /*
  * This file is part of tatam.
- * 
+ *
  *     tatam is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
- * 
+ *
  *     tatam is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
- * 
+ *
  *     You should have received a copy of the GNU General Public License
  *     along with tatam.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * Copyright 2020 Takayuki Tanaka
  */
 
@@ -22,13 +22,13 @@ using Gst;
 namespace Tatam {
     public class MetadataReader : GLib.Object {
         private static uint count;
-        
+
         private Pipeline pipeline;
         private Element uridecoder;
         private Element fakesink;
 
         public signal bool tag_found(string tag, GLib.Value? value);
-        
+
         public MetadataReader() {
             count++;
             pipeline = new Pipeline("metadata-pipeline" + count.to_string());
@@ -37,15 +37,15 @@ namespace Tatam {
             fakesink = ElementFactory.make("fakesink", "sink");
             pipeline.add(fakesink);
             uridecoder.pad_added.connect((pad) => {
-                    Pad sinkpad = fakesink.get_static_pad("sink");
-                    if (!sinkpad.is_linked()) {
-                        if (pad.link(sinkpad) != PadLinkReturn.OK) {
-                            debug("Pad link failed\n");
-                        } else {
-                            debug("Pad link succeeded\n");
-                        }
+                Pad sinkpad = fakesink.get_static_pad("sink");
+                if (!sinkpad.is_linked()) {
+                    if (pad.link(sinkpad) != PadLinkReturn.OK) {
+                        debug("Pad link failed\n");
+                    } else {
+                        debug("Pad link succeeded\n");
                     }
-                });
+                }
+            });
         }
 
         public SmallTime get_duration() {
@@ -59,7 +59,7 @@ namespace Tatam {
                 return new SmallTime(0);
             }
         }
-        
+
         public void get_metadata(string file_path) throws Tatam.Error, GLib.Error {
             GLib.File file = GLib.File.new_for_path(file_path);
 
@@ -92,7 +92,7 @@ namespace Tatam {
                             debug("Gst message (EOS)");
                             terminated = true;
                             break;
-                            
+
                         case MessageType.ASYNC_DONE:
                             debug("Gst message (ASYNC_DONE)");
                             terminated = true;
@@ -109,19 +109,19 @@ namespace Tatam {
                             TagList tag_list;
                             message.parse_tag(out tag_list);
                             tag_list.foreach((tag_list_each, tag) => {
-                                    if (!terminated) {
-                                        uint num = tag_list_each.get_tag_size(tag);
-                                        for (int i = 0; i < num; i++) {
-                                            GLib.Value value;
-                                            value = tag_list_each.get_value_index(tag, i);
-                                            bool response = tag_found(tag, value);
-                                            if (!response) {
-                                                terminated = true;
-                                                break;
-                                            }
+                                if (!terminated) {
+                                    uint num = tag_list_each.get_tag_size(tag);
+                                    for (int i = 0; i < num; i++) {
+                                        GLib.Value value;
+                                        value = tag_list_each.get_value_index(tag, i);
+                                        bool response = tag_found(tag, value);
+                                        if (!response) {
+                                            terminated = true;
+                                            break;
                                         }
                                     }
-                                });
+                                }
+                            });
                             GLib.Value duration_value = GLib.Value(typeof(Tatam.SmallTime));
                             duration_value.set_object(get_duration());
                             tag_found("duration", duration_value);

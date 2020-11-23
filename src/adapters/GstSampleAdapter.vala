@@ -1,19 +1,19 @@
 /*
  * This file is part of tatam.
- * 
+ *
  *     tatam is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
- * 
+ *
  *     tatam is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
- * 
+ *
  *     You should have received a copy of the GNU General Public License
  *     along with tatam.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * Copyright 2020 Takayuki Tanaka
  */
 
@@ -24,15 +24,15 @@ namespace Tatam {
             try {
                 MetadataReader meta_reader = new Tatam.MetadataReader();
                 meta_reader.tag_found.connect((tag, value) => {
-                        if (tag == "image") {
-                            Gst.Sample? sample = (Gst.Sample?) value.get_boxed();
-                            if (sample != null) {
-                                pixbuf = extract_pixbuf_from_gst_sample(sample, file_path);
-                            }
-                            return false;
+                    if (tag == "image") {
+                        Gst.Sample? sample = (Gst.Sample?)value.get_boxed();
+                        if (sample != null) {
+                            pixbuf = extract_pixbuf_from_gst_sample(sample, file_path);
                         }
-                        return true;
-                    });
+                        return false;
+                    }
+                    return true;
+                });
                 meta_reader.get_metadata(file_path);
             } catch (Tatam.Error e) {
                 stderr.printf(@"Tatam.Error: $(e.message)\n");
@@ -51,13 +51,13 @@ namespace Tatam {
                 if (buffer == null) {
                     return null;
                 }
-                    
+
                 debug("buffer ok");
                 size_t size_1 = buffer.get_size();
                 if (size_1 == 0) {
                     return null;
                 }
-                    
+
                 debug("size ok");
                 uint8[] data;
                 buffer.extract_dup(0, size_1, out data);

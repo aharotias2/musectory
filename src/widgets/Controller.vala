@@ -1,19 +1,19 @@
 /*
  * This file is part of tatam.
- * 
+ *
  *     tatam is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
- * 
+ *
  *     tatam is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
- * 
+ *
  *     You should have received a copy of the GNU General Public License
  *     along with tatam.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * Copyright 2020 Takayuki Tanaka
  */
 
@@ -65,7 +65,7 @@ namespace Tatam {
         private ToggleButton toggle_shuffle_button;
         private ToggleButton toggle_repeat_button;
         private Scale volume_bar;
-        
+
         private ControllerState play_pause_button_state_value;
         private SmallTime music_total_time_value;
         private SmallTime music_current_time_value;
@@ -73,7 +73,7 @@ namespace Tatam {
         private uint artwork_size_value;
         private bool running;
         private Gdk.Pixbuf? original_pixbuf;
-        
+
         public ControllerState play_pause_button_state {
             get {
                 return play_pause_button_state_value;
@@ -90,15 +90,15 @@ namespace Tatam {
                             icon.icon_name = IconName.Symbolic.MEDIA_PLAYBACK_PAUSE;
                         }
                         Timeout.add(100, () => {
-                                if (running) {
-                                    music_current_time += 100;
-                                }
-                                if (music_current_time_value.milliseconds
-                                    >= music_total_time_value.milliseconds) {
-                                    play_pause_button_state = ControllerState.FINISHED;
-                                }
-                                return running;
-                            });
+                            if (running) {
+                                music_current_time += 100;
+                            }
+                            if (music_current_time_value.milliseconds
+                                >= music_total_time_value.milliseconds) {
+                                play_pause_button_state = ControllerState.FINISHED;
+                            }
+                            return running;
+                        });
                         debug("play_pause_button_state was set to PLAY");
                         break;
                     case ControllerState.PAUSE:
@@ -139,7 +139,7 @@ namespace Tatam {
                 debug("music_total_time was set to %s", music_total_time_value.to_string());
             }
         }
-        
+
         public uint music_current_time {
             get {
                 return music_current_time_value.milliseconds;
@@ -150,8 +150,8 @@ namespace Tatam {
                 }
                 music_current_time_value.milliseconds = value;
                 music_rest_time_value.milliseconds
-                = music_total_time_value.milliseconds
-                - music_current_time_value.milliseconds;
+                    = music_total_time_value.milliseconds
+                      - music_current_time_value.milliseconds;
                 time_label_current.label = music_current_time_value.to_string();
                 time_label_rest.label = music_rest_time_value.to_string_without_deciseconds();
                 if (value != (uint) time_bar.get_value()) {
@@ -168,7 +168,7 @@ namespace Tatam {
                 music_title_label.label = value;
             }
         }
-        
+
         public uint artwork_size {
             get {
                 return artwork_size_value;
@@ -189,13 +189,13 @@ namespace Tatam {
                 volume_bar.set_value(value);
             }
         }
-        
+
         public void set_artwork(Gdk.Pixbuf pixbuf) {
             original_pixbuf = pixbuf;
             Gdk.Pixbuf resized_pixbuf = Tatam.PixbufUtils.scale(original_pixbuf, (int) this.artwork_size);
             artwork.pixbuf = resized_pixbuf;
         }
-        
+
         public Controller() {
             Box main_box = new Box(Orientation.HORIZONTAL, 2);
             {
@@ -211,8 +211,8 @@ namespace Tatam {
                     artwork_button.get_style_context().add_class(StyleClass.FLAT);
                     artwork_button.add(artwork);
                     artwork_button.clicked.connect(() => {
-                            artwork_clicked();
-                        });
+                        artwork_clicked();
+                    });
                 }
 
                 var controller_second_box = new Box(Orientation.HORIZONTAL, 2);
@@ -223,18 +223,18 @@ namespace Tatam {
                         );
                     {
                         play_pause_button.clicked.connect(() => {
-                                switch (play_pause_button_state) {
-                                case ControllerState.FINISHED:
-                                case ControllerState.PAUSE: {
-                                    unpause();
-                                    play_button_clicked();
-                                } break;
-                                case ControllerState.PLAY: {
-                                    pause();
-                                    pause_button_clicked();
-                                } break;
-                                }
-                            });
+                            switch (play_pause_button_state) {
+                            case ControllerState.FINISHED:
+                            case ControllerState.PAUSE: {
+                                unpause();
+                                play_button_clicked();
+                            } break;
+                            case ControllerState.PLAY: {
+                                pause();
+                                pause_button_clicked();
+                            } break;
+                            }
+                        });
                     }
 
                     next_track_button = new ToolButton(
@@ -243,8 +243,8 @@ namespace Tatam {
                     {
                         next_track_button.sensitive = false;
                         next_track_button.clicked.connect(() => {
-                                next_button_clicked();
-                            });
+                            next_button_clicked();
+                        });
                     }
 
                     prev_track_button = new ToolButton(
@@ -253,8 +253,8 @@ namespace Tatam {
                     {
                         prev_track_button.sensitive = false;
                         prev_track_button.clicked.connect(() => {
-                                prev_button_clicked();
-                            });
+                            prev_button_clicked();
+                        });
                     }
 
                     controller_second_box.valign = Align.CENTER;
@@ -287,13 +287,13 @@ namespace Tatam {
                         time_bar.has_origin = true;
                         time_bar.set_increments(SMALL_STEP_MILLISECONDS, BIG_STEP_MILLISECONDS);
                         time_bar.value_changed.connect(() => {
-                                music_current_time = (uint) time_bar.get_value();
-                            });
+                            music_current_time = (uint) time_bar.get_value();
+                        });
                         time_bar.change_value.connect((scroll_type, new_value) => {
-                                debug("change_value %f, %f", new_value, time_bar.get_value());
-                                time_position_changed(time_bar.get_value());
-                                return false;
-                            });
+                            debug("change_value %f, %f", new_value, time_bar.get_value());
+                            time_position_changed(time_bar.get_value());
+                            return false;
+                        });
                     }
 
                     var time_label_box = new Box(Orientation.HORIZONTAL, 0);
@@ -309,7 +309,7 @@ namespace Tatam {
                         time_label_box.pack_start(time_label_current, false, false);
                         time_label_box.pack_end(time_label_rest, false, false);
                     }
-            
+
                     time_bar_box.valign = Align.CENTER;
                     time_bar_box.pack_start(music_title_label, false, false);
                     time_bar_box.pack_start(time_bar, true, false);
@@ -332,18 +332,18 @@ namespace Tatam {
                                 volume_bar.value_pos = PositionType.BOTTOM;
                                 volume_bar.margin = 5;
                                 volume_bar.value_changed.connect(() => {
-                                        volume_changed(volume_bar.get_value());
-                                        var icon = ((Image) volume_button.icon_widget);
-                                        if (volume_bar.get_value() == 0.0) {
-                                            icon.icon_name = IconName.Symbolic.AUDIO_VOLUME_MUTED;
-                                        } else if (volume_bar.get_value() < 0.35) {
-                                            icon.icon_name = IconName.Symbolic.AUDIO_VOLUME_LOW;
-                                        } else if (volume_bar.get_value() < 0.75) {
-                                            icon.icon_name = IconName.Symbolic.AUDIO_VOLUME_MEDIUM;
-                                        } else {
-                                            icon.icon_name = IconName.Symbolic.AUDIO_VOLUME_HIGH;
-                                        }
-                                    });
+                                    volume_changed(volume_bar.get_value());
+                                    var icon = ((Image) volume_button.icon_widget);
+                                    if (volume_bar.get_value() == 0.0) {
+                                        icon.icon_name = IconName.Symbolic.AUDIO_VOLUME_MUTED;
+                                    } else if (volume_bar.get_value() < 0.35) {
+                                        icon.icon_name = IconName.Symbolic.AUDIO_VOLUME_LOW;
+                                    } else if (volume_bar.get_value() < 0.75) {
+                                        icon.icon_name = IconName.Symbolic.AUDIO_VOLUME_MEDIUM;
+                                    } else {
+                                        icon.icon_name = IconName.Symbolic.AUDIO_VOLUME_HIGH;
+                                    }
+                                });
                             }
 
                             popover.add(volume_bar);
@@ -365,8 +365,8 @@ namespace Tatam {
                         toggle_shuffle_button.valign = Align.CENTER;
                         toggle_shuffle_button.halign = Align.CENTER;
                         toggle_shuffle_button.toggled.connect(() => {
-                                shuffle_button_toggled(toggle_shuffle_button.active);
-                            });
+                            shuffle_button_toggled(toggle_shuffle_button.active);
+                        });
                     }
 
                     toggle_repeat_button = new ToggleButton();
@@ -378,8 +378,8 @@ namespace Tatam {
                         toggle_repeat_button.valign = Align.CENTER;
                         toggle_repeat_button.halign = Align.CENTER;
                         toggle_repeat_button.toggled.connect(() => {
-                                repeat_button_toggled(toggle_repeat_button.active);
-                            });
+                            repeat_button_toggled(toggle_repeat_button.active);
+                        });
                     }
 
                     controller_third_box.valign = Align.CENTER;
@@ -413,7 +413,7 @@ namespace Tatam {
             toggle_shuffle_button.visible = true;
             artwork_button.sensitive = true;
         }
-        
+
         public void hide_buttons() {
             prev_track_button.visible = false;
             next_track_button.visible = false;
@@ -425,7 +425,7 @@ namespace Tatam {
         public void show_artwork() {
             this.artwork_button.visible = true;
         }
-        
+
         public void hide_artwork() {
             this.artwork_button.visible = false;
         }
@@ -433,13 +433,13 @@ namespace Tatam {
         public bool has_artwork() {
             return artwork.pixbuf != null;
         }
-        
+
         public void activate_buttons(bool track_is_first, bool track_is_last) {
             play_pause_button.sensitive = true;
             prev_track_button.sensitive = !track_is_first;
             next_track_button.sensitive = !track_is_last;
         }
-        
+
         public void deactivate_buttons() {
             play_pause_button.sensitive = false;
             prev_track_button.sensitive = false;

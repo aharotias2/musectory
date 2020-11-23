@@ -1,19 +1,19 @@
 /*
  * This file is part of tatam.
- * 
+ *
  *     tatam is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
- * 
+ *
  *     tatam is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
- * 
+ *
  *     You should have received a copy of the GNU General Public License
  *     along with tatam.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * Copyright 2020 Takayuki Tanaka
  */
 
@@ -26,21 +26,21 @@ public class AppBase {
         set_print_handler((text) => output.printf(text));
         debugging_on = Environment.get_variable("G_MESSAGES_DEBUG") == "all";
     }
-    
+
     protected static string choose_file(string dir_path) throws GLib.Error, GLib.FileError {
         Tatam.DirectoryReader reader = new Tatam.DirectoryReader(dir_path);
         Gee.List<string> dir_list = new Gee.ArrayList<string>();
         Gee.List<string> file_list = new Gee.ArrayList<string>();
 
         reader.directory_found.connect((dir) => {
-                dir_list.add(dir.get_basename());
-                return true;
-            });
+            dir_list.add(dir.get_basename());
+            return true;
+        });
 
         reader.file_found.connect((file) => {
-                file_list.add(file.get_basename());
-                return true;
-            });
+            file_list.add(file.get_basename());
+            return true;
+        });
 
         reader.run();
 

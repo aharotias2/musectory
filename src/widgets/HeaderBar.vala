@@ -1,19 +1,19 @@
 /*
  * This file is part of tatam.
- * 
+ *
  *     tatam is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
- * 
+ *
  *     tatam is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
- * 
+ *
  *     You should have received a copy of the GNU General Public License
  *     along with tatam.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * Copyright 2020 Takayuki Tanaka
  */
 
@@ -43,14 +43,14 @@ namespace Tatam {
         public enum FoldButtonState {
             OPENED, FOLDED
         }
-        
+
         private Button switch_button;
         private Button add_button;
         private ToggleButton fold_button;
         private Button about_button;
 
         private SwitchButtonState switch_button_state_value;
-        
+
         public SwitchButtonState switch_button_state {
             get {
                 return switch_button_state_value;
@@ -76,7 +76,7 @@ namespace Tatam {
         }
 
         private FoldButtonState fold_button_state_value;
-        
+
         public FoldButtonState fold_button_state {
             get {
                 return fold_button_state_value;
@@ -95,7 +95,7 @@ namespace Tatam {
                 }
             }
         }
-        
+
         public HeaderBar() {
             this.switch_button_state = SwitchButtonState.FINDER;
 
@@ -106,13 +106,13 @@ namespace Tatam {
                     this.switch_button.get_style_context().add_class(StyleClass.TITLEBUTTON);
                     this.switch_button.add(new Image.from_icon_name(IconName.Symbolic.VIEW_LIST, IconSize.BUTTON));
                     this.switch_button.clicked.connect(() => {
-                            if (this.switch_button_state == SwitchButtonState.FINDER) {
-                                this.switch_button_state = SwitchButtonState.PLAYLIST;
-                            } else {
-                                this.switch_button_state = SwitchButtonState.FINDER;
-                            }
-                            this.switch_button_clicked(this.switch_button_state);
-                        });
+                        if (this.switch_button_state == SwitchButtonState.FINDER) {
+                            this.switch_button_state = SwitchButtonState.PLAYLIST;
+                        } else {
+                            this.switch_button_state = SwitchButtonState.FINDER;
+                        }
+                        this.switch_button_clicked(this.switch_button_state);
+                    });
                 }
 
                 this.add_button = new Button.from_icon_name(IconName.Symbolic.BOOKMARK_NEW, IconSize.BUTTON);
@@ -121,8 +121,8 @@ namespace Tatam {
                     this.add_button.add(new Image.from_icon_name(IconName.Symbolic.BOOKMARK_NEW, IconSize.BUTTON));
                     this.add_button.tooltip_text = Text.TOOLTIP_SAVE_PLAYLIST;
                     this.add_button.clicked.connect(() => {
-                            this.add_button_clicked();
-                        });
+                        this.add_button_clicked();
+                    });
                 }
 
                 header_box.add(this.switch_button);
@@ -136,25 +136,25 @@ namespace Tatam {
                 this.fold_button.sensitive = true;
                 this.fold_button.active = true;
                 this.fold_button.clicked.connect(() => {
-                        if (this.fold_button_state == FoldButtonState.OPENED) {
-                            this.fold_button_state = FoldButtonState.FOLDED;
-                        } else {
-                            this.fold_button_state = FoldButtonState.OPENED;
-                        }
-                        this.fold_button_clicked(this.fold_button_state);
-                    });
+                    if (this.fold_button_state == FoldButtonState.OPENED) {
+                        this.fold_button_state = FoldButtonState.FOLDED;
+                    } else {
+                        this.fold_button_state = FoldButtonState.OPENED;
+                    }
+                    this.fold_button_clicked(this.fold_button_state);
+                });
             }
-            
+
             this.about_button = new Button();
             {
                 this.about_button.get_style_context().add_class(StyleClass.TITLEBUTTON);
                 this.about_button.add(new Image.from_icon_name(IconName.Symbolic.HELP_ABOUT, IconSize.BUTTON));
                 this.about_button.sensitive = true;
                 this.about_button.clicked.connect(() => {
-                        this.about_button_clicked();
-                    });
+                    this.about_button_clicked();
+                });
             }
-            
+
             this.show_close_button = true;
             this.title = PROGRAM_NAME;
             this.has_subtitle = false;

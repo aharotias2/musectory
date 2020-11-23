@@ -1,19 +1,19 @@
 /*
  * This file is part of tatam.
- * 
+ *
  *     tatam is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
- * 
+ *
  *     tatam is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
- * 
+ *
  *     You should have received a copy of the GNU General Public License
  *     along with tatam.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * Copyright 2018 Takayuki Tanaka
  */
 
@@ -49,7 +49,7 @@ namespace Tatam {
         public signal void item_activated(uint index, Tatam.FileInfo item);
         public signal void playlist_changed();
     }
-    
+
     public class PlaylistBox : Bin, PlaylistBoxInterface {
         private GLib.ListStore? store;
         private ScrolledWindow? scrolled;
@@ -58,7 +58,7 @@ namespace Tatam {
         private ListBox? list_box;
         public string? playlist_name { get; set; }
         public uint image_size { get; set; }
-        
+
         public PlaylistBox() {
             freader = new FileInfoAdapter();
             name = null;
@@ -72,12 +72,12 @@ namespace Tatam {
                     list_box.activate_on_single_click = true;
                     list_box.selection_mode = SelectionMode.SINGLE;
                     list_box.row_activated.connect((row) => {
-                            PlaylistItem? item = row as PlaylistItem;
-                            if (item != null) {
-                                set_index(item.get_index());
-                                item_activated(tracker.current, item.file_info);
-                            }
-                        });
+                        PlaylistItem? item = row as PlaylistItem;
+                        if (item != null) {
+                            set_index(item.get_index());
+                            item_activated(tracker.current, item.file_info);
+                        }
+                    });
                 }
                 scrolled.add(list_box);
             }
@@ -89,11 +89,11 @@ namespace Tatam {
         }
 
         public Tatam.FileInfo? get_file_info() {
-            return (Tatam.FileInfo?) store.get_item(tracker.current);
+            return (Tatam.FileInfo?)store.get_item(tracker.current);
         }
-        
+
         public Tatam.FileInfo? get_file_info_at_index(uint index) {
-            return (Tatam.FileInfo?) store.get_item(index);
+            return (Tatam.FileInfo?)store.get_item(index);
         }
 
         public PlaylistItem? get_current_item() {
@@ -105,7 +105,7 @@ namespace Tatam {
             debug("PlaylistBox.get_item: index = %u, track title = %s", index, item != null ? item.track_title : "null");
             return item;
         }
-        
+
         public void add_item(Tatam.FileInfo? file_info) {
             if (file_info != null) {
                 store.append(file_info);
@@ -128,7 +128,7 @@ namespace Tatam {
             tracker.reset(get_list_size(), tracker.current < tracker.max ? tracker.current : tracker.max - 1);
             playlist_changed();
         }
-        
+
         public uint max_index() {
             return tracker.max;
         }
@@ -170,7 +170,7 @@ namespace Tatam {
             item.clicked();
             item.queue_draw();
         }
-        
+
         public uint get_index() {
             return tracker.current;
         }
@@ -233,31 +233,31 @@ namespace Tatam {
                 playlist_changed();
             }
         }
-        
+
         private Widget create_list_item(Object object) {
-            PlaylistItem list_item = new PlaylistItem((Tatam.FileInfo) object, image_size);
+            PlaylistItem list_item = new PlaylistItem((Tatam.FileInfo)object, image_size);
             {
                 list_item.set_index(get_list_size());
                 list_item.menu_activated.connect((type, index) => {
-                        Tatam.FileInfo file_info = get_file_info_at_index(index);
-                        uint size = get_list_size();
-                        if (type == MenuType.REMOVE) {
+                    Tatam.FileInfo file_info = get_file_info_at_index(index);
+                    uint size = get_list_size();
+                    if (type == MenuType.REMOVE) {
+                        store.remove(index);
+                        playlist_changed();
+                    } else if (type == MenuType.MOVE_UP) {
+                        if (index > 0) {
+                            store.insert(index - 1, file_info);
+                            store.remove(index + 1);
+                            playlist_changed();
+                        }
+                    } else if (type == MenuType.MOVE_DOWN) {
+                        if (index < size - 1) {
+                            store.insert(index + 2, file_info);
                             store.remove(index);
                             playlist_changed();
-                        } else if (type == MenuType.MOVE_UP) {
-                            if (index > 0) {
-                                store.insert(index - 1, file_info);
-                                store.remove(index + 1);
-                                playlist_changed();
-                            }
-                        } else if (type == MenuType.MOVE_DOWN) {
-                            if (index < size - 1) {
-                                store.insert(index + 2, file_info);
-                                store.remove(index);
-                                playlist_changed();
-                            }
                         }
-                    });
+                    }
+                });
             }
             return list_item;
         }

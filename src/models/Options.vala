@@ -1,19 +1,19 @@
 /*
  * This file is part of tatam.
- * 
+ *
  *     tatam is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
- * 
+ *
  *     tatam is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
- * 
+ *
  *     You should have received a copy of the GNU General Public License
  *     along with tatam.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * Copyright 2018 Takayuki Tanaka
  */
 
@@ -27,12 +27,12 @@ namespace Tatam {
         public abstract void parse_args(ref unowned string[] args) throws Tatam.Error;
         public abstract void parse_conf() throws Tatam.Error;
     }
-    
+
     public class Options : OptionsInterface {
-        private Gee.Map<Tatam.OptionKey, Gee.List<string>> config_map;
-        
+        private Gee.Map<Tatam.OptionKey, Gee.List<string> > config_map;
+
         public Options() {
-            config_map = new Gee.HashMap<Tatam.OptionKey, Gee.List<string>>();
+            config_map = new Gee.HashMap<Tatam.OptionKey, Gee.List<string> >();
             {
                 foreach (OptionKey key in OptionKey.values()) {
                     config_map.set(key, new Gee.ArrayList<string>());
@@ -65,7 +65,7 @@ namespace Tatam {
         public void remove_key(OptionKey key) {
             config_map.get(key).clear();
         }
-        
+
         public void set(OptionKey key, string? value) {
             if (value == null) {
                 debug("WARNING: Options.set requires arg value is not null");
@@ -80,7 +80,7 @@ namespace Tatam {
         public Gee.Set<OptionKey> keys() {
             return config_map.keys;
         }
-        
+
         public void parse_args(ref unowned string[] args) throws Tatam.Error {
             for (int i = 1; i < args.length; i++) {
                 OptionKey key;

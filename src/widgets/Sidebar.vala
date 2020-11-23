@@ -1,19 +1,19 @@
 /*
  * This file is part of tatam.
- * 
+ *
  *     tatam is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
- * 
+ *
  *     tatam is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
- * 
+ *
  *     You should have received a copy of the GNU General Public License
  *     along with tatam.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * Copyright 2020 Takayuki Tanaka
  */
 
@@ -56,7 +56,7 @@ namespace Tatam {
                 sidebar_scroll.max_content_width = value;
             }
         }
-        
+
         public int min_width {
             get {
                 return sidebar_scroll.min_content_width;
@@ -72,7 +72,7 @@ namespace Tatam {
                 }
             }
         }
-        
+
         public int max_height {
             get {
                 return sidebar_scroll.max_content_height;
@@ -81,7 +81,7 @@ namespace Tatam {
                 sidebar_scroll.max_content_height = value;
             }
         }
-        
+
         public int min_height {
             get {
                 return sidebar_scroll.min_content_height;
@@ -97,7 +97,7 @@ namespace Tatam {
                 }
             }
         }
-        
+
         public Sidebar() {
             sidebar_scroll = new ScrolledWindow(null, null);
             {
@@ -150,91 +150,91 @@ namespace Tatam {
                     sidebar_tree.level_indentation = 0;
 
                     sidebar_tree.set_row_separator_func((model, iter) => {
-                            Value menu_type;
-                            model.get_value(iter, 3, out menu_type);
-                            return ((MenuType) menu_type == MenuType.SEPARATOR);
-                        });
+                        Value menu_type;
+                        model.get_value(iter, 3, out menu_type);
+                        return ((MenuType) menu_type == MenuType.SEPARATOR);
+                    });
 
                     sidebar_tree.get_selection().changed.connect(() => {
-                            TreeSelection sidebar_selection = sidebar_tree.get_selection();
-                            sidebar_store.foreach((model, path, iter) => {
-                                    Value type;
-                                    sidebar_store.get_value(iter, 3, out type);
-                                    if ((MenuType) type == MenuType.FOLDER || (MenuType) type == MenuType.PLAYLIST_NAME) {
-                                        string icon_name = "";
-                                        if (sidebar_selection.iter_is_selected(iter)) {
-                                            icon_name = IconName.LIST_REMOVE;
-                                        } else {
-                                            icon_name = "";
-                                        }
-                                        sidebar_store.set_value(iter, 4, icon_name);
-                                    }
-                                    return false;
-                                });
+                        TreeSelection sidebar_selection = sidebar_tree.get_selection();
+                        sidebar_store.foreach((model, path, iter) => {
+                            Value type;
+                            sidebar_store.get_value(iter, 3, out type);
+                            if ((MenuType) type == MenuType.FOLDER || (MenuType) type == MenuType.PLAYLIST_NAME) {
+                                string icon_name = "";
+                                if (sidebar_selection.iter_is_selected(iter)) {
+                                    icon_name = IconName.LIST_REMOVE;
+                                } else {
+                                    icon_name = "";
+                                }
+                                sidebar_store.set_value(iter, 4, icon_name);
+                            }
+                            return false;
                         });
+                    });
 
                     sidebar_tree.row_activated.connect((path, column) => {
-                            Value dir_path;
-                            Value sidebar_name;
-                            TreeIter bm_iter;
+                        Value dir_path;
+                        Value sidebar_name;
+                        TreeIter bm_iter;
 
-                            debug("sidebar_tree_row_activated.");
-                            sidebar_tree.model.get_iter(out bm_iter, path);
-                            sidebar_tree.model.get_value(bm_iter, 3, out sidebar_name);
+                        debug("sidebar_tree_row_activated.");
+                        sidebar_tree.model.get_iter(out bm_iter, path);
+                        sidebar_tree.model.get_value(bm_iter, 3, out sidebar_name);
 
-                            switch ((MenuType) sidebar_name) {
-                            case MenuType.BOOKMARK:
-                                if (sidebar_tree.is_row_expanded(path)) {
-                                    sidebar_tree.collapse_row(path);
-                                } else {
-                                    sidebar_tree.expand_row(path, false);
-                                }
-                                break;
-                                
-                            case MenuType.FOLDER:
-                                sidebar_tree.model.get_value(bm_iter, 2, out dir_path);
+                        switch ((MenuType) sidebar_name) {
+                        case MenuType.BOOKMARK:
+                            if (sidebar_tree.is_row_expanded(path)) {
+                                sidebar_tree.collapse_row(path);
+                            } else {
+                                sidebar_tree.expand_row(path, false);
+                            }
+                            break;
 
-                                if (column.get_title() != "del") {
-                                    bookmark_directory_selected((string) dir_path);
-                                } else {
-                                    if (bookmark_del_button_clicked((string) dir_path)) {
-                                        if (sidebar_store != null) {
-                                            sidebar_store.remove(ref bm_iter);
-                                        }
-                                    }
-                                }
-                                break;
+                        case MenuType.FOLDER:
+                            sidebar_tree.model.get_value(bm_iter, 2, out dir_path);
 
-                            case MenuType.PLAYLIST_HEADER:
-                                if (sidebar_tree.is_row_expanded(path)) {
-                                    sidebar_tree.collapse_row(path);
-                                } else {
-                                    sidebar_tree.expand_row(path, false);
-                                }
-                                break;
-
-                            case MenuType.PLAYLIST_NAME:
-                                Value val1;
-                                Value val2;
-                                sidebar_tree.model.get_value(bm_iter, 1, out val1);
-                                sidebar_tree.model.get_value(bm_iter, 2, out val2);
-                                string playlist_name = (string) val1;
-                                string playlist_path = (string) val2;
-
-                                if (column.get_title() != "del") {
-                                    playlist_selected(playlist_name, playlist_path);
-                                } else {
-                                    if (playlist_del_button_clicked(playlist_path)) {
+                            if (column.get_title() != "del") {
+                                bookmark_directory_selected((string) dir_path);
+                            } else {
+                                if (bookmark_del_button_clicked((string) dir_path)) {
+                                    if (sidebar_store != null) {
                                         sidebar_store.remove(ref bm_iter);
                                     }
                                 }
-                                break;
-
-                            case MenuType.CHOOSER:
-                                file_chooser_called();
-                                break;
                             }
-                        });
+                            break;
+
+                        case MenuType.PLAYLIST_HEADER:
+                            if (sidebar_tree.is_row_expanded(path)) {
+                                sidebar_tree.collapse_row(path);
+                            } else {
+                                sidebar_tree.expand_row(path, false);
+                            }
+                            break;
+
+                        case MenuType.PLAYLIST_NAME:
+                            Value val1;
+                            Value val2;
+                            sidebar_tree.model.get_value(bm_iter, 1, out val1);
+                            sidebar_tree.model.get_value(bm_iter, 2, out val2);
+                            string playlist_name = (string) val1;
+                            string playlist_path = (string) val2;
+
+                            if (column.get_title() != "del") {
+                                playlist_selected(playlist_name, playlist_path);
+                            } else {
+                                if (playlist_del_button_clicked(playlist_path)) {
+                                    sidebar_store.remove(ref bm_iter);
+                                }
+                            }
+                            break;
+
+                        case MenuType.CHOOSER:
+                            file_chooser_called();
+                            break;
+                        }
+                    });
 
                     sidebar_tree.expand_all();
                 }
@@ -293,7 +293,7 @@ namespace Tatam {
             bool start_editing = false;
             sidebar_tree.set_cursor(tree_path, tree_view_column, start_editing);
         }
-        
+
         public void add_bookmark(string file_path) {
             File file = File.new_for_path(file_path);
             string file_name = file.get_basename();
@@ -324,7 +324,7 @@ namespace Tatam {
                 } while (sidebar_store.iter_next(ref iter));
             }
         }
-        
+
         public Gee.List<string> get_bookmarks() {
             Gee.List<string> bookmark_list = new Gee.ArrayList<string>();
             if (sidebar_store.iter_has_child(bookmark_root)) {
@@ -358,7 +358,7 @@ namespace Tatam {
             }
             return false;
         }
-        
+
         public bool has_playlist(string playlist_name) {
             if (sidebar_store.iter_has_child(playlist_root)) {
                 TreeIter iter;
@@ -374,7 +374,7 @@ namespace Tatam {
             }
             return false;
         }
-        
+
         public void add_playlist(string playlist_name, string playlist_path) {
             TreeIter temp_iter;
             sidebar_store.append(out temp_iter, playlist_root);

@@ -1,19 +1,19 @@
 /*
  * This file is part of tatam.
- * 
+ *
  *     tatam is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
- * 
+ *
  *     tatam is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
- * 
+ *
  *     You should have received a copy of the GNU General Public License
  *     along with tatam.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * Copyright 2020 Takayuki Tanaka
  */
 
@@ -41,7 +41,7 @@ namespace Tatam {
             SECONDS_DECISECONDS,
             MINUMUM,
         }
-        
+
         private uint hours_value;
         private uint minutes_value;
         private uint seconds_value;
@@ -49,11 +49,11 @@ namespace Tatam {
         private uint milliseconds_value;
         private bool with_deciseconds_value;
         private FormatType format_type_value;
-        
+
         private delegate string SmallTimeToStringFunc();
         private SmallTimeToStringFunc to_string_func;
         private SmallTimeToStringFunc to_string_without_deciseconds_func;
-        
+
         public uint milliseconds {
             get {
                 return milliseconds_value;
@@ -66,7 +66,7 @@ namespace Tatam {
                 deciseconds_value = milliseconds_value % SECOND_IN_MILLISECONDS / DECISECOND_IN_MILLISECONDS;
             }
         }
-        
+
         public double seconds {
             get {
                 return milliseconds_value / SECOND_IN_MILLISECONDS;
@@ -82,7 +82,7 @@ namespace Tatam {
                 set_to_string_func(format_type_value);
             }
         }
-        
+
         private void init_time_regex() {
             if (time_regex == null) {
                 try {
@@ -93,7 +93,7 @@ namespace Tatam {
                 }
             }
         }
-        
+
         public SmallTime(FormatType format_type = FormatType.MINUMUM) {
             this.with_deciseconds_value = true;
             this.format_type = format_type;
@@ -101,7 +101,7 @@ namespace Tatam {
             this.milliseconds_value = 0;
             set_to_string_func(format_type);
         }
-        
+
         public SmallTime.from_seconds(int seconds, FormatType format_type = FormatType.MINUMUM) {
             this.with_deciseconds_value = true;
             this.format_type = format_type;
@@ -167,7 +167,7 @@ namespace Tatam {
         public SmallTime minus(SmallTime subject) {
             return new SmallTime.from_milliseconds(this.milliseconds - subject.milliseconds, format_type);
         }
-        
+
         public string to_string() {
             return to_string_func();
         }
@@ -175,7 +175,7 @@ namespace Tatam {
         public string to_string_without_deciseconds() {
             return to_string_without_deciseconds_func();
         }
-            
+
         private void set_to_string_func(FormatType format_type = MINUMUM) {
             switch (format_type) {
             case FormatType.HOURS_MINUTES_SECONDS_DECISECONDS:
@@ -205,7 +205,7 @@ namespace Tatam {
                 break;
             }
         }
-        
+
         private string to_string_with_hours() {
             return "%u:%02u:%02u.%u".printf(hours_value, minutes_value, seconds_value, deciseconds_value);
         }

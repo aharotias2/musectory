@@ -1,19 +1,19 @@
 /*
  * This file is part of tatam.
- * 
+ *
  *     tatam is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
- * 
+ *
  *     tatam is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
- * 
+ *
  *     You should have received a copy of the GNU General Public License
  *     along with tatam.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * Copyright 2020 Takayuki Tanaka
  */
 
@@ -29,9 +29,9 @@ namespace Tatam {
             try {
                 MetadataReader meta_reader = new Tatam.MetadataReader();
                 meta_reader.tag_found.connect((tag, value) => {
-                        file_info_set_value(ref file_info, tag, value);
-                        return true;
-                    });
+                    file_info_set_value(ref file_info, tag, value);
+                    return true;
+                });
                 meta_reader.get_metadata(file_path);
             } catch (Tatam.Error e) {
                 stderr.printf(@"Tatam.Error: $(e.message)\n");
@@ -40,7 +40,7 @@ namespace Tatam {
             }
             return file_info;
         }
-        
+
         private void file_info_set_value(ref Tatam.FileInfo file_info, string tag, Value? value) {
             string tag_lower = tag.down();
             debug(@"Tag: $(tag)");
@@ -61,7 +61,7 @@ namespace Tatam {
                 break;
 
             case "datetime":
-                Gst.DateTime datetime = (Gst.DateTime) value.get_boxed();
+                Gst.DateTime datetime = (Gst.DateTime)value.get_boxed();
                 file_info.date = datetime.get_year();
                 break;
 
@@ -94,13 +94,13 @@ namespace Tatam {
                 break;
 
             case "duration":
-                file_info.time_length = (Tatam.SmallTime) value.get_object();
+                file_info.time_length = (Tatam.SmallTime)value.get_object();
                 break;
 
             case "image":
                 GstSampleAdapter preader = new GstSampleAdapter();
                 Gdk.Pixbuf? pixbuf = null;
-                pixbuf = preader.extract_pixbuf_from_gst_sample((Gst.Sample) value.get_boxed(), file_info.path);
+                pixbuf = preader.extract_pixbuf_from_gst_sample((Gst.Sample)value.get_boxed(), file_info.path);
                 file_info.artwork = pixbuf;
                 break;
             }

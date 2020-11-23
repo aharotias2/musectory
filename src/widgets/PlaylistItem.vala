@@ -1,19 +1,19 @@
 /*
  * This file is part of tatam.
- * 
+ *
  *     tatam is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
- * 
+ *
  *     tatam is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
- * 
+ *
  *     You should have received a copy of the GNU General Public License
  *     along with tatam.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * Copyright 2020 Takayuki Tanaka
  */
 
@@ -32,7 +32,7 @@ namespace Tatam {
         public signal void menu_activated(MenuType type, uint index);
 
         private Image? image_artwork;
-            
+
         public PlaylistItem(Tatam.FileInfo file, uint image_size) {
             file_info = file;
             status = PlaylistItemStatus.NORMAL;
@@ -54,7 +54,7 @@ namespace Tatam {
                                 image_artwork.valign = Align.CENTER;
                             }
                         }
-                            
+
                         icon_area = new PlaylistDrawingArea();
                         {
                             icon_area.status = PlaylistItemStatus.NORMAL;
@@ -91,7 +91,7 @@ namespace Tatam {
                         if (file.date != 0) {
                             album_year += " (" + file.date.to_string() + ")";
                         }
-                        
+
                         Label album = new Label(album_year);
                         {
                             album.ellipsize = EllipsizeMode.END;
@@ -120,7 +120,7 @@ namespace Tatam {
                         grid2.row_homogeneous = false;
                         grid2.column_homogeneous = true;
                     }
-            
+
                     Label time = new Label(file.time_length.to_string_without_deciseconds());
 
                     button = new Gtk.MenuButton();
@@ -134,8 +134,8 @@ namespace Tatam {
                                 menu_item_remove.image = new Image.from_icon_name(
                                     IconName.Symbolic.LIST_REMOVE,IconSize.SMALL_TOOLBAR);
                                 menu_item_remove.activate.connect(() => {
-                                        menu_activated(MenuType.REMOVE, get_index());
-                                    });
+                                    menu_activated(MenuType.REMOVE, get_index());
+                                });
                             }
 
                             var menu_item_go_up = new Gtk.ImageMenuItem.with_label(Text.MENU_MOVE_UP);
@@ -144,8 +144,8 @@ namespace Tatam {
                                 menu_item_go_up.image = new Image.from_icon_name(
                                     IconName.Symbolic.GO_UP,IconSize.SMALL_TOOLBAR);
                                 menu_item_go_up.activate.connect(() => {
-                                        menu_activated(MenuType.MOVE_UP, get_index());
-                                    });
+                                    menu_activated(MenuType.MOVE_UP, get_index());
+                                });
                             }
 
                             var menu_item_go_down = new Gtk.ImageMenuItem.with_label(Text.MENU_MOVE_DOWN);
@@ -154,8 +154,8 @@ namespace Tatam {
                                 menu_item_go_down.image = new Image.from_icon_name(
                                     IconName.Symbolic.GO_DOWN,IconSize.SMALL_TOOLBAR);
                                 menu_item_go_down.activate.connect(() => {
-                                        menu_activated(MenuType.MOVE_DOWN, get_index());
-                                    });
+                                    menu_activated(MenuType.MOVE_DOWN, get_index());
+                                });
                             }
 
                             menu.halign = Align.END;
@@ -182,13 +182,13 @@ namespace Tatam {
                 }
 
                 ev_box.enter_notify_event.connect((event) => {
-                        on_enter();
-                        return Source.CONTINUE;
-                    });
+                    on_enter();
+                    return Source.CONTINUE;
+                });
                 ev_box.leave_notify_event.connect((event) => {
-                        on_leave();
-                        return Source.CONTINUE;
-                    });
+                    on_leave();
+                    return Source.CONTINUE;
+                });
                 ev_box.add(grid);
                 ev_box.show_all();
             }
@@ -205,16 +205,16 @@ namespace Tatam {
                 );
             tooltip_image = PixbufUtils.scale(file.artwork, image_size);
             query_tooltip.connect ((x, y, keyboard_tooltip, tooltip) => {
-                    tooltip.set_icon(tooltip_image);
-                    tooltip.set_text(tooltip_text);
-                    return true;
-                });
+                tooltip.set_icon(tooltip_image);
+                tooltip.set_text(tooltip_text);
+                return true;
+            });
         }
 
         public void set_index(uint index) {
             icon_area.index = index;
         }
-            
+
         public void on_enter() {
             switch (status) {
             case PlaylistItemStatus.PLAYING:

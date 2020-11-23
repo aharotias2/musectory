@@ -1,19 +1,19 @@
 /*
  * This file is part of tatam.
- * 
+ *
  *     tatam is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
- * 
+ *
  *     tatam is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
- * 
+ *
  *     You should have received a copy of the GNU General Public License
  *     along with tatam.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * Copyright 2018 Takayuki Tanaka
  */
 
@@ -88,17 +88,17 @@ namespace Tatam {
             try {
                 IconTheme icon_theme = Gtk.IconTheme.get_default();
                 return new Finder.Builder()
-                                 .file_pixbuf(icon_theme.load_icon(IconName.AUDIO_FILE, max_icon_size, 0))
-                                 .disc_pixbuf(icon_theme.load_icon(IconName.MEDIA_OPTICAL, max_icon_size, 0))
-                                 .folder_pixbuf(icon_theme.load_icon(IconName.FOLDER_MUSIC, max_icon_size, 0))
-                                 .parent_pixbuf(icon_theme.load_icon(IconName.GO_UP, max_icon_size, 0))
-                                 .build();
+                       .file_pixbuf(icon_theme.load_icon(IconName.AUDIO_FILE, max_icon_size, 0))
+                       .disc_pixbuf(icon_theme.load_icon(IconName.MEDIA_OPTICAL, max_icon_size, 0))
+                       .folder_pixbuf(icon_theme.load_icon(IconName.FOLDER_MUSIC, max_icon_size, 0))
+                       .parent_pixbuf(icon_theme.load_icon(IconName.GO_UP, max_icon_size, 0))
+                       .build();
             } catch (GLib.Error e) {
                 stderr.printf(Text.ERROR_LOAD_ICON);
                 Process.exit(1);
             }
         }
-        
+
         private Finder(Builder builder) {
             debug("creating finder start");
             zoom_level = 9;
@@ -130,11 +130,11 @@ namespace Tatam {
                         progress_revealer.valign = Align.START;
                         progress_revealer.add(progress);
                     }
-            
+
                     finder_box.pack_start(progress_revealer, false, false);
                     finder_box.pack_start(finder_container, true, true);
                 }
-            
+
                 var while_label_box = new Box(Orientation.VERTICAL, 4);
                 {
                     while_label = new Label("");
@@ -149,7 +149,7 @@ namespace Tatam {
                     while_label_box.valign = Align.END;
                     while_label_box.get_style_context().add_class(StyleClass.WHILE_LABEL);
                 }
-            
+
                 overlay_while_label.add(finder_box);
                 overlay_while_label.add_overlay(while_label_box);
             }
@@ -168,14 +168,14 @@ namespace Tatam {
             progress.set_fraction(0.0);
             progress_revealer.reveal_child = true;
 
-            var thread = new Thread<Gee.List<Tatam.FileInfo?>>(null, () => {
-                    Gee.List<Tatam.FileInfo?> result_list = Tatam.Files.get_file_info_list_in_dir(dir_path);
-                    Idle.add(change_dir.callback);
-                    return result_list;
-                });
+            var thread = new Thread<Gee.List<Tatam.FileInfo?> >(null, () => {
+                Gee.List<Tatam.FileInfo?> result_list = Tatam.Files.get_file_info_list_in_dir(dir_path);
+                Idle.add(change_dir.callback);
+                return result_list;
+            });
             yield;
             file_info_list = thread.join();
-            
+
             if (finder != null) {
                 finder_container.remove(finder.get_parent());
                 finder = null;
@@ -194,7 +194,7 @@ namespace Tatam {
             finder_container.add(finder);
 
             int i = 0;
-            
+
             foreach (Tatam.FileInfo file_info in this.file_info_list) {
                 if (file_info.name == "..") {
                     continue;
@@ -219,32 +219,32 @@ namespace Tatam {
                     case Tatam.FileType.DIRECTORY:
                     case Tatam.FileType.DISC:
                         item_widget.clicked.connect(() => {
-                                change_dir.begin(file_info.path);
-                                file_button_clicked(file_info.path);
-                            });
+                            change_dir.begin(file_info.path);
+                            file_button_clicked(file_info.path);
+                        });
                         item_widget.bookmark_button_clicked.connect((file_path) => {
-                                bookmark_button_clicked(file_path);
-                            });
+                            bookmark_button_clicked(file_path);
+                        });
                         break;
 
                     case Tatam.FileType.FILE:
                         item_widget.clicked.connect(() => {
-                                play_button_clicked(file_info.path);
-                            });
+                            play_button_clicked(file_info.path);
+                        });
                         break;
                     }
 
                     item_widget.add_button_clicked.connect((file_path) => {
-                            add_button_clicked(file_path);
-                        });
+                        add_button_clicked(file_path);
+                    });
 
                     item_widget.play_button_clicked.connect((file_path) => {
-                            play_button_clicked(file_path);
-                        });
+                        play_button_clicked(file_path);
+                    });
                 }
 
                 finder.add(item_widget);
-                
+
                 double fraction = (double) i + 1 / (double) file_info_list.size;
                 progress.fraction = fraction;
 
@@ -271,7 +271,7 @@ namespace Tatam {
         private void set_default_icon_size(int icon_size) {
             zoom_level = get_size_level(icon_size);
         }
-        
+
         private void change_cursor(Gdk.CursorType cursor_type) {
             finder_container.get_parent_window().set_cursor(
                 new Gdk.Cursor.for_display(Gdk.Screen.get_default().get_display(), cursor_type));

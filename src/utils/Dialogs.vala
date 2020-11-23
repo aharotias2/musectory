@@ -1,19 +1,19 @@
 /*
  * This file is part of tatam.
- * 
+ *
  *     tatam is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
- * 
+ *
  *     tatam is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
- * 
+ *
  *     You should have received a copy of the GNU General Public License
  *     along with tatam.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * Copyright 2018 Takayuki Tanaka
  */
 
@@ -31,7 +31,7 @@ namespace Tatam {
             m.close ();
             return result == ResponseType.OK;
         }
-        
+
         public static string? choose_file(Window parent_window) {
             string? file_path = null;
             var file_chooser = new FileChooserDialog(
@@ -46,7 +46,7 @@ namespace Tatam {
             file_chooser.destroy ();
             return file_path;
         }
-    
+
         public static string? choose_directory(Window parent_window) {
             string? dir_name = null;
             var file_chooser = new FileChooserDialog (Text.DIALOG_OPEN_FILE, parent_window,

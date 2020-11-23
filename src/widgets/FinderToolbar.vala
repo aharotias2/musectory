@@ -1,19 +1,19 @@
 /*
  * This file is part of tatam.
- * 
+ *
  *     tatam is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
- * 
+ *
  *     tatam is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
- * 
+ *
  *     You should have received a copy of the GNU General Public License
  *     along with tatam.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * Copyright 2020 Takayuki Tanaka
  */
 
@@ -34,7 +34,7 @@ namespace Tatam {
         public signal void location_entered(string location);
         public signal void refresh_button_clicked();
         public signal void add_button_clicked();
-        
+
         public FinderToolbar() {
             var box = new Box(Orientation.HORIZONTAL, 4);
             {
@@ -42,10 +42,10 @@ namespace Tatam {
                 {
                     finder_parent_button.tooltip_text = Text.TOOLTIP_FINDER_GO_UP;
                     finder_parent_button.clicked.connect(() => {
-                            parent_button_clicked();
-                        });
+                        parent_button_clicked();
+                    });
                 }
-                
+
                 var finder_zoom_box = new Box(Orientation.HORIZONTAL, 0);
                 {
                     finder_zoomin_button = new Button.from_icon_name(IconName.Symbolic.ZOOM_IN,
@@ -54,8 +54,8 @@ namespace Tatam {
                         finder_zoomin_button.get_style_context().add_class(StyleClass.TITLEBUTTON);
                         finder_zoomin_button.tooltip_text = Text.TOOLTIP_FINDER_ZOOMIN;
                         finder_zoomin_button.clicked.connect(() => {
-                                zoomin_button_clicked();
-                            });
+                            zoomin_button_clicked();
+                        });
                     }
 
                     finder_zoomout_button = new Button.from_icon_name(IconName.Symbolic.ZOOM_OUT,
@@ -64,19 +64,19 @@ namespace Tatam {
                         finder_zoomout_button.get_style_context().add_class(StyleClass.TITLEBUTTON);
                         finder_zoomout_button.tooltip_text = Text.TOOLTIP_FINDER_ZOOMOUT;
                         finder_zoomout_button.clicked.connect(() => {
-                                zoomout_button_clicked();
-                            });
+                            zoomout_button_clicked();
+                        });
                     }
 
                     finder_zoom_box.pack_start(finder_zoomin_button, false, false);
                     finder_zoom_box.pack_start(finder_zoomout_button, false, false);
                 }
-                
+
                 finder_location = new Entry();
                 {
                     finder_location.activate.connect(() => {
-                            location_entered(finder_location.get_text());
-                        });
+                        location_entered(finder_location.get_text());
+                    });
                 }
 
                 finder_refresh_button = new Button.from_icon_name(IconName.Symbolic.VIEW_REFRESH,
@@ -85,20 +85,20 @@ namespace Tatam {
                     finder_refresh_button.get_style_context().add_class(StyleClass.TITLEBUTTON);
                     finder_refresh_button.tooltip_text = Text.TOOLTIP_REFRESH_FINDER;
                     finder_refresh_button.clicked.connect(() => {
-                            refresh_button_clicked();
-                        });
+                        refresh_button_clicked();
+                    });
                 }
-                
+
                 finder_add_button = new Button.from_icon_name(IconName.Symbolic.BOOKMARK_NEW,
                                                               IconSize.BUTTON);
                 {
                     finder_add_button.get_style_context().add_class(StyleClass.TITLEBUTTON);
                     finder_add_button.tooltip_text = Text.TOOLTIP_SAVE_FINDER;
                     finder_add_button.clicked.connect(() => {
-                            add_button_clicked();
-                        });
+                        add_button_clicked();
+                    });
                 }
-                
+
                 box.pack_start(finder_parent_button, false, false);
                 box.pack_start(finder_zoom_box, false, false);
                 box.pack_start(finder_location, true, true);
