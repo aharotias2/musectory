@@ -316,7 +316,7 @@ public class TatamApplication : AppBase, TatamApplicationInterface {
                 {
                     finder = Tatam.Finder.create_default_instance();
                     {
-                        finder.dir_changed.connect((path) => {
+                        finder.dir_selected.connect((path) => {
                             location_entry.text = path;
                         });
                         finder.bookmark_button_clicked.connect((file_path) => {

@@ -24,6 +24,7 @@ namespace Tatam {
         public abstract bool use_popover { get; set; }
         public abstract string dir_path { get; set; }
         public abstract bool activate_on_single_click { get; set; }
+        public signal void dir_selected(string dir_path);
         public signal void dir_changed(string dir_path);
         public signal void bookmark_button_clicked(string file_path);
         public signal void add_button_clicked(string file_path);
@@ -161,12 +162,14 @@ namespace Tatam {
 
         public async void change_dir(string dir_path) {
             this.dir_path = dir_path;
+            int counter_holder = ++count;
             change_cursor(Gdk.CursorType.WATCH);
             while_label.visible = true;
             while_label.label = Text.FINDER_LOAD_FILES;
             int size = get_level_size();
             progress.set_fraction(0.0);
             progress_revealer.reveal_child = true;
+            dir_selected(dir_path);
 
             var thread = new Thread<Gee.List<Tatam.FileInfo?> >(null, () => {
                 Gee.List<Tatam.FileInfo?> result_list = Tatam.Files.get_file_info_list_in_dir(dir_path);
@@ -260,6 +263,10 @@ namespace Tatam {
                 yield;
 
                 i++;
+                
+                if (counter_holder != count) {
+                    return;
+                }
             }
 
             change_cursor(Gdk.CursorType.LEFT_PTR);
