@@ -235,6 +235,9 @@ namespace Tatam {
                             play_button_clicked(file_info.path);
                         });
                         break;
+
+                    default:
+                        break;
                     }
 
                     item_widget.add_button_clicked.connect((file_path) => {
@@ -263,7 +266,7 @@ namespace Tatam {
                 yield;
 
                 i++;
-                
+
                 if (counter_holder != count) {
                     return;
                 }

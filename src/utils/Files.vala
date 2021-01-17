@@ -19,7 +19,7 @@
 
 namespace Tatam {
     namespace Files {
-        public bool mimetype_is_audio(string file_path) {
+        public bool mimetype_is_audio(string file_path) throws GLib.Error {
             File file = File.new_for_path(file_path);
             if (file.query_exists()) {
                 return file.query_info("standard::*", 0).get_content_type().has_prefix("audio/");

@@ -45,7 +45,7 @@ namespace Tatam {
         public abstract void remove_item_at_index(uint index);
         public abstract void remove_all();
         public abstract void set_artwork_size(uint size);
-        public abstract void load_list_from_file(string m3u_file_path) throws FileError;
+        public abstract void load_list_from_file(string m3u_file_path) throws GLib.Error, FileError;
         public signal void item_activated(uint index, Tatam.FileInfo item);
         public signal void playlist_changed();
     }
@@ -216,7 +216,7 @@ namespace Tatam {
             image_size = size;
         }
 
-        public void load_list_from_file(string m3u_file_path) throws FileError {
+        public void load_list_from_file(string m3u_file_path) throws GLib.Error, FileError {
             string contents;
             if (GLib.FileUtils.test(m3u_file_path, FileTest.EXISTS)) {
                 GLib.FileUtils.get_contents(m3u_file_path, out contents);

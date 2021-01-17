@@ -224,6 +224,8 @@ namespace Tatam {
             case PlaylistItemStatus.NORMAL:
                 icon_area.status = PlaylistItemStatus.PLAYING;
                 break;
+            case PlaylistItemStatus.HIDDEN:
+                break;
             }
         }
 
@@ -237,6 +239,8 @@ namespace Tatam {
                 break;
             case PlaylistItemStatus.NORMAL:
                 icon_area.status = PlaylistItemStatus.NORMAL;
+                break;
+            case PlaylistItemStatus.HIDDEN:
                 break;
             }
         }
@@ -254,6 +258,8 @@ namespace Tatam {
             case PlaylistItemStatus.PAUSED:
             case PlaylistItemStatus.NORMAL:
                 set_status(PlaylistItemStatus.PLAYING);
+                break;
+            case PlaylistItemStatus.HIDDEN:
                 break;
             }
         }
