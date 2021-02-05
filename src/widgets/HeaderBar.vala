@@ -20,6 +20,14 @@
 using Gtk;
 
 namespace Tatam {
+    public enum SwitchButtonState {
+        FINDER, PLAYLIST
+    }
+
+    public enum FoldButtonState {
+        OPENED, FOLDED
+    }
+
     public interface HeaderBarInterface {
         public abstract SwitchButtonState switch_button_state { get; set; }
         public abstract FoldButtonState fold_button_state { get; set; }
@@ -37,13 +45,6 @@ namespace Tatam {
     }
 
     public class HeaderBar : Gtk.HeaderBar, HeaderBarInterface {
-        public enum SwitchButtonState {
-            FINDER, PLAYLIST
-        }
-        public enum FoldButtonState {
-            OPENED, FOLDED
-        }
-
         private Button switch_button;
         private Button add_button;
         private ToggleButton fold_button;
