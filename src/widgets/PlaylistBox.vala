@@ -46,6 +46,10 @@ namespace Tatam {
         public abstract void remove_all();
         public abstract void set_artwork_size(uint size);
         public abstract void load_list_from_file(string m3u_file_path) throws GLib.Error, FileError;
+        public abstract bool move_up_items();
+        public abstract bool move_down_items();
+        public abstract bool remove_items();
+        public abstract void unselect_all();
         public signal void item_activated(uint index, Tatam.FileInfo item);
         public signal void playlist_changed();
     }
@@ -238,26 +242,6 @@ namespace Tatam {
             PlaylistItem list_item = new PlaylistItem((Tatam.FileInfo)object, image_size);
             {
                 list_item.set_index(get_list_size());
-                list_item.menu_activated.connect((type, index) => {
-                    Tatam.FileInfo file_info = get_file_info_at_index(index);
-                    uint size = get_list_size();
-                    if (type == MenuType.REMOVE) {
-                        store.remove(index);
-                        playlist_changed();
-                    } else if (type == MenuType.MOVE_UP) {
-                        if (index > 0) {
-                            store.insert(index - 1, file_info);
-                            store.remove(index + 1);
-                            playlist_changed();
-                        }
-                    } else if (type == MenuType.MOVE_DOWN) {
-                        if (index < size - 1) {
-                            store.insert(index + 2, file_info);
-                            store.remove(index);
-                            playlist_changed();
-                        }
-                    }
-                });
             }
             return list_item;
         }
@@ -267,6 +251,91 @@ namespace Tatam {
             var item = get_item_at_index(index);
             if (item != null) {
                 item.clicked();
+            }
+        }
+
+        public bool move_up_items() {
+            bool change_flag = false;
+            uint length = store.get_n_items();
+            for (int i = 0; i < length; i++) {
+                var list_item = list_box.get_row_at_index(i) as PlaylistItem;
+                if (list_item.checked) {
+                    if (i == 0) {
+                        return false;
+                    } else {
+                        var file_info = get_file_info_at_index(i);
+                        store.remove(i);
+                        store.insert(i - 1, file_info);
+                        var new_list_item = list_box.get_row_at_index(i - 1) as PlaylistItem;
+                        new_list_item.checked = true;
+                        change_flag = true;
+                    }
+                }
+            }
+            if (change_flag) {
+                renumber_items();
+                playlist_changed();
+            }
+            return true;
+        }
+
+        public bool move_down_items() {
+            bool change_flag = false;
+            uint length = store.get_n_items();
+            for (int i = (int) length - 1; i >= 0; i--) {
+                var list_item = list_box.get_row_at_index(i) as PlaylistItem;
+                if (list_item.checked) {
+                    if (i == length - 1) {
+                        return false;
+                    } else {
+                        var file_info = get_file_info_at_index(i);
+                        store.remove(i);
+                        store.insert(i + 1, file_info);
+                        var new_list_item = list_box.get_row_at_index(i + 1) as PlaylistItem;
+                        new_list_item.checked = true;
+                        change_flag = true;
+                    }
+                }
+            }
+            if (change_flag) {
+                renumber_items();
+                playlist_changed();
+            }
+            return true;
+        }
+
+        public bool remove_items() {
+            bool change_flag = false;
+            uint length = store.get_n_items();
+            for (int i = (int) length - 1; i >= 0; i--) {
+                var list_item = list_box.get_row_at_index(i) as PlaylistItem;
+                if (list_item.checked) {
+                    store.remove(i);
+                    change_flag = true;
+                }
+            }
+            if (change_flag) {
+                renumber_items();
+                playlist_changed();
+            }
+            return true;
+        }
+
+        public void unselect_all() {
+            uint length = store.get_n_items();
+            for (int i = 0; i < length; i++) {
+                var list_item = list_box.get_row_at_index(i) as PlaylistItem;
+                if (list_item.checked) {
+                    list_item.checked = false;
+                }
+            }
+        }
+
+        private void renumber_items() {
+            uint length = store.get_n_items();
+            for (int i = 0; i < length; i++) {
+                var list_item = list_box.get_row_at_index(i) as PlaylistItem;
+                list_item.set_index(i + 1);
             }
         }
     }

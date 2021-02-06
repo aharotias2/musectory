@@ -28,8 +28,15 @@ namespace Tatam {
         private Gdk.Pixbuf tooltip_image;
         private MenuButton button;
         public Tatam.FileInfo file_info { get; set; }
-
-        public signal void menu_activated(MenuType type, uint index);
+        private CheckButton check_button;
+        public bool checked {
+            get {
+                return check_button.active;
+            }
+            set {
+                check_button.active = value;
+            }
+        }
 
         private Image? image_artwork;
 
@@ -123,60 +130,16 @@ namespace Tatam {
 
                     Label time = new Label(file.time_length.to_string_without_deciseconds());
 
-                    button = new Gtk.MenuButton();
+                    check_button = new Gtk.CheckButton();
                     {
-                        var image = new Image.from_icon_name(IconName.Symbolic.VIEW_MORE, IconSize.BUTTON);
-                        var menu = new Gtk.Menu();
-                        {
-                            var menu_item_remove = new Gtk.ImageMenuItem.with_label(Text.MENU_REMOVE_ITEM);
-                            {
-                                menu_item_remove.always_show_image = true;
-                                menu_item_remove.image = new Image.from_icon_name(
-                                    IconName.Symbolic.LIST_REMOVE,IconSize.SMALL_TOOLBAR);
-                                menu_item_remove.activate.connect(() => {
-                                    menu_activated(MenuType.REMOVE, get_index());
-                                });
-                            }
-
-                            var menu_item_go_up = new Gtk.ImageMenuItem.with_label(Text.MENU_MOVE_UP);
-                            {
-                                menu_item_go_up.always_show_image = true;
-                                menu_item_go_up.image = new Image.from_icon_name(
-                                    IconName.Symbolic.GO_UP,IconSize.SMALL_TOOLBAR);
-                                menu_item_go_up.activate.connect(() => {
-                                    menu_activated(MenuType.MOVE_UP, get_index());
-                                });
-                            }
-
-                            var menu_item_go_down = new Gtk.ImageMenuItem.with_label(Text.MENU_MOVE_DOWN);
-                            {
-                                menu_item_go_down.always_show_image = true;
-                                menu_item_go_down.image = new Image.from_icon_name(
-                                    IconName.Symbolic.GO_DOWN,IconSize.SMALL_TOOLBAR);
-                                menu_item_go_down.activate.connect(() => {
-                                    menu_activated(MenuType.MOVE_DOWN, get_index());
-                                });
-                            }
-
-                            menu.halign = Align.END;
-                            menu.add(menu_item_go_up);
-                            menu.add(menu_item_go_down);
-                            menu.add(menu_item_remove);
-                            menu.show_all();
-                        }
-                        button.add(image);
-                        button.get_style_context().add_class(StyleClass.FLAT);
-                        button.direction = ArrowType.DOWN;
-                        button.halign = Align.CENTER;
-                        button.valign = Align.CENTER;
-                        button.popup = menu;
-                        button.use_popover = false;
+                        check_button.halign = Gtk.Align.CENTER;
+                        check_button.valign = Gtk.Align.CENTER;
                     }
 
                     grid.attach(image_overlay, 0, 0, 1, 1);
                     grid.attach(grid2, 1, 0, 8, 1);
                     grid.attach(time, 9, 0, 1, 1);
-                    grid.attach(button, 10, 0, 1, 1);
+                    grid.attach(check_button, 10, 0, 1, 1);
                     grid.row_homogeneous = false;
                     grid.column_homogeneous = true;
                 }

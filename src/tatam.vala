@@ -18,33 +18,29 @@
  */
 
 public class TatamApplication : Gtk.Application {
-    private static string config_dir;
-
-    public Tatam.Options options { get; set; }
+    private string config_dir;
+    private Tatam.Options options;
 
     public static int main(string[] args) {
         Gst.init(ref args);
-        TatamApplication app = new TatamApplication() {
-            options = setup_configs(ref args)
-        };
-        app.run();
-        Gtk.main();
-        return 0;
+        TatamApplication app = new TatamApplication();
+        app.setup_configs(ref args);
+        return app.run();
     }
 
     public TatamApplication() {
         Object(application_id: "com.github.aharotias2.tatam",
                 flags: ApplicationFlags.FLAGS_NONE);
     }
-    
+
     protected override void activate() {
-        TatamWindow window = new TatamWindow(this, options);
-        window.destroy.connect(() => quit());
+        Tatam.Window window = new Tatam.Window(options);
+        add_window(window);
         window.show_all();
     }
-    
-    private static Tatam.Options setup_configs(ref unowned string[] args) {
-        Tatam.Options options = new Tatam.Options();
+
+    public void setup_configs(ref unowned string[] args) {
+        options = new Tatam.Options();
         try {
             options.parse_conf();
         } catch (Tatam.Error e) {
@@ -66,6 +62,5 @@ public class TatamApplication : Gtk.Application {
                 stderr.printf(@"FileError: $(e.message)\n");
             }
         }
-        return options;
     }
 }

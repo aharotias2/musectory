@@ -56,6 +56,7 @@ namespace Tatam {
             public const string HELP_ABOUT = "help-about-symbolic";
             public const string VIEW_REFRESH = "view-refresh-symbolic";
             public const string EMBLEM_MUSIC = "emblem-music-symbolic";
+            public const string OBJECT_SELECT = "object-select-symbolic";
         }
         public const string AUDIO_FILE = "audio-x-generic";
         public const string MEDIA_OPTICAL = "media-optical";
