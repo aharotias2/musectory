@@ -99,7 +99,9 @@ namespace Tatam {
 
         public HeaderBar() {
             this.switch_button_state = SwitchButtonState.FINDER;
+        }
 
+        construct {
             var header_box = new Box(Orientation.HORIZONTAL, 0);
             {
                 this.switch_button = new Button.from_icon_name(IconName.Symbolic.VIEW_LIST, IconSize.BUTTON);
