@@ -41,6 +41,7 @@ executable(
     'src/widgets/FinderItem.vala',
     'src/widgets/PlaylistDrawingArea.vala',
     'src/widgets/FinderToolbar.vala',
+    'src/widgets/Window.vala',
     'src/atoms/Hex.vala',
     'src/atoms/SmallTime.vala',
     'src/models/Tracker.vala',

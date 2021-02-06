@@ -59,8 +59,7 @@ namespace Tatam {
                             icon_pixbuf = create_icon_pixbuf();
 
                             icon_image = new Image.from_pixbuf(
-                                Tatam.PixbufUtils.scale(icon_pixbuf, this.icon_size)
-                                );
+                                    Tatam.PixbufUtils.scale(icon_pixbuf, this.icon_size));
                             {
                                 icon_image.get_style_context().add_class(StyleClass.FINDER_ICON);
                             }
@@ -81,11 +80,9 @@ namespace Tatam {
                             Image mini_icon = null;
                             {
                                 if (file_info.type == Tatam.FileType.FILE) {
-                                    mini_icon = new Image.from_icon_name(IconName.AUDIO_FILE,
-                                                                         IconSize.LARGE_TOOLBAR);
+                                    mini_icon = new Image.from_icon_name(IconName.AUDIO_FILE, IconSize.LARGE_TOOLBAR);
                                 } else if (file_info.type == Tatam.FileType.DISC) {
-                                    mini_icon = new Image.from_icon_name(IconName.FOLDER,
-                                                                         IconSize.LARGE_TOOLBAR);
+                                    mini_icon = new Image.from_icon_name(IconName.FOLDER, IconSize.LARGE_TOOLBAR);
                                     mini_icon.visible = false;
                                 }
 
