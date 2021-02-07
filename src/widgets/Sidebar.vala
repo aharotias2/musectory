@@ -75,7 +75,7 @@ namespace Tatam {
                     var box = new Box(Orientation.HORIZONTAL, 0);
                     {
                         box.pack_start(new Image.from_icon_name(IconName.FOLDER_OPEN, IconSize.SMALL_TOOLBAR), false, false);
-                        box.pack_start(new Label(Text.MENU_CHOOSE_DIR), false, false);
+                        box.pack_start(new Label(_("Choose directory...")), false, false);
                     }
                     directory_chooser.relief = ReliefStyle.NONE;
                     directory_chooser.add(box);
@@ -117,7 +117,7 @@ namespace Tatam {
                 var new_del_button = new Button.from_icon_name(IconName.LIST_REMOVE);
                 {
                     new_del_button.relief = ReliefStyle.NONE;
-                    new_del_button.tooltip_text = Text.TOOLTIP_DEL_BOOKMARK.printf(bookmark_name);
+                    new_del_button.tooltip_text = _("Delete the bookmark \"%s\"").printf(bookmark_name);
                     new_del_button.clicked.connect(() => {
                         if (bookmark_del_button_clicked(file_path)) {
                             bookmark_box.remove(bookmark_buttons[file_path]);
@@ -181,7 +181,7 @@ namespace Tatam {
                 var new_del_button = new Button.from_icon_name(IconName.LIST_REMOVE, IconSize.SMALL_TOOLBAR);
                 {
                     new_del_button.relief = ReliefStyle.NONE;
-                    new_del_button.tooltip_text = Text.TOOLTIP_DEL_PLAYLIST.printf(playlist_name);
+                    new_del_button.tooltip_text = _("Delete the playlist \"%s\"").printf(playlist_name);
                     new_del_button.clicked.connect(() => {
                         if (playlist_del_button_clicked(playlist_path)) {
                             playlist_box.remove(playlist_buttons[playlist_name]);

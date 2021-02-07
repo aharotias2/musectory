@@ -29,11 +29,11 @@ namespace Tatam {
         public DirectoryReader(string path) throws Tatam.Error {
             GLib.File file = GLib.File.new_for_path(path);
             if (!file.query_exists()) {
-                throw new Tatam.Error.FILE_DOES_NOT_EXISTS(Text.ERROR_FILE_DOES_NOT_EXISTS.printf(path));
+                throw new Tatam.Error.FILE_DOES_NOT_EXISTS(_("File does not exists (%s)\n").printf(path));
             }
             GLib.FileType file_type = file.query_file_type(0);
             if (file_type != GLib.FileType.DIRECTORY) {
-                throw new Tatam.Error.FILE_IS_NOT_A_DIRECTORY(Text.ERROR_FILE_IS_NOT_A_DIRECTORY.printf(path));
+                throw new Tatam.Error.FILE_IS_NOT_A_DIRECTORY(_("File is not a directory (%s)\n").printf(path));
             }
             this.path = path;
         }

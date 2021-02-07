@@ -122,7 +122,7 @@
                         header_bookmark_button.clicked.connect(() => {
                             if (!sidebar.has_bookmark(location)) {
                                 sidebar.add_bookmark(location);
-                            } else if (Tatam.Dialogs.confirm(Tatam.Text.CONFIRM_REMOVE_BOOKMARK, this)) {
+                            } else if (Tatam.Dialogs.confirm(_("Do you really remove this bookmark?"), this)) {
                                 sidebar.remove_bookmark(location);
                             }
                         });
@@ -171,7 +171,7 @@
 
                             sidebar.bookmark_del_button_clicked.connect((dir_path) => {
                                 sidebar_popover.visible = false;
-                                return Tatam.Dialogs.confirm(Tatam.Text.CONFIRM_REMOVE_BOOKMARK, this);
+                                return Tatam.Dialogs.confirm(_("Do you really remove this bookmark?"), this);
                             });
 
                             sidebar.playlist_selected.connect((playlist_name, playlist_path) => {
@@ -194,13 +194,13 @@
 
                             sidebar.playlist_del_button_clicked.connect((playlist_path) => {
                                 sidebar_popover.visible = false;
-                                bool answer = Tatam.Dialogs.confirm(Tatam.Text.CONFIRM_REMOVE_PLAYLIST, this);
+                                bool answer = Tatam.Dialogs.confirm(_("Do you really remove this playlist?"), this);
                                 if (answer) {
                                     File playlist_file = File.new_for_path(playlist_path);
                                     try {
                                         playlist_file.delete();
                                     } catch (GLib.Error e) {
-                                        Dialogs.alert(Text.ALERT_FAIL_TO_DELETE_FILE.printf(playlist_path), this);
+                                        Dialogs.alert(_("Failed to delete a file (%s)").printf(playlist_path), this);
                                     }
                                 }
                                 return answer;
@@ -255,7 +255,7 @@
                         finder.bookmark_button_clicked.connect((file_path) => {
                             if (!sidebar.has_bookmark(file_path)) {
                                 sidebar.add_bookmark(file_path);
-                            } else if (Tatam.Dialogs.confirm(Tatam.Text.CONFIRM_REMOVE_BOOKMARK, this)) {
+                            } else if (Tatam.Dialogs.confirm(_("Do you really remove this bookmark?"), this)) {
                                 sidebar.remove_bookmark(file_path);
                             }
                         });
@@ -264,12 +264,17 @@
                             setup_playlist.begin(path, false, (res, obj) => {
                                 playlist_view.set_index(0);
                                 gst_player.play(playlist_view.get_file_info().path);
+                                show_playlist();
+                                find_button.active = false;
+                                playlist_button.active = true;
                             });
                             show_playlist();
                         });
 
                         finder.add_button_clicked.connect((path) => {
                             show_playlist();
+                            find_button.active = false;
+                            playlist_button.active = true;
                             setup_playlist.begin(path, true);
                         });
                     }
@@ -383,27 +388,34 @@
                                 {
                                     var move_up_button = new Gtk.Button.from_icon_name(IconName.Symbolic.GO_UP, Gtk.IconSize.SMALL_TOOLBAR);
                                     {
+                                        move_up_button.tooltip_text = _("Move up selected items");
                                         move_up_button.clicked.connect(() => {
                                             playlist_view.move_up_items();
                                         });
                                     }
 
-                                    var move_down_button = new Gtk.Button.from_icon_name(IconName.Symbolic.GO_DOWN, Gtk.IconSize.SMALL_TOOLBAR);
+                                    var move_down_button = new Gtk.Button.from_icon_name(
+                                            IconName.Symbolic.GO_DOWN, Gtk.IconSize.SMALL_TOOLBAR);
                                     {
+                                        move_down_button.tooltip_text = _("Move down selected items");
                                         move_down_button.clicked.connect(() => {
                                             playlist_view.move_down_items();
                                         });
                                     }
 
-                                    var list_remove_button = new Gtk.Button.from_icon_name(IconName.Symbolic.LIST_REMOVE, Gtk.IconSize.SMALL_TOOLBAR);
+                                    var list_remove_button = new Gtk.Button.from_icon_name(
+                                            IconName.Symbolic.LIST_REMOVE, Gtk.IconSize.SMALL_TOOLBAR);
                                     {
+                                        list_remove_button.tooltip_text = _("Remove selected items");
                                         list_remove_button.clicked.connect(() => {
                                             playlist_view.remove_items();
                                         });
                                     }
 
-                                    var list_unselect_button = new Gtk.Button.from_icon_name(IconName.Symbolic.OBJECT_SELECT, Gtk.IconSize.SMALL_TOOLBAR);
+                                    var list_unselect_button = new Gtk.Button.from_icon_name(
+                                            IconName.Symbolic.OBJECT_SELECT, Gtk.IconSize.SMALL_TOOLBAR);
                                     {
+                                        list_unselect_button.tooltip_text = _("Unselect all items");
                                         list_unselect_button.clicked.connect(() => {
                                             playlist_view.unselect_all();
                                         });
@@ -418,7 +430,7 @@
 
                                 Gtk.Button save_button = new Gtk.Button.from_icon_name(Tatam.IconName.Symbolic.DOCUMENT_SAVE);
                                 {
-                                    save_button.tooltip_text = Tatam.Text.TOOLTIP_SAVE_BUTTON;
+                                    save_button.tooltip_text = _("Save this playlist");
                                     save_button.clicked.connect(() => {
                                         Gee.List<string> file_path_list = new Gee.ArrayList<string>();
                                         for (int i = 0; i < playlist_view.get_list_size(); i++) {
@@ -428,7 +440,7 @@
                                         if (playlist_view.playlist_name == null) {
                                             save_playlist(file_path_list);
                                         } else if (sidebar.has_playlist(playlist_name)) {
-                                            if (Tatam.Dialogs.confirm(Tatam.Text.CONFIRM_OVERWRITE.printf(playlist_name), this)) {
+                                            if (Tatam.Dialogs.confirm(_("A playlist %s exists. Do you overwrite it?").printf(playlist_name), this)) {
                                                 overwrite_playlist(playlist_name, file_path_list);
                                             } else {
                                                 save_playlist(file_path_list);
@@ -570,8 +582,11 @@
                     debug("playlist has next track");
                     playlist_view.next();
                     debug("playlist moved to next track");
-                    string next_path = playlist_view.get_file_info().path;
-                    gst_player.play(next_path);
+                    Tatam.FileInfo? next_file_info = playlist_view.get_file_info();
+                    if (next_file_info != null) {
+                        string next_path = next_file_info.path;
+                        gst_player.play(next_path);
+                    }
                 } else {
                     debug("playing all files is completed!");
                     playing = false;
@@ -671,12 +686,12 @@
                 Gee.List<string> copy_of_list = file_path_list;
                 save_playlist_dialog = new Gtk.Dialog.with_buttons(Tatam.PROGRAM_NAME + ": save playlist", this,
                         Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT,
-                        Tatam.Text.DIALOG_OK, Gtk.ResponseType.ACCEPT,
-                        Tatam.Text.DIALOG_CANCEL, Gtk.ResponseType.CANCEL);
+                        _("_OK"), Gtk.ResponseType.ACCEPT,
+                        _("_Cancel"), Gtk.ResponseType.CANCEL);
                 {
                     var save_playlist_dialog_hbox = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 5);
                     {
-                        var label = new Gtk.Label(Tatam.Text.PLAYLIST_SAVE_NAME);
+                        var label = new Gtk.Label(_("Enter new playlist name:"));
                         playlist_name_entry = new Gtk.Entry();
                         save_playlist_dialog_hbox.pack_start(label);
                         save_playlist_dialog_hbox.pack_start(playlist_name_entry);
@@ -692,7 +707,7 @@
                             overwrite_playlist(playlist_name, copy_of_list);
                             playlist_view.playlist_name = playlist_name;
                         }
-                        playlist_name_entry.text = Tatam.Text.EMPTY;
+                        playlist_name_entry.text = "";
                         save_playlist_dialog.visible = false;
                     });
                     save_playlist_dialog.destroy.connect(() => {
@@ -718,7 +733,7 @@
                 FileUtils.set_contents(playlist_file_path, playlist_file_contents.to_string());
                 debug("playlist file has been saved at %s", playlist_file_path);
             } catch (FileError e) {
-                stderr.printf(Tatam.Text.ERROR_WRITE_CONFIG);
+                stderr.printf(_("Error: can not write to config file.\n"));
                 Process.exit(1);
             }
         }
@@ -785,7 +800,7 @@
                     css_provider.load_from_path(css_path);
                 } catch (GLib.Error e) {
                     debug("ERROR: css_path: %s", css_path);
-                    stderr.printf(Tatam.Text.ERROR_CREATE_WINDOW);
+                    stderr.printf(_("ERROR: failed to create a window\n"));
                     return;
                 }
                 Gtk.StyleContext.add_provider_for_screen(win_screen,
@@ -793,19 +808,6 @@
                                                          Gtk.STYLE_PROVIDER_PRIORITY_USER);
             } else {
                 debug("css does not exists!");
-            }
-        }
-
-        protected void print_file_info_pretty(Tatam.FileInfo? file_info) {
-            if (file_info != null) {
-                try {
-                    Json.Node json = Json.from_string(file_info.to_string());
-                    print("%s\n", Json.to_string(json, true));
-                } catch (GLib.Error e) {
-                    stderr.printf(@"GLib.Error: $(e.message)\n");
-                }
-            } else {
-                stderr.printf("file_info is null\n");
             }
         }
     }

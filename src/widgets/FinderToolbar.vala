@@ -40,7 +40,7 @@ namespace Tatam {
             {
                 finder_parent_button = new Button.from_icon_name(IconName.Symbolic.GO_UP, IconSize.BUTTON);
                 {
-                    finder_parent_button.tooltip_text = Text.TOOLTIP_FINDER_GO_UP;
+                    finder_parent_button.tooltip_text = _("Go up");
                     finder_parent_button.clicked.connect(() => {
                         parent_button_clicked();
                     });
@@ -52,7 +52,7 @@ namespace Tatam {
                                                                      IconSize.BUTTON);
                     {
                         finder_zoomin_button.get_style_context().add_class(StyleClass.TITLEBUTTON);
-                        finder_zoomin_button.tooltip_text = Text.TOOLTIP_FINDER_ZOOMIN;
+                        finder_zoomin_button.tooltip_text = _("Zoom in");
                         finder_zoomin_button.clicked.connect(() => {
                             zoomin_button_clicked();
                         });
@@ -62,7 +62,7 @@ namespace Tatam {
                                                                       IconSize.BUTTON);
                     {
                         finder_zoomout_button.get_style_context().add_class(StyleClass.TITLEBUTTON);
-                        finder_zoomout_button.tooltip_text = Text.TOOLTIP_FINDER_ZOOMOUT;
+                        finder_zoomout_button.tooltip_text = _("Zoom out");
                         finder_zoomout_button.clicked.connect(() => {
                             zoomout_button_clicked();
                         });
@@ -83,7 +83,7 @@ namespace Tatam {
                                                                   IconSize.BUTTON);
                 {
                     finder_refresh_button.get_style_context().add_class(StyleClass.TITLEBUTTON);
-                    finder_refresh_button.tooltip_text = Text.TOOLTIP_REFRESH_FINDER;
+                    finder_refresh_button.tooltip_text = _("Reload");
                     finder_refresh_button.clicked.connect(() => {
                         refresh_button_clicked();
                     });
@@ -93,7 +93,7 @@ namespace Tatam {
                                                               IconSize.BUTTON);
                 {
                     finder_add_button.get_style_context().add_class(StyleClass.TITLEBUTTON);
-                    finder_add_button.tooltip_text = Text.TOOLTIP_SAVE_FINDER;
+                    finder_add_button.tooltip_text = _("Bookmark this directory");
                     finder_add_button.clicked.connect(() => {
                         add_button_clicked();
                     });

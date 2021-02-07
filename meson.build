@@ -7,18 +7,18 @@ project(
 posix_dep = meson.get_compiler('vala').find_library('posix')
 libm_dep = meson.get_compiler('c').find_library('libm')
 
+subdir('po')
+
 executable(
     'tatam',
     'src/tatam.vala',
     'src/consts/enums.vala',
-    'src/consts/Text.vala',
     'src/consts/OptionKey.vala',
     'src/consts/IconNames.vala',
     'src/consts/ProgramName.vala',
     'src/consts/Error.vala',
     'src/consts/DefaultCss.vala',
     'src/consts/StyleClass.vala',
-    'src/AppBase.vala',
     'src/utils/FilePathUtils.vala',
     'src/utils/RGBAUtils.vala',
     'src/utils/NumberUtils.vala',
@@ -35,7 +35,6 @@ executable(
     'src/widgets/HeaderBar.vala',
     'src/widgets/Finder.vala',
     'src/widgets/PlaylistItem.vala',
-    'src/widgets/Stack.vala',
     'src/widgets/PlaylistBox.vala',
     'src/widgets/Sidebar.vala',
     'src/widgets/FinderItem.vala',
@@ -54,8 +53,6 @@ executable(
         dependency('gee-0.8'),
         dependency('gstreamer-1.0'),
         dependency('gtk+-3.0'),
-        dependency('gdk-3.0'),
-        dependency('json-glib-1.0'),
         posix_dep,
         libm_dep
     ],

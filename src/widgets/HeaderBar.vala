@@ -64,13 +64,13 @@ namespace Tatam {
                     if (image != null) {
                         image.icon_name = IconName.Symbolic.VIEW_LIST;
                     }
-                    this.switch_button.tooltip_text = Text.TOOLTIP_SHOW_PLAYLIST;
+                    this.switch_button.tooltip_text = _("Show playlist");
                     break;
                 case SwitchButtonState.PLAYLIST:
                     if (image != null) {
                         image.icon_name = IconName.Symbolic.GO_PREVIOUS;
                     }
-                    this.switch_button.tooltip_text = Text.TOOLTIP_SHOW_FINDER;
+                    this.switch_button.tooltip_text = _("Show finder");
                     break;
                 }
             }
@@ -122,7 +122,7 @@ namespace Tatam {
                 {
                     this.add_button.get_style_context().add_class(StyleClass.TITLEBUTTON);
                     this.add_button.add(new Image.from_icon_name(IconName.Symbolic.BOOKMARK_NEW, IconSize.BUTTON));
-                    this.add_button.tooltip_text = Text.TOOLTIP_SAVE_PLAYLIST;
+                    this.add_button.tooltip_text = _("Save this playlist");
                     this.add_button.clicked.connect(() => {
                         this.add_button_clicked();
                     });

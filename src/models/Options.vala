@@ -98,7 +98,7 @@ namespace Tatam {
                         config_map.get(key).add(option_file.get_path());
                         i++;
                     } else {
-                        throw new Tatam.Error.FILE_DOES_NOT_EXISTS(Tatam.Text.ERROR_FILE_DOES_NOT_EXISTS);
+                        throw new Tatam.Error.FILE_DOES_NOT_EXISTS(_("File does not exists (%s)\n").printf(option_file.get_path()));
                     }
                     break;
                 default:
@@ -136,7 +136,7 @@ namespace Tatam {
                         if (option_file.query_exists()) {
                             config_map.get(option_key).add(option_file.get_path());
                         } else {
-                            throw new Tatam.Error.FILE_DOES_NOT_EXISTS(Tatam.Text.ERROR_FILE_DOES_NOT_EXISTS);
+                            throw new Tatam.Error.FILE_DOES_NOT_EXISTS(_("File does not exists (%s)\n").printf(option_file.get_path()));
                         }
                         break;
                     default:

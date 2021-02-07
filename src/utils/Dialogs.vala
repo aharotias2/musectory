@@ -42,12 +42,10 @@ namespace Tatam {
 
         public static string? choose_file(Window parent_window) {
             string? file_path = null;
-            var file_chooser = new FileChooserDialog(
-                Tatam.Text.DIALOG_OPEN_FILE, parent_window,
-                FileChooserAction.OPEN,
-                Tatam.Text.DIALOG_CANCEL, ResponseType.CANCEL,
-                Tatam.Text.DIALOG_OPEN, ResponseType.ACCEPT
-                );
+            var file_chooser = new FileChooserDialog(_("Open File"), parent_window,
+                    FileChooserAction.OPEN,
+                    _("_Cancel"), ResponseType.CANCEL,
+                    _("_Open"), ResponseType.ACCEPT);
             if (file_chooser.run () == ResponseType.ACCEPT) {
                 file_path = file_chooser.get_filename();
             }
@@ -57,10 +55,10 @@ namespace Tatam {
 
         public static string? choose_directory(Window parent_window) {
             string? dir_name = null;
-            var file_chooser = new FileChooserDialog (Text.DIALOG_OPEN_FILE, parent_window,
-                                                      FileChooserAction.SELECT_FOLDER,
-                                                      Text.DIALOG_CANCEL, ResponseType.CANCEL,
-                                                      Text.DIALOG_OPEN, ResponseType.ACCEPT);
+            var file_chooser = new FileChooserDialog (_("Open File"), parent_window,
+                    FileChooserAction.SELECT_FOLDER,
+                    _("_Cancel"), ResponseType.CANCEL,
+                    _("_Open"), ResponseType.ACCEPT);
             if (file_chooser.run () == ResponseType.ACCEPT) {
                 dir_name = file_chooser.get_filename();
             }

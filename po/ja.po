@@ -1,0 +1,166 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-02-07 02:33+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Takayuki Tanaka <aharotias2@gmail.com>\n"
+"Language-Team: Japanese <LL@li.org>\n"
+"Language: Japanese\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/consts/OptionKey.vala:107
+msgid "Invalid key was found\n"
+msgstr ""
+
+#: src/AppBase.vala:105 src/widgets/Window.vala:795
+msgid "ERROR: failed to create a window\n"
+msgstr ""
+
+#: src/utils/Dialogs.vala:45 src/utils/Dialogs.vala:58
+msgid "Open File"
+msgstr ""
+
+#: src/utils/Dialogs.vala:47 src/utils/Dialogs.vala:60
+#: src/widgets/Window.vala:682
+msgid "_Cancel"
+msgstr ""
+
+#: src/utils/Dialogs.vala:48 src/utils/Dialogs.vala:61
+msgid "_Open"
+msgstr ""
+
+#: src/widgets/Window.vala:125 src/widgets/Window.vala:174
+#: src/widgets/Window.vala:258
+msgid "Do you really remove this bookmark?"
+msgstr ""
+
+#: src/widgets/Window.vala:197
+msgid "Do you really remove this playlist?"
+msgstr ""
+
+#: src/widgets/Window.vala:203
+#, c-format
+msgid "Failed to delete a file (%s)"
+msgstr ""
+
+#: src/widgets/Window.vala:386
+msgid "Move up selected items"
+msgstr "選択したアイテムを上に移動する"
+
+#: src/widgets/Window.vala:395
+msgid "Move down selected items"
+msgstr "選択したアイテムを下に移動する"
+
+#: src/widgets/Window.vala:404
+msgid "Remove selected items"
+msgstr "選択したアイテムを削除する"
+
+#: src/widgets/Window.vala:413
+msgid "Unselect all items"
+msgstr "全ての選択を解除する"
+
+#: src/widgets/Window.vala:428 src/widgets/HeaderBar.vala:125
+msgid "Save this playlist"
+msgstr "このプレイリストを保存する"
+
+#: src/widgets/Window.vala:438
+#, c-format
+msgid "A playlist %s exists. Do you overwrite it?"
+msgstr "プレイリスト %s は存在します。上書きしますか？"
+
+#: src/widgets/Window.vala:681
+msgid "_OK"
+msgstr "_OK"
+
+#: src/widgets/Window.vala:686
+msgid "Enter new playlist name:"
+msgstr "プレイリスト名を入力してください"
+
+#: src/widgets/Window.vala:728
+msgid "Error: can not write to config file.\n"
+msgstr ""
+
+#: src/widgets/HeaderBar.vala:67
+msgid "Show playlist"
+msgstr ""
+
+#: src/widgets/HeaderBar.vala:73
+msgid "Show finder"
+msgstr ""
+
+#: src/widgets/Finder.vala:98
+msgid "icon file can not load.\n"
+msgstr ""
+
+#: src/widgets/Finder.vala:168
+msgid "Loading data from disk..."
+msgstr ""
+
+#: src/widgets/Finder.vala:207
+#, c-format
+msgid "%s is loaded"
+msgstr ""
+
+#: src/widgets/Finder.vala:214
+#, c-format
+msgid "FileError catched with file_info.path '%s' which is cannot open\n"
+msgstr ""
+
+#: src/widgets/Sidebar.vala:78
+msgid "Choose directory..."
+msgstr ""
+
+#: src/widgets/Sidebar.vala:120
+#, c-format
+msgid "Delete the bookmark \"%s\""
+msgstr ""
+
+#: src/widgets/Sidebar.vala:184
+#, c-format
+msgid "Delete the playlist \"%s\""
+msgstr ""
+
+#: src/widgets/FinderToolbar.vala:43
+msgid "Go up"
+msgstr ""
+
+#: src/widgets/FinderToolbar.vala:55
+msgid "Zoom in"
+msgstr ""
+
+#: src/widgets/FinderToolbar.vala:65
+msgid "Zoom out"
+msgstr ""
+
+#: src/widgets/FinderToolbar.vala:86
+msgid "Reload"
+msgstr ""
+
+#: src/widgets/FinderToolbar.vala:96
+msgid "Bookmark this directory"
+msgstr ""
+
+#: src/models/Options.vala:101 src/models/Options.vala:139
+#: src/strategy/MetadataReader.vala:67 src/strategy/DirectoryReader.vala:32
+#, c-format
+msgid "File does not exists (%s)\n"
+msgstr ""
+
+#: src/strategy/MetadataReader.vala:71
+#, c-format
+msgid "File is not an audio file (%s)\n"
+msgstr ""
+
+#: src/strategy/DirectoryReader.vala:36
+#, c-format
+msgid "File is not a directory (%s)\n"
+msgstr ""

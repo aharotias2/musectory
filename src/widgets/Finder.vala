@@ -77,7 +77,8 @@ namespace Tatam {
         private FlowBox finder;
         private ProgressBar progress;
         private Revealer progress_revealer;
-        private Label while_label;
+        private Label empty_dir_label;
+        private Stack finder_stack;
 
         private Gee.List<Tatam.FileInfo?> file_info_list;
 
@@ -95,7 +96,7 @@ namespace Tatam {
                        .parent_pixbuf(icon_theme.load_icon(IconName.GO_UP, max_icon_size, 0))
                        .build();
             } catch (GLib.Error e) {
-                stderr.printf(Text.ERROR_LOAD_ICON);
+                stderr.printf(_("icon file can not load.\n"));
                 Process.exit(1);
             }
         }
@@ -110,52 +111,46 @@ namespace Tatam {
             FinderItem.cd_pixbuf = builder.cd_pixbuf_value;
             FinderItem.folder_pixbuf = builder.folder_pixbuf_value;
             FinderItem.parent_pixbuf = builder.parent_pixbuf_value;
-            var overlay_while_label = new Overlay();
+            finder_stack = new Stack();
             {
-                var finder_box = new Box(Orientation.VERTICAL, 1);
+                var overlay_progress = new Overlay();
                 {
                     finder_container = new ScrolledWindow(null, null);
                     {
                         finder_container.get_style_context().add_class(StyleClass.VIEW);
                     }
 
-                    progress_revealer = new Revealer();
+                    var progress_box = new Box(Orientation.VERTICAL, 0);
                     {
-                        progress = new ProgressBar();
+                        progress_revealer = new Revealer();
                         {
-                            progress.show_text = false;
+                            progress = new ProgressBar();
+                            {
+                                progress.show_text = false;
+                            }
+
+                            progress_revealer.reveal_child = false;
+                            progress_revealer.transition_type = RevealerTransitionType.SLIDE_DOWN;
+                            progress_revealer.valign = Align.START;
+                            progress_revealer.add(progress);
                         }
 
-                        progress_revealer.reveal_child = false;
-                        progress_revealer.transition_type = RevealerTransitionType.SLIDE_DOWN;
-                        progress_revealer.valign = Align.START;
-                        progress_revealer.add(progress);
+                        progress_box.pack_start(progress_revealer, false, false);
                     }
 
-                    finder_box.pack_start(progress_revealer, false, false);
-                    finder_box.pack_start(finder_container, true, true);
+                    overlay_progress.add(finder_container);
+                    overlay_progress.add_overlay(progress_box);
+                    overlay_progress.set_overlay_pass_through(progress_box, true);
                 }
 
-                var while_label_box = new Box(Orientation.VERTICAL, 4);
-                {
-                    while_label = new Label("");
-                    {
-                        while_label.margin = 4;
-                    }
+                empty_dir_label = new Label(_("This directory is empty"));
 
-                    while_label_box.pack_start(while_label);
-                    while_label_box.hexpand = false;
-                    while_label_box.vexpand = false;
-                    while_label_box.halign = Align.START;
-                    while_label_box.valign = Align.END;
-                    while_label_box.get_style_context().add_class(StyleClass.WHILE_LABEL);
-                }
-
-                overlay_while_label.add(finder_box);
-                overlay_while_label.add_overlay(while_label_box);
+                finder_stack.add_named(overlay_progress, "not-empty");
+                finder_stack.add_named(empty_dir_label, "empty");
+                finder_stack.visible_child_name = "empty";
             }
 
-            add(overlay_while_label);
+            add(finder_stack);
 
             debug("creating finder end");
         }
@@ -164,8 +159,6 @@ namespace Tatam {
             this.dir_path = dir_path;
             int counter_holder = ++count;
             change_cursor(Gdk.CursorType.WATCH);
-            while_label.visible = true;
-            while_label.label = Text.FINDER_LOAD_FILES;
             int size = get_level_size();
             progress.set_fraction(0.0);
             progress_revealer.reveal_child = true;
@@ -196,22 +189,29 @@ namespace Tatam {
 
             finder_container.add(finder);
 
+            if (file_info_list.size == 0) {
+                finder_stack.visible_child_name = "empty";
+            } else {
+                finder_stack.visible_child_name = "not-empty";
+            }
+
             int i = 0;
+
+            finder_container.show_all();
+
+            Idle.add(change_dir.callback);
+            yield;
 
             foreach (Tatam.FileInfo file_info in this.file_info_list) {
                 if (file_info.name == "..") {
                     continue;
                 }
 
-                if (file_info.name != "..") {
-                    while_label.label = Text.FILE_LOADED.printf(file_info.name);
-                }
-
                 if (file_info.type == Tatam.FileType.DIRECTORY) {
                     try {
                         file_info.type = Tatam.Files.get_file_type(file_info.path);
                     } catch (FileError e) {
-                        stderr.printf(Text.ERROR_OPEN_FILE.printf(file_info.path));
+                        stderr.printf(_("FileError catched with file_info.path '%s' which is cannot open\n").printf(file_info.path));
                         break;
                     }
                 }
@@ -247,20 +247,15 @@ namespace Tatam {
                     item_widget.play_button_clicked.connect((file_path) => {
                         play_button_clicked(file_path);
                     });
+
+                    item_widget.show_all();
+                    item_widget.hide_buttons();
                 }
 
                 finder.add(item_widget);
 
-                double fraction = (double) i + 1 / (double) file_info_list.size;
+                double fraction = (double) (i + 1) / (double) file_info_list.size;
                 progress.fraction = fraction;
-
-                finder_container.show_all();
-                for (int j = 0; j < file_info_list.size; j++) {
-                    var finder_item = finder.get_child_at_index(j) as FinderItem;
-                    if (finder_item != null) {
-                        finder_item.hide_buttons();
-                    }
-                }
 
                 Idle.add(change_dir.callback);
                 yield;
@@ -273,7 +268,6 @@ namespace Tatam {
             }
 
             change_cursor(Gdk.CursorType.LEFT_PTR);
-            while_label.visible = false;
             progress_revealer.reveal_child = false;
             dir_changed(dir_path);
         }

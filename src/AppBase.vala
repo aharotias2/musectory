@@ -102,7 +102,7 @@ public class AppBase {
                 css_provider.load_from_path(css_path);
             } catch (Error e) {
                 debug("ERROR: css_path: %s", css_path);
-                stderr.printf(Tatam.Text.ERROR_CREATE_WINDOW);
+                stderr.printf(_("ERROR: failed to create a window\n"));
                 return;
             }
             Gtk.StyleContext.add_provider_for_screen(win_screen,

@@ -104,7 +104,7 @@ namespace Tatam {
                 return PLAYLIST_ITEM;
 
             default:
-                throw new Tatam.Error.OPTION_KEY_ERROR(Text.ERROR_INVALID_OPTION_KEY);
+                throw new Tatam.Error.OPTION_KEY_ERROR(_("Invalid key was found\n"));
             }
         }
 

@@ -55,9 +55,9 @@ namespace Tatam {
     public class Controller : Bin, ControllerInterface {
         private Button artwork_button;
         private Image artwork;
-        private ToolButton play_pause_button;
-        private ToolButton next_track_button;
-        private ToolButton prev_track_button;
+        private Button play_pause_button;
+        private Button next_track_button;
+        private Button prev_track_button;
         private Label music_title_label;
         private Scale time_bar;
         private Label time_label_current;
@@ -85,7 +85,7 @@ namespace Tatam {
                     switch (play_pause_button_state) {
                     case ControllerState.PLAY:
                         running = true;
-                        Image? icon = play_pause_button.icon_widget as Image;
+                        Image? icon = play_pause_button.image as Image;
                         if (icon != null) {
                             icon.icon_name = IconName.Symbolic.MEDIA_PLAYBACK_PAUSE;
                         }
@@ -103,7 +103,7 @@ namespace Tatam {
                         break;
                     case ControllerState.PAUSE:
                         running = false;
-                        Image? icon = play_pause_button.icon_widget as Image;
+                        Image? icon = play_pause_button.image as Image;
                         if (icon != null) {
                             icon.icon_name = IconName.Symbolic.MEDIA_PLAYBACK_START;
                         }
@@ -111,7 +111,7 @@ namespace Tatam {
                         break;
                     case ControllerState.FINISHED:
                         running = false;
-                        Image? icon = play_pause_button.icon_widget as Image;
+                        Image? icon = play_pause_button.image as Image;
                         if (icon != null) {
                             icon.icon_name = IconName.Symbolic.MEDIA_PLAYBACK_START;
                         }
@@ -215,12 +215,10 @@ namespace Tatam {
                     });
                 }
 
-                var controller_second_box = new Box(Orientation.HORIZONTAL, 2);
+                var controller_second_box = new ButtonBox(Orientation.HORIZONTAL);
                 {
-                    play_pause_button = new ToolButton(
-                        new Image.from_icon_name(IconName.Symbolic.MEDIA_PLAYBACK_START,
-                                                 IconSize.SMALL_TOOLBAR), null
-                        );
+                    play_pause_button = new Button.from_icon_name(
+                            IconName.Symbolic.MEDIA_PLAYBACK_START, IconSize.SMALL_TOOLBAR);
                     {
                         play_pause_button.clicked.connect(() => {
                             switch (play_pause_button_state) {
@@ -237,9 +235,8 @@ namespace Tatam {
                         });
                     }
 
-                    next_track_button = new ToolButton(
-                        new Image.from_icon_name(IconName.Symbolic.MEDIA_SKIP_FORWARD,
-                                                 IconSize.SMALL_TOOLBAR), null);
+                    next_track_button = new Button.from_icon_name(
+                            IconName.Symbolic.MEDIA_SKIP_FORWARD, IconSize.SMALL_TOOLBAR);
                     {
                         next_track_button.sensitive = false;
                         next_track_button.clicked.connect(() => {
@@ -247,9 +244,8 @@ namespace Tatam {
                         });
                     }
 
-                    prev_track_button = new ToolButton(
-                        new Image.from_icon_name(IconName.Symbolic.MEDIA_SKIP_BACKWARD,
-                                                 IconSize.SMALL_TOOLBAR), null);
+                    prev_track_button = new Button.from_icon_name(
+                            IconName.Symbolic.MEDIA_SKIP_BACKWARD, IconSize.SMALL_TOOLBAR);
                     {
                         prev_track_button.sensitive = false;
                         prev_track_button.clicked.connect(() => {
@@ -260,7 +256,7 @@ namespace Tatam {
                     controller_second_box.valign = Align.CENTER;
                     controller_second_box.vexpand = false;
                     controller_second_box.margin_end = 10;
-                    controller_second_box.get_style_context().add_class(StyleClass.LINKED);
+                    controller_second_box.layout_style = ButtonBoxStyle.EXPAND;
                     controller_second_box.pack_start(prev_track_button, false, false);
                     controller_second_box.pack_start(play_pause_button, false, false);
                     controller_second_box.pack_start(next_track_button, false, false);
@@ -291,7 +287,7 @@ namespace Tatam {
                         });
                         time_bar.change_value.connect((scroll_type, new_value) => {
                             debug("change_value %f, %f", new_value, time_bar.get_value());
-                            time_position_changed(time_bar.get_value());
+                            time_position_changed(new_value);
                             return false;
                         });
                     }
@@ -318,8 +314,8 @@ namespace Tatam {
 
                 var controller_third_box = new Box(Orientation.HORIZONTAL, 2);
                 {
-                    var volume_button = new ToolButton(
-                        new Image.from_icon_name(IconName.Symbolic.AUDIO_VOLUME_MEDIUM, IconSize.SMALL_TOOLBAR), null);
+                    var volume_button = new Button.from_icon_name(
+                            IconName.Symbolic.AUDIO_VOLUME_MEDIUM, IconSize.SMALL_TOOLBAR);
                     {
                         var popover = new Popover(volume_button);
                         {
@@ -333,7 +329,7 @@ namespace Tatam {
                                 volume_bar.margin = 5;
                                 volume_bar.value_changed.connect(() => {
                                     volume_changed(volume_bar.get_value());
-                                    var icon = ((Image) volume_button.icon_widget);
+                                    var icon = (Image) volume_button.image;
                                     if (volume_bar.get_value() == 0.0) {
                                         icon.icon_name = IconName.Symbolic.AUDIO_VOLUME_MUTED;
                                     } else if (volume_bar.get_value() < 0.35) {

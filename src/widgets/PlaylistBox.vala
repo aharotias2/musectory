@@ -73,8 +73,8 @@ namespace Tatam {
                 list_box = new ListBox();
                 {
                     list_box.bind_model(store, create_list_item);
-                    list_box.activate_on_single_click = true;
-                    list_box.selection_mode = SelectionMode.SINGLE;
+                    list_box.activate_on_single_click = false;
+                    list_box.selection_mode = SelectionMode.NONE;
                     list_box.row_activated.connect((row) => {
                         PlaylistItem? item = row as PlaylistItem;
                         if (item != null) {

@@ -64,11 +64,11 @@ namespace Tatam {
             GLib.File file = GLib.File.new_for_path(file_path);
 
             if (!file.query_exists()) {
-                throw new Tatam.Error.FILE_DOES_NOT_EXISTS(Text.ERROR_FILE_DOES_NOT_EXISTS, file_path);
+                throw new Tatam.Error.FILE_DOES_NOT_EXISTS(_("File does not exists (%s)\n"), file_path);
             }
 
             if (!file.query_info("standard::*", 0).get_content_type().has_prefix("audio")) {
-                throw new Tatam.Error.FILE_IS_NOT_AN_AUDIO(Text.ERROR_FILE_IS_NOT_AN_AUDIO, file_path);
+                throw new Tatam.Error.FILE_IS_NOT_AN_AUDIO(_("File is not an audio file (%s)\n"), file_path);
             }
 
             uridecoder.set("uri", "file://" + file_path);
