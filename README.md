@@ -7,7 +7,6 @@ A simple GTK+3 music player written in vala.
 * vala
 * gtk+-3.0
 * gee-0.8
-* json-glib-1.0
 * gstreamer-1.0
 
 ## Build
