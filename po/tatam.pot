@@ -1,14 +1,14 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
+# This file is distributed under the same license as the tatam package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: tatam\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-02-07 02:33+0900\n"
+"POT-Creation-Date: 2021-02-11 14:46+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,16 +21,12 @@ msgstr ""
 msgid "Invalid key was found\n"
 msgstr ""
 
-#: src/AppBase.vala:105 src/widgets/Window.vala:795
-msgid "ERROR: failed to create a window\n"
-msgstr ""
-
 #: src/utils/Dialogs.vala:45 src/utils/Dialogs.vala:58
 msgid "Open File"
 msgstr ""
 
 #: src/utils/Dialogs.vala:47 src/utils/Dialogs.vala:60
-#: src/widgets/Window.vala:682
+#: src/widgets/Window.vala:698
 msgid "_Cancel"
 msgstr ""
 
@@ -38,55 +34,59 @@ msgstr ""
 msgid "_Open"
 msgstr ""
 
-#: src/widgets/Window.vala:125 src/widgets/Window.vala:174
-#: src/widgets/Window.vala:258
+#: src/widgets/Window.vala:124 src/widgets/Window.vala:173
+#: src/widgets/Window.vala:257
 msgid "Do you really remove this bookmark?"
 msgstr ""
 
-#: src/widgets/Window.vala:197
+#: src/widgets/Window.vala:196
 msgid "Do you really remove this playlist?"
 msgstr ""
 
-#: src/widgets/Window.vala:203
+#: src/widgets/Window.vala:202
 #, c-format
 msgid "Failed to delete a file (%s)"
 msgstr ""
 
-#: src/widgets/Window.vala:386
+#: src/widgets/Window.vala:398
 msgid "Move up selected items"
 msgstr ""
 
-#: src/widgets/Window.vala:395
+#: src/widgets/Window.vala:407
 msgid "Move down selected items"
 msgstr ""
 
-#: src/widgets/Window.vala:404
+#: src/widgets/Window.vala:416
 msgid "Remove selected items"
 msgstr ""
 
-#: src/widgets/Window.vala:413
+#: src/widgets/Window.vala:425
 msgid "Unselect all items"
 msgstr ""
 
-#: src/widgets/Window.vala:428 src/widgets/HeaderBar.vala:125
+#: src/widgets/Window.vala:440 src/widgets/HeaderBar.vala:125
 msgid "Save this playlist"
 msgstr ""
 
-#: src/widgets/Window.vala:438
+#: src/widgets/Window.vala:453
 #, c-format
 msgid "A playlist %s exists. Do you overwrite it?"
 msgstr ""
 
-#: src/widgets/Window.vala:681
+#: src/widgets/Window.vala:697
 msgid "_OK"
 msgstr ""
 
-#: src/widgets/Window.vala:686
+#: src/widgets/Window.vala:702
 msgid "Enter new playlist name:"
 msgstr ""
 
-#: src/widgets/Window.vala:728
+#: src/widgets/Window.vala:744
 msgid "Error: can not write to config file.\n"
+msgstr ""
+
+#: src/widgets/Window.vala:809
+msgid "ERROR: failed to create a window\n"
 msgstr ""
 
 #: src/widgets/HeaderBar.vala:67
@@ -97,17 +97,12 @@ msgstr ""
 msgid "Show finder"
 msgstr ""
 
-#: src/widgets/Finder.vala:98
+#: src/widgets/Finder.vala:99
 msgid "icon file can not load.\n"
 msgstr ""
 
-#: src/widgets/Finder.vala:168
-msgid "Loading data from disk..."
-msgstr ""
-
-#: src/widgets/Finder.vala:207
-#, c-format
-msgid "%s is loaded"
+#: src/widgets/Finder.vala:146
+msgid "This directory is empty"
 msgstr ""
 
 #: src/widgets/Finder.vala:214

@@ -19,36 +19,34 @@
 
 using Gdk;
 
-namespace Tatam {
-    public class NumberUtils {
-        public static int hex2int(string hex) {
-            int result = 0;
-            for (int i = 0; i < hex.length; i++) {
-                if (hex.valid_char(i)) {
-                    unichar c = hex.get_char(i);
-                    if (c.isdigit()) {
-                        result *= 16;
-                        result += int.parse(c.to_string());
-                    } else if (c.isalpha()) {
-                        result *= 16;
-                        if (c == 'a' || c == 'A') {
-                            result += 10;
-                        } else if (c == 'b' || c == 'B') {
-                            result += 11;
-                        } else if (c == 'c' || c == 'C') {
-                            result += 12;
-                        } else if (c == 'd' || c == 'D') {
-                            result += 13;
-                        } else if (c == 'e' || c == 'E') {
-                            result += 14;
-                        } else if (c == 'f' || c == 'F') {
-                            result += 15;
-                        }
+namespace Tatam.NumberUtils {
+    public int hex2int(string hex) {
+        int result = 0;
+        for (int i = 0; i < hex.length; i++) {
+            if (hex.valid_char(i)) {
+                unichar c = hex.get_char(i);
+                if (c.isdigit()) {
+                    result *= 16;
+                    result += int.parse(c.to_string());
+                } else if (c.isalpha()) {
+                    result *= 16;
+                    if (c == 'a' || c == 'A') {
+                        result += 10;
+                    } else if (c == 'b' || c == 'B') {
+                        result += 11;
+                    } else if (c == 'c' || c == 'C') {
+                        result += 12;
+                    } else if (c == 'd' || c == 'D') {
+                        result += 13;
+                    } else if (c == 'e' || c == 'E') {
+                        result += 14;
+                    } else if (c == 'f' || c == 'F') {
+                        result += 15;
                     }
                 }
             }
-            return result;
         }
+        return result;
     }
 }
 

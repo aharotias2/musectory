@@ -17,27 +17,26 @@
  * Copyright 2018 Takayuki Tanaka
  */
 
-namespace Tatam {
-    class RGBAUtils {
-        public static Gdk.RGBA new_rgba_from_int(int red, int green, int blue, double alpha) {
-            if ((0 <= red < 256) &&  (0 <= green < 256) && (0 <= blue < 256) && (0 <= alpha <= 1.0)) {
-                Gdk.RGBA rgba = { red / 256.0, green / 256.0, blue / 256.0, alpha };
-                return rgba;
-            } else {
-                Gdk.RGBA rgba = { 1.0, 1.0, 1.0, 1.0 };
-                return rgba;
-            }
+namespace Tatam.RGBAUtils {
+    public Gdk.RGBA new_rgba_from_int(int red, int green, int blue, double alpha) {
+        if ((0 <= red < 256) &&  (0 <= green < 256) && (0 <= blue < 256) && (0 <= alpha <= 1.0)) {
+            Gdk.RGBA rgba = { red / 256.0, green / 256.0, blue / 256.0, alpha };
+            return rgba;
+        } else {
+            Gdk.RGBA rgba = { 1.0, 1.0, 1.0, 1.0 };
+            return rgba;
         }
+    }
 
-        public static Gdk.RGBA new_rgba_from_string(string rgb_string, double alpha) {
-            string hex_red_part = rgb_string.substring(0, 2);
-            string hex_green_part = rgb_string.substring(2, 2);
-            string hex_blue_part = rgb_string.substring(4, 2);
-            return new_rgba_from_int(Hex.value_of(hex_red_part).to_int(),
-                                     Hex.value_of(hex_green_part).to_int(),
-                                     Hex.value_of(hex_blue_part).to_int(),
-                                     alpha);
-        }
+    public Gdk.RGBA new_rgba_from_string(string rgb_string, double alpha) {
+        string hex_red_part = rgb_string.substring(0, 2);
+        string hex_green_part = rgb_string.substring(2, 2);
+        string hex_blue_part = rgb_string.substring(4, 2);
+        return new_rgba_from_int(
+                Hex.value_of(hex_red_part).to_int(),
+                Hex.value_of(hex_green_part).to_int(),
+                Hex.value_of(hex_blue_part).to_int(),
+                alpha);
     }
 }
 

@@ -61,9 +61,9 @@
             setup_gst_player();
             setup_file_info_adapter();
             setup_widgets();
-            setup_css(options.get(Tatam.OptionKey.CSS_PATH));
             init_bookmarks_of_sidebar();
             init_playlists_of_sidebar();
+            setup_css(options.get(Tatam.OptionKey.CSS_PATH));
         }
 
         private void setup_widgets() {
@@ -84,7 +84,6 @@
                                 show_playlist();
                             }
                         });
-                        find_button.active = true;
                     }
 
                     playlist_button = new Gtk.ToggleButton();
@@ -262,11 +261,13 @@
 
                         finder.play_button_clicked.connect((path) => {
                             setup_playlist.begin(path, false, (res, obj) => {
-                                playlist_view.set_index(0);
-                                gst_player.play(playlist_view.get_file_info().path);
-                                show_playlist();
-                                find_button.active = false;
-                                playlist_button.active = true;
+                                if (playlist_view.get_file_info() != null) {
+                                    playlist_view.set_index(0);
+                                    gst_player.play(playlist_view.get_file_info().path);
+                                    show_playlist();
+                                    find_button.active = false;
+                                    playlist_button.active = true;
+                                }
                             });
                             show_playlist();
                         });
@@ -279,7 +280,7 @@
                         });
                     }
 
-                    finder_revealer.child = finder;
+                    finder_revealer.add(finder);
                     finder_revealer.reveal_child = true;
                     finder_revealer.transition_type = Gtk.RevealerTransitionType.SLIDE_DOWN;
                 }
@@ -299,59 +300,63 @@
                     });
 
                     controller.play_button_clicked.connect(() => {
-                        debug("controller.play_button_clicked");
                         if (!playing) {
-                            gst_player.play(playlist_view.get_file_info().path);
-                            playing = true;
+                            Tatam.FileInfo? info = playlist_view.get_file_info();
+                            if (info != null) {
+                                gst_player.play(info.path);
+                                playing = true;
+                            }
                         } else {
                             gst_player.unpause();
                         }
                     });
 
                     controller.pause_button_clicked.connect(() => {
-                        debug("controller.pause_button_clicked");
                         gst_player.pause();
                     });
 
                     controller.next_button_clicked.connect(() => {
-                        debug("controller.next_button_clicked");
                         if (playlist_view.has_next()) {
                             playlist_view.next();
                             set_controller_artwork();
-                            gst_player.play(playlist_view.get_file_info().path);
+                            Tatam.FileInfo? info = playlist_view.get_file_info();
+                            if (info != null) {
+                                gst_player.play(info.path);
+                            }
                         }
                     });
 
                     controller.prev_button_clicked.connect(() => {
-                        debug("controller.prev_button_clicked");
                         if (controller.music_current_time > 1000) {
                             controller.music_current_time = 0;
                             gst_player.quit();
-                            gst_player.play(playlist_view.get_file_info().path);
+                            Tatam.FileInfo? info = playlist_view.get_file_info();
+                            if (info != null) {
+                                gst_player.play(info.path);
+                            }
                         } else if (playlist_view.has_previous()) {
                             playlist_view.previous();
                             set_controller_artwork();
-                            gst_player.play(playlist_view.get_file_info().path);
+                            Tatam.FileInfo? info = playlist_view.get_file_info();
+                            if (info != null) {
+                                gst_player.play(info.path);
+                            }
                         }
                     });
 
                     controller.time_position_changed.connect((new_value) => {
-                        debug("controller.time_position_changed");
                         gst_player.set_position(new Tatam.SmallTime.from_milliseconds((uint) new_value));
                     });
 
                     controller.volume_changed.connect((value) => {
-                        debug("controller.volume_changed");
                         gst_player.volume = value;
                     });
 
                     controller.shuffle_button_toggled.connect((shuffle_on) => {
-                        debug("shuffle was set to %s", shuffle_on ? "ON" : "OFF");
                         playlist_view.set_shuffling(shuffle_on);
                     });
 
                     controller.repeat_button_toggled.connect((repeat_on) => {
-                        debug("repeating was set to %s", repeat_on ? "ON" : "OFF");
                         playlist_view.set_repeating(repeat_on);
                     });
                 }
@@ -376,8 +381,10 @@
                                         }
                                     } else {
                                         gst_player.quit();
-                                        debug("playlist item activated at %u, %s", index, file_info.path);
-                                        gst_player.play(playlist_view.get_file_info().path);
+                                        Tatam.FileInfo? info = playlist_view.get_file_info();
+                                        if (info != null) {
+                                            gst_player.play(info.path);
+                                        }
                                     }
                                 });
                             }
@@ -434,7 +441,10 @@
                                     save_button.clicked.connect(() => {
                                         Gee.List<string> file_path_list = new Gee.ArrayList<string>();
                                         for (int i = 0; i < playlist_view.get_list_size(); i++) {
-                                            file_path_list.add(playlist_view.get_file_info_at_index(i).path);
+                                            Tatam.FileInfo? info = playlist_view.get_file_info_at_index(i);
+                                            if (info != null) {
+                                                file_path_list.add(info.path);
+                                            }
                                         }
                                         string playlist_name = playlist_view.playlist_name;
                                         if (playlist_view.playlist_name == null) {
@@ -482,7 +492,6 @@
 
             set_titlebar(header_bar);
             add(box_1);
-            set_title(Tatam.PROGRAM_NAME);
             set_default_size(700, 500);
             configure_event.connect((cr) => {
                 if (artwork_view.visible && controller.has_artwork()) {
@@ -496,6 +505,8 @@
         public override void show_all() {
             base.show_all();
             artwork_view.visible = false;
+            find_button.active = true;
+            controller.hide_artwork();
             init_playlist.begin();
             finder.change_dir.begin(options.get(Tatam.OptionKey.LAST_VISITED_DIR));
         }
@@ -514,8 +525,11 @@
             }
             options.remove_key(Tatam.OptionKey.PLAYLIST_ITEM);
             for (uint i = 0; i < playlist_view.get_list_size(); i++) {
-                string playlist_item_path = playlist_view.get_file_info_at_index(i).path;
-                options.set(Tatam.OptionKey.PLAYLIST_ITEM, playlist_item_path);
+                Tatam.FileInfo? info = playlist_view.get_file_info_at_index(i);
+                if (info != null) {
+                    string playlist_item_path = info.path;
+                    options.set(Tatam.OptionKey.PLAYLIST_ITEM, playlist_item_path);
+                }
             }
             Tatam.StringJoiner config_file_contents = new Tatam.StringJoiner("\n", null, "\n");
             foreach (Tatam.OptionKey key in options.keys()) {
@@ -550,7 +564,6 @@
             gst_player = new Tatam.GstPlayer();
             gst_player.volume = 0.5;
             gst_player.started.connect(() => {
-                debug("gst_player.started was called");
                 set_controller_artwork();
                 controller.play_pause_button_state = Tatam.ControllerState.PLAY;
                 current_music = playlist_view.get_file_info();
@@ -579,9 +592,7 @@
             gst_player.finished.connect(() => {
                 debug("gst_player.finished was called");
                 if (playlist_view.has_next()) {
-                    debug("playlist has next track");
                     playlist_view.next();
-                    debug("playlist moved to next track");
                     Tatam.FileInfo? next_file_info = playlist_view.get_file_info();
                     if (next_file_info != null) {
                         string next_path = next_file_info.path;
@@ -595,12 +606,10 @@
             });
 
             gst_player.unpaused.connect(() => {
-                debug("gst_player.unpaused was called");
                 playlist_view.toggle_status();
             });
 
             gst_player.paused.connect(() => {
-                debug("gst_player.paused was called");
                 playlist_view.toggle_status();
             });
         }
@@ -661,7 +670,6 @@
             var setup_playlist_thread = new Thread<Gee.List<Tatam.FileInfo?> >(null, () => {
                 try {
                     var playlist_internal = Tatam.Files.find_file_infos_recursively(path);
-                    debug("playlist was loaded\n");
                     return playlist_internal;
                 } catch (FileError e) {
                     stderr.printf(@"FileError: $(e.message)\n");
@@ -741,7 +749,6 @@
         private void init_bookmarks_of_sidebar() {
             Gee.List<string> bookmarks = options.get_all(Tatam.OptionKey.BOOKMARK_DIR);
             foreach (string bookmark_path in bookmarks) {
-                debug(@"bookmark_path: $(bookmark_path)");
                 sidebar.add_bookmark(bookmark_path);
             }
         }
@@ -799,7 +806,6 @@
                 try {
                     css_provider.load_from_path(css_path);
                 } catch (GLib.Error e) {
-                    debug("ERROR: css_path: %s", css_path);
                     stderr.printf(_("ERROR: failed to create a window\n"));
                     return;
                 }

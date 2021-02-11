@@ -77,7 +77,7 @@ namespace Tatam {
             }
             debug("start playing");
             init();
-            playbin.set("uri", "file://" + file_path);
+            playbin.set("uri", Gst.filename_to_uri(file_path));
             playbin.set("volume", volume_value);
             Gst.Bus bus = playbin.get_bus();
             bus.add_watch(0, handle_message);

@@ -4,6 +4,9 @@ project(
     version: '1.0.0'
 )
 
+i18n = import('i18n')
+add_project_arguments('-DGETTEXT_PACKAGE="tatam"', language:'c')
+
 posix_dep = meson.get_compiler('vala').find_library('posix')
 libm_dep = meson.get_compiler('c').find_library('libm')
 

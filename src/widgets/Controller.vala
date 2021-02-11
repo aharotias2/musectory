@@ -55,6 +55,7 @@ namespace Tatam {
     public class Controller : Bin, ControllerInterface {
         private Button artwork_button;
         private Image artwork;
+        private ButtonBox controller_second_box;
         private Button play_pause_button;
         private Button next_track_button;
         private Button prev_track_button;
@@ -71,9 +72,9 @@ namespace Tatam {
         private SmallTime music_current_time_value;
         private SmallTime music_rest_time_value;
         private uint artwork_size_value;
-        private bool running;
         private Gdk.Pixbuf? original_pixbuf;
-
+        private uint state_change_counter;
+        
         public ControllerState play_pause_button_state {
             get {
                 return play_pause_button_state_value;
@@ -84,25 +85,24 @@ namespace Tatam {
                     play_pause_button_state_value = value;
                     switch (play_pause_button_state) {
                     case ControllerState.PLAY:
-                        running = true;
+                        uint state_change_count_save = state_change_counter + 1;
                         Image? icon = play_pause_button.image as Image;
                         if (icon != null) {
                             icon.icon_name = IconName.Symbolic.MEDIA_PLAYBACK_PAUSE;
                         }
                         Timeout.add(100, () => {
-                            if (running) {
+                            if (state_change_count_save == state_change_counter) {
                                 music_current_time += 100;
                             }
                             if (music_current_time_value.milliseconds
                                 >= music_total_time_value.milliseconds) {
                                 play_pause_button_state = ControllerState.FINISHED;
                             }
-                            return running;
+                            return state_change_count_save == state_change_counter;
                         });
                         debug("play_pause_button_state was set to PLAY");
                         break;
                     case ControllerState.PAUSE:
-                        running = false;
                         Image? icon = play_pause_button.image as Image;
                         if (icon != null) {
                             icon.icon_name = IconName.Symbolic.MEDIA_PLAYBACK_START;
@@ -110,7 +110,6 @@ namespace Tatam {
                         debug("play_pause_button_state was set to PAUSE");
                         break;
                     case ControllerState.FINISHED:
-                        running = false;
                         Image? icon = play_pause_button.image as Image;
                         if (icon != null) {
                             icon.icon_name = IconName.Symbolic.MEDIA_PLAYBACK_START;
@@ -119,6 +118,7 @@ namespace Tatam {
                         debug("play_pause_button_state was set to FINISHED");
                         break;
                     }
+                    state_change_counter++;
                 }
             }
         }
@@ -215,7 +215,7 @@ namespace Tatam {
                     });
                 }
 
-                var controller_second_box = new ButtonBox(Orientation.HORIZONTAL);
+                controller_second_box = new ButtonBox(Orientation.HORIZONTAL);
                 {
                     play_pause_button = new Button.from_icon_name(
                             IconName.Symbolic.MEDIA_PLAYBACK_START, IconSize.SMALL_TOOLBAR);
@@ -419,12 +419,14 @@ namespace Tatam {
         }
 
         public void show_artwork() {
-            this.artwork_button.visible = true;
+            artwork_button.visible = true;
+            controller_second_box.margin_start = 0;
         }
 
         public void hide_artwork() {
-            this.artwork_button.visible = false;
-        }
+            artwork_button.visible = false; 
+            controller_second_box.margin_start = 10;
+       }
 
         public bool has_artwork() {
             return artwork.pixbuf != null;

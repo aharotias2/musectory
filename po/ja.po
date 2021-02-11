@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-02-07 02:33+0900\n"
+"POT-Creation-Date: 2021-02-11 14:46+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Takayuki Tanaka <aharotias2@gmail.com>\n"
 "Language-Team: Japanese <LL@li.org>\n"
@@ -19,148 +19,143 @@ msgstr ""
 
 #: src/consts/OptionKey.vala:107
 msgid "Invalid key was found\n"
-msgstr ""
-
-#: src/AppBase.vala:105 src/widgets/Window.vala:795
-msgid "ERROR: failed to create a window\n"
-msgstr ""
+msgstr "不正なキーです\n"
 
 #: src/utils/Dialogs.vala:45 src/utils/Dialogs.vala:58
 msgid "Open File"
-msgstr ""
+msgstr "ファイルを開く"
 
 #: src/utils/Dialogs.vala:47 src/utils/Dialogs.vala:60
-#: src/widgets/Window.vala:682
+#: src/widgets/Window.vala:698
 msgid "_Cancel"
-msgstr ""
+msgstr "キャンセル"
 
 #: src/utils/Dialogs.vala:48 src/utils/Dialogs.vala:61
 msgid "_Open"
-msgstr ""
+msgstr "開く"
 
-#: src/widgets/Window.vala:125 src/widgets/Window.vala:174
-#: src/widgets/Window.vala:258
+#: src/widgets/Window.vala:124 src/widgets/Window.vala:173
+#: src/widgets/Window.vala:257
 msgid "Do you really remove this bookmark?"
-msgstr ""
+msgstr "本当にこのブックマークを削除しますか？"
 
-#: src/widgets/Window.vala:197
+#: src/widgets/Window.vala:196
 msgid "Do you really remove this playlist?"
-msgstr ""
+msgstr "本当にこのプレイリストを削除しますか？"
 
-#: src/widgets/Window.vala:203
+#: src/widgets/Window.vala:202
 #, c-format
 msgid "Failed to delete a file (%s)"
-msgstr ""
+msgstr "ファイル(%s)の削除に失敗しました"
 
-#: src/widgets/Window.vala:386
+#: src/widgets/Window.vala:398
 msgid "Move up selected items"
 msgstr "選択したアイテムを上に移動する"
 
-#: src/widgets/Window.vala:395
+#: src/widgets/Window.vala:407
 msgid "Move down selected items"
 msgstr "選択したアイテムを下に移動する"
 
-#: src/widgets/Window.vala:404
+#: src/widgets/Window.vala:416
 msgid "Remove selected items"
 msgstr "選択したアイテムを削除する"
 
-#: src/widgets/Window.vala:413
+#: src/widgets/Window.vala:425
 msgid "Unselect all items"
 msgstr "全ての選択を解除する"
 
-#: src/widgets/Window.vala:428 src/widgets/HeaderBar.vala:125
+#: src/widgets/Window.vala:440 src/widgets/HeaderBar.vala:125
 msgid "Save this playlist"
 msgstr "このプレイリストを保存する"
 
-#: src/widgets/Window.vala:438
+#: src/widgets/Window.vala:453
 #, c-format
 msgid "A playlist %s exists. Do you overwrite it?"
 msgstr "プレイリスト %s は存在します。上書きしますか？"
 
-#: src/widgets/Window.vala:681
+#: src/widgets/Window.vala:697
 msgid "_OK"
 msgstr "_OK"
 
-#: src/widgets/Window.vala:686
+#: src/widgets/Window.vala:702
 msgid "Enter new playlist name:"
 msgstr "プレイリスト名を入力してください"
 
-#: src/widgets/Window.vala:728
+#: src/widgets/Window.vala:744
 msgid "Error: can not write to config file.\n"
-msgstr ""
+msgstr "エラー: 設定ファイルに書き込めませでした\n"
+
+#: src/widgets/Window.vala:809
+msgid "ERROR: failed to create a window\n"
+msgstr "エラー: ウィンドウの作成に失敗しました\n"
 
 #: src/widgets/HeaderBar.vala:67
 msgid "Show playlist"
-msgstr ""
+msgstr "プレイリストを表示する"
 
 #: src/widgets/HeaderBar.vala:73
 msgid "Show finder"
-msgstr ""
+msgstr "ファインダーを表示する"
 
-#: src/widgets/Finder.vala:98
+#: src/widgets/Finder.vala:99
 msgid "icon file can not load.\n"
-msgstr ""
+msgstr "アイコンファイルが読み込めませでした\n"
 
-#: src/widgets/Finder.vala:168
-msgid "Loading data from disk..."
-msgstr ""
-
-#: src/widgets/Finder.vala:207
-#, c-format
-msgid "%s is loaded"
+#: src/widgets/Finder.vala:146
+msgid "This directory is empty"
 msgstr ""
 
 #: src/widgets/Finder.vala:214
 #, c-format
 msgid "FileError catched with file_info.path '%s' which is cannot open\n"
-msgstr ""
+msgstr "ファイルエラー: %s は開けませんでした\n"
 
 #: src/widgets/Sidebar.vala:78
 msgid "Choose directory..."
-msgstr ""
+msgstr "ディレクトリーを選択する…"
 
 #: src/widgets/Sidebar.vala:120
 #, c-format
 msgid "Delete the bookmark \"%s\""
-msgstr ""
+msgstr "ブックマーク \"%s\" を削除する"
 
 #: src/widgets/Sidebar.vala:184
 #, c-format
 msgid "Delete the playlist \"%s\""
-msgstr ""
+msgstr "プレイリスト \"%s\" を削除する"
 
 #: src/widgets/FinderToolbar.vala:43
 msgid "Go up"
-msgstr ""
+msgstr "上に移動する"
 
 #: src/widgets/FinderToolbar.vala:55
 msgid "Zoom in"
-msgstr ""
+msgstr "拡大する"
 
 #: src/widgets/FinderToolbar.vala:65
 msgid "Zoom out"
-msgstr ""
+msgstr "縮小する"
 
 #: src/widgets/FinderToolbar.vala:86
 msgid "Reload"
-msgstr ""
+msgstr "再読込"
 
 #: src/widgets/FinderToolbar.vala:96
 msgid "Bookmark this directory"
-msgstr ""
+msgstr "このディレクトリをブックマークする"
 
 #: src/models/Options.vala:101 src/models/Options.vala:139
 #: src/strategy/MetadataReader.vala:67 src/strategy/DirectoryReader.vala:32
 #, c-format
 msgid "File does not exists (%s)\n"
-msgstr ""
+msgstr "ファイル (%s) は存在しません\n"
 
 #: src/strategy/MetadataReader.vala:71
 #, c-format
 msgid "File is not an audio file (%s)\n"
-msgstr ""
+msgstr "ファイル (%s) は音声ファイルではありません\n"
 
 #: src/strategy/DirectoryReader.vala:36
 #, c-format
 msgid "File is not a directory (%s)\n"
-msgstr ""
+msgstr "ファイル (%s) はディレクトリーではありません\n"

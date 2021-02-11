@@ -19,15 +19,13 @@
 
 using Gdk;
 
-namespace Tatam {
-    public class StringUtils {
-        public static Gee.List<string> array_to_list(string[] array) {
-            Gee.List<string> list = new Gee.ArrayList<string>();
-            foreach (string item in array) {
-                list.add(item);
-            }
-            return list;
+namespace Tatam.StringUtils {
+    public Gee.List<string> array_to_list(string[] array) {
+        Gee.List<string> list = new Gee.ArrayList<string>();
+        foreach (string item in array) {
+            list.add(item);
         }
+        return list;
     }
 }
 

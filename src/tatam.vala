@@ -20,7 +20,7 @@
 public class TatamApplication : Gtk.Application {
     private string config_dir;
     private Tatam.Options options;
-
+    
     public static int main(string[] args) {
         Gst.init(ref args);
         TatamApplication app = new TatamApplication();
@@ -39,7 +39,7 @@ public class TatamApplication : Gtk.Application {
         window.show_all();
     }
 
-    public void setup_configs(ref unowned string[] args) {
+    private void setup_configs(ref unowned string[] args) {
         options = new Tatam.Options();
         try {
             options.parse_conf();

@@ -1,6 +1,6 @@
 # Tatam
 
-A simple GTK+3 music player written in vala
+A simple GTK+3 music player written in vala.
 
 ## Requirements
 
