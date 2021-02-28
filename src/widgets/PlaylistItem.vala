@@ -22,6 +22,7 @@ using Gtk, Gdk, Pango;
 namespace Tatam {
     public class PlaylistItem : ListBoxRow {
         public uint image_size { get; set; }
+        public bool mouse_not_out_flag;
         private PlaylistItemStatus status;
         private PlaylistDrawingArea icon_area;
         public string track_title { get; private set; }
@@ -41,6 +42,7 @@ namespace Tatam {
         private Image? image_artwork;
 
         public PlaylistItem(Tatam.FileInfo file, uint image_size) {
+            mouse_not_out_flag = false;
             file_info = file;
             status = PlaylistItemStatus.NORMAL;
             debug("PlaylistItem.image_size = %u", image_size);
@@ -149,7 +151,23 @@ namespace Tatam {
                     return Source.CONTINUE;
                 });
                 ev_box.leave_notify_event.connect((event) => {
+                    mouse_not_out_flag = false;
                     on_leave();
+                    return Source.CONTINUE;
+                });
+                ev_box.button_press_event.connect((event) => {
+                    mouse_not_out_flag = true;
+                    return Source.CONTINUE;
+                });
+                ev_box.button_release_event.connect((event) => {
+                    if (mouse_not_out_flag) {
+                        check_button.active = !check_button.active;
+                        if (check_button.active) {
+                            this.get_style_context().add_class("playlist_item_selected");
+                        } else {
+                            this.get_style_context().remove_class("playlist_item_selected");
+                        }
+                    }
                     return Source.CONTINUE;
                 });
                 ev_box.add(grid);
@@ -211,6 +229,11 @@ namespace Tatam {
         public void set_status(PlaylistItemStatus status) {
             this.status = status;
             icon_area.status = status;
+            if (status == PlaylistItemStatus.PLAYING) {
+                this.get_style_context().add_class("playlist_item_playing");
+            } else {
+                this.get_style_context().remove_class("playlist_item_playing");
+            }
         }
 
         public void clicked() {

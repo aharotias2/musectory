@@ -68,6 +68,14 @@ namespace Tatam {
     color: #ffffff;
 }
 
+.playlist_item_selected {
+    background-color: #bbe2f1;
+}
+
+.playlist_item_playing {
+    background-color: #f6b483;
+}
+
 .tooltip {
     color: rgba(252, 252, 252, 1.0);
     font-style: italic;
