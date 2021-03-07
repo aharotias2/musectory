@@ -34,10 +34,10 @@ namespace Tatam {
         public signal void repeat_button_toggled(bool repeat_on);
 
         public abstract ControllerState play_pause_button_state { get; set; }
-        public abstract uint music_total_time { get; set; }
-        public abstract uint music_current_time { get; set; }
+        public abstract int music_total_time { get; set; }
+        public abstract int music_current_time { get; set; }
         public abstract string music_title { get; set; }
-        public abstract uint artwork_size { get; set; }
+        public abstract int artwork_size { get; set; }
         public abstract double volume { get; set; }
 
         public abstract void set_artwork(Gdk.Pixbuf pixbuf);
@@ -71,9 +71,9 @@ namespace Tatam {
         private SmallTime music_total_time_value;
         private SmallTime music_current_time_value;
         private SmallTime music_rest_time_value;
-        private uint artwork_size_value;
+        private int artwork_size_value;
         private Gdk.Pixbuf? original_pixbuf;
-        private uint state_change_counter;
+        private int state_change_counter;
 
         public ControllerState play_pause_button_state {
             get {
@@ -85,7 +85,7 @@ namespace Tatam {
                     play_pause_button_state_value = value;
                     switch (play_pause_button_state) {
                     case ControllerState.PLAY:
-                        uint state_change_count_save = state_change_counter + 1;
+                        int state_change_count_save = state_change_counter + 1;
                         Image? icon = play_pause_button.image as Image;
                         if (icon != null) {
                             icon.icon_name = IconName.Symbolic.MEDIA_PLAYBACK_PAUSE;
@@ -123,7 +123,7 @@ namespace Tatam {
             }
         }
 
-        public uint music_total_time {
+        public int music_total_time {
             get {
                 return music_total_time_value.milliseconds;
             }
@@ -140,7 +140,7 @@ namespace Tatam {
             }
         }
 
-        public uint music_current_time {
+        public int music_current_time {
             get {
                 return music_current_time_value.milliseconds;
             }
@@ -154,7 +154,7 @@ namespace Tatam {
                       - music_current_time_value.milliseconds;
                 time_label_current.label = music_current_time_value.to_string();
                 time_label_rest.label = music_rest_time_value.to_string_without_deciseconds();
-                if (value != (uint) time_bar.get_value()) {
+                if (value != (int) time_bar.get_value()) {
                     time_bar.set_value(value);
                 }
             }
@@ -169,7 +169,7 @@ namespace Tatam {
             }
         }
 
-        public uint artwork_size {
+        public int artwork_size {
             get {
                 return artwork_size_value;
             }
@@ -283,7 +283,7 @@ namespace Tatam {
                         time_bar.has_origin = true;
                         time_bar.set_increments(SMALL_STEP_MILLISECONDS, BIG_STEP_MILLISECONDS);
                         time_bar.value_changed.connect(() => {
-                            music_current_time = (uint) time_bar.get_value();
+                            music_current_time = (int) time_bar.get_value();
                         });
                         time_bar.change_value.connect((scroll_type, new_value) => {
                             debug("change_value %f, %f", new_value, time_bar.get_value());

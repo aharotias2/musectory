@@ -20,13 +20,12 @@
 namespace Tatam {
     public interface SmallTimeInterface {
         public const string TIME_PATTERN = "^([0-9]*:)?([0-5]?[0-9]:)?[0-5]?[0-9](\\.[0-5])?$";
-        public const uint HOUR_IN_MILLISECONDS = 3600000;
-        public const uint MINUTE_IN_MILLISECONDS = 60000;
-        public const uint SECOND_IN_MILLISECONDS = 1000;
-        public const uint DECISECOND_IN_MILLISECONDS = 100;
-        public abstract uint milliseconds { get; set; }
+        public const int HOUR_IN_MILLISECONDS = 3600000;
+        public const int MINUTE_IN_MILLISECONDS = 60000;
+        public const int SECOND_IN_MILLISECONDS = 1000;
+        public const int DECISECOND_IN_MILLISECONDS = 100;
+        public abstract int milliseconds { get; set; }
         public abstract double seconds { get; }
-//        public abstract FormatType format_type { get; set; }
         public abstract SmallTime minus(SmallTime subject);
         public abstract string to_string();
         public abstract string to_string_without_deciseconds();
@@ -42,11 +41,11 @@ namespace Tatam {
             MINUMUM,
         }
 
-        private uint hours_value;
-        private uint minutes_value;
-        private uint seconds_value;
-        private uint deciseconds_value;
-        private uint milliseconds_value;
+        private int hours_value;
+        private int minutes_value;
+        private int seconds_value;
+        private int deciseconds_value;
+        private int milliseconds_value;
         private bool with_deciseconds_value;
         private FormatType format_type_value;
 
@@ -54,7 +53,7 @@ namespace Tatam {
         private SmallTimeToStringFunc to_string_func;
         private SmallTimeToStringFunc to_string_without_deciseconds_func;
 
-        public uint milliseconds {
+        public int milliseconds {
             get {
                 return milliseconds_value;
             }
@@ -110,7 +109,7 @@ namespace Tatam {
             set_to_string_func(format_type);
         }
 
-        public SmallTime.from_milliseconds(uint milliseconds, FormatType format_type = FormatType.MINUMUM) {
+        public SmallTime.from_milliseconds(int milliseconds, FormatType format_type = FormatType.MINUMUM) {
             this.with_deciseconds_value = true;
             this.format_type = format_type;
             init_time_regex();
@@ -130,30 +129,30 @@ namespace Tatam {
             }
             string[] parts1 = time_string.split(":");
             string[] parts2;
-            uint small_time = 0;
+            int small_time = 0;
             switch (parts1.length) {
             case 3:
                 parts2 = parts1[2].split(".");
-                small_time += uint.parse(parts1[0]) * HOUR_IN_MILLISECONDS;
-                small_time += uint.parse(parts1[1]) * MINUTE_IN_MILLISECONDS;
-                small_time += uint.parse(parts2[0]) * SECOND_IN_MILLISECONDS;
+                small_time += int.parse(parts1[0]) * HOUR_IN_MILLISECONDS;
+                small_time += int.parse(parts1[1]) * MINUTE_IN_MILLISECONDS;
+                small_time += int.parse(parts2[0]) * SECOND_IN_MILLISECONDS;
                 if (parts2.length >= 2) {
                     small_time += int.parse(parts2[1].substring(0, 1)) * DECISECOND_IN_MILLISECONDS;
                 }
                 break;
             case 2:
                 parts2 = parts1[1].split(".");
-                small_time += uint.parse(parts1[0]) * MINUTE_IN_MILLISECONDS;
-                small_time += uint.parse(parts2[0]) * SECOND_IN_MILLISECONDS;
+                small_time += int.parse(parts1[0]) * MINUTE_IN_MILLISECONDS;
+                small_time += int.parse(parts2[0]) * SECOND_IN_MILLISECONDS;
                 if (parts2.length >= 2) {
                     small_time += int.parse(parts2[1].substring(0, 1)) * DECISECOND_IN_MILLISECONDS;
                 }
                 break;
             case 1:
                 parts2 = parts1[0].split(".");
-                small_time += uint.parse(parts2[0]) * SECOND_IN_MILLISECONDS;
+                small_time += int.parse(parts2[0]) * SECOND_IN_MILLISECONDS;
                 if (parts2.length >= 2) {
-                    small_time += uint.parse(parts2[1].substring(0, 1)) * DECISECOND_IN_MILLISECONDS;
+                    small_time += int.parse(parts2[1].substring(0, 1)) * DECISECOND_IN_MILLISECONDS;
                 }
                 break;
             case 0:

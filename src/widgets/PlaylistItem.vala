@@ -230,8 +230,9 @@ namespace Tatam {
                 icon_area.status = PlaylistItemStatus.PLAYING;
                 break;
             case PlaylistItemStatus.HIDDEN:
-                break;
+                return;
             }
+            icon_area.queue_draw();
         }
 
         public void on_leave() {
@@ -246,8 +247,9 @@ namespace Tatam {
                 icon_area.status = PlaylistItemStatus.NORMAL;
                 break;
             case PlaylistItemStatus.HIDDEN:
-                break;
+                return;
             }
+            icon_area.queue_draw();
         }
 
         public void set_status(PlaylistItemStatus status) {
@@ -270,8 +272,9 @@ namespace Tatam {
                 set_status(PlaylistItemStatus.PLAYING);
                 break;
             case PlaylistItemStatus.HIDDEN:
-                break;
+                return;
             }
+            icon_area.queue_draw();
         }
 
         public void resize_image(uint size) {

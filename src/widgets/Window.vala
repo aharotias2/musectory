@@ -287,7 +287,7 @@
 
                 controller = new Tatam.Controller();
                 {
-                    controller.artwork_size = uint.parse(options.get(Tatam.OptionKey.CONTROLLER_IMAGE_SIZE_MIN));
+                    controller.artwork_size = int.parse(options.get(Tatam.OptionKey.CONTROLLER_IMAGE_SIZE_MIN));
                     controller.artwork_clicked.connect(() => {
                         if (playlist_revealer.child_revealed) {
                             controller.hide_artwork();
@@ -357,7 +357,7 @@
                     });
 
                     controller.time_position_changed.connect((new_value) => {
-                        gst_player.set_position(new Tatam.SmallTime.from_milliseconds((uint) new_value));
+                        gst_player.set_position(new Tatam.SmallTime.from_milliseconds((int) new_value));
                     });
 
                     controller.volume_changed.connect((value) => {
@@ -544,7 +544,7 @@
                 options.set(Tatam.OptionKey.BOOKMARK_DIR, bookmark_dir);
             }
             options.remove_key(Tatam.OptionKey.PLAYLIST_ITEM);
-            for (uint i = 0; i < playlist_view.get_list_size(); i++) {
+            for (int i = 0; i < playlist_view.get_list_size(); i++) {
                 Tatam.FileInfo? info = playlist_view.get_file_info_at_index(i);
                 if (info != null) {
                     string playlist_item_path = info.path;
@@ -657,7 +657,7 @@
             playlist_revealer.reveal_child = false;
             box_1.set_child_packing(playlist_revealer, false, false, 0, Gtk.PackType.START);
 
-            controller.artwork_size = uint.parse(options.get(Tatam.OptionKey.CONTROLLER_IMAGE_SIZE_MIN));
+            controller.artwork_size = int.parse(options.get(Tatam.OptionKey.CONTROLLER_IMAGE_SIZE_MIN));
         }
 
         private void show_playlist() {
@@ -675,7 +675,7 @@
             playlist_revealer.reveal_child = true;
             box_1.set_child_packing(playlist_revealer, true, true, 0, Gtk.PackType.START);
 
-            controller.artwork_size = uint.parse(options.get(Tatam.OptionKey.CONTROLLER_IMAGE_SIZE_MAX));
+            controller.artwork_size = int.parse(options.get(Tatam.OptionKey.CONTROLLER_IMAGE_SIZE_MAX));
         }
 
         private void set_controller_artwork() {

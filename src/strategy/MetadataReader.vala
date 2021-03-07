@@ -21,7 +21,7 @@ using Gst;
 
 namespace Tatam {
     public class MetadataReader : GLib.Object {
-        private static uint count;
+        private static int count;
 
         private Pipeline pipeline;
         private Element uridecoder;
@@ -49,9 +49,9 @@ namespace Tatam {
         }
 
         public SmallTime get_duration() {
-            uint64 time_in_nanoseconds;
+            int64 time_in_nanoseconds;
             if (pipeline.query_duration(Gst.Format.TIME, out time_in_nanoseconds)) {
-                uint time_in_milliseconds = (uint) (time_in_nanoseconds / 1000000);
+                int time_in_milliseconds = (int) (time_in_nanoseconds / 1000000);
                 SmallTime time = new SmallTime.from_milliseconds(time_in_milliseconds);
                 return time;
             } else {
@@ -111,7 +111,7 @@ namespace Tatam {
                             tag_list.foreach((tag_list_each, tag) => {
                                 if (!terminated) {
                                     uint num = tag_list_each.get_tag_size(tag);
-                                    for (int i = 0; i < num; i++) {
+                                    for (uint i = 0; i < num; i++) {
                                         GLib.Value value;
                                         value = tag_list_each.get_value_index(tag, i);
                                         bool response = tag_found(tag, value);
