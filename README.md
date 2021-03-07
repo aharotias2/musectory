@@ -13,8 +13,8 @@ A simple GTK+3 music player written in vala.
 ### Finder view actions:
 * Click "Play" button on a music file, then this app adds the music file into the newly created playlist plays it.
 * Click "Play" button on a directory, then this app adds the all music files in the directory recursively into the newly created playlist plays them.
-* Click "Add" button on a music file, then this app adds the music file into the newly created playlist;
-* Click "Add" button on a directory, then this app adds the all music files into the playlist in the directory recursively.
+* Click "Add" button on a music file, then this app adds the music file into the current playlist;
+* Click "Add" button on a directory, then this app adds the all music files into the current playlist in the directory recursively.
 * Click "Bookmark" button on a directory, then this app adds this directory into the bookmark list that can be found on header menu popup.
 
 ### Playlist view actions:
