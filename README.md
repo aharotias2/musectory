@@ -4,9 +4,11 @@ A simple GTK+3 music player written in vala.
 
 ## Screenshots
 
-![The Finder Screen](tatam-screenshot-01.jpg "The Finder Screen")
+finder screen
+![The Finder Screen](tatam-screenshot-finder.jpg "The Finder Screen")
 
-![The Playlist Screen](tatam-screenshot-02.jpg "The Playlist Screen")
+playlist screen
+![The Playlist Screen](tatam-screenshot-playlist.jpg "The Playlist Screen")
 
 ## Features
 
