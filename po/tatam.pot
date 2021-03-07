@@ -1,14 +1,14 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the tatam package.
+# This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: tatam\n"
+"Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-02-11 14:46+0900\n"
+"POT-Creation-Date: 2021-03-07 13:38+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,97 +17,21 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: src/consts/OptionKey.vala:107
-msgid "Invalid key was found\n"
-msgstr ""
-
-#: src/utils/Dialogs.vala:45 src/utils/Dialogs.vala:58
-msgid "Open File"
-msgstr ""
-
-#: src/utils/Dialogs.vala:47 src/utils/Dialogs.vala:60
-#: src/widgets/Window.vala:698
-msgid "_Cancel"
-msgstr ""
-
-#: src/utils/Dialogs.vala:48 src/utils/Dialogs.vala:61
-msgid "_Open"
-msgstr ""
-
-#: src/widgets/Window.vala:124 src/widgets/Window.vala:173
-#: src/widgets/Window.vala:257
-msgid "Do you really remove this bookmark?"
-msgstr ""
-
-#: src/widgets/Window.vala:196
-msgid "Do you really remove this playlist?"
-msgstr ""
-
-#: src/widgets/Window.vala:202
-#, c-format
-msgid "Failed to delete a file (%s)"
-msgstr ""
-
-#: src/widgets/Window.vala:398
-msgid "Move up selected items"
-msgstr ""
-
-#: src/widgets/Window.vala:407
-msgid "Move down selected items"
-msgstr ""
-
-#: src/widgets/Window.vala:416
-msgid "Remove selected items"
-msgstr ""
-
-#: src/widgets/Window.vala:425
-msgid "Unselect all items"
-msgstr ""
-
-#: src/widgets/Window.vala:440 src/widgets/HeaderBar.vala:125
-msgid "Save this playlist"
-msgstr ""
-
-#: src/widgets/Window.vala:453
+#: src/widgets/Window.vala:471
 #, c-format
 msgid "A playlist %s exists. Do you overwrite it?"
 msgstr ""
 
-#: src/widgets/Window.vala:697
-msgid "_OK"
+#: src/widgets/FinderItem.vala:132
+msgid "Add to playlist"
 msgstr ""
 
-#: src/widgets/Window.vala:702
-msgid "Enter new playlist name:"
+#: src/widgets/FinderItem.vala:120
+msgid "Bookmark"
 msgstr ""
 
-#: src/widgets/Window.vala:744
-msgid "Error: can not write to config file.\n"
-msgstr ""
-
-#: src/widgets/Window.vala:809
-msgid "ERROR: failed to create a window\n"
-msgstr ""
-
-#: src/widgets/HeaderBar.vala:67
-msgid "Show playlist"
-msgstr ""
-
-#: src/widgets/HeaderBar.vala:73
-msgid "Show finder"
-msgstr ""
-
-#: src/widgets/Finder.vala:99
-msgid "icon file can not load.\n"
-msgstr ""
-
-#: src/widgets/Finder.vala:146
-msgid "This directory is empty"
-msgstr ""
-
-#: src/widgets/Finder.vala:214
-#, c-format
-msgid "FileError catched with file_info.path '%s' which is cannot open\n"
+#: src/widgets/FinderToolbar.vala:96
+msgid "Bookmark this directory"
 msgstr ""
 
 #: src/widgets/Sidebar.vala:78
@@ -124,8 +48,103 @@ msgstr ""
 msgid "Delete the playlist \"%s\""
 msgstr ""
 
+#: src/widgets/Window.vala:124 src/widgets/Window.vala:173
+#: src/widgets/Window.vala:257
+msgid "Do you really remove this bookmark?"
+msgstr ""
+
+#: src/widgets/Window.vala:196
+msgid "Do you really remove this playlist?"
+msgstr ""
+
+#: src/widgets/Window.vala:841
+msgid "ERROR: failed to create a window\n"
+msgstr ""
+
+#: src/widgets/Window.vala:734
+msgid "Enter new playlist name:"
+msgstr ""
+
+#: src/widgets/Window.vala:776
+msgid "Error: can not write to config file.\n"
+msgstr ""
+
+#: src/widgets/Window.vala:202
+#, c-format
+msgid "Failed to delete a file (%s)"
+msgstr ""
+
+#: src/strategy/MetadataReader.vala:67 src/strategy/DirectoryReader.vala:32
+#: src/models/Options.vala:101 src/models/Options.vala:139
+#, c-format
+msgid "File does not exists (%s)\n"
+msgstr ""
+
+#: src/strategy/DirectoryReader.vala:36
+#, c-format
+msgid "File is not a directory (%s)\n"
+msgstr ""
+
+#: src/strategy/MetadataReader.vala:71
+#, c-format
+msgid "File is not an audio file (%s)\n"
+msgstr ""
+
+#: src/widgets/Finder.vala:212
+#, c-format
+msgid "FileError catched with file_info.path '%s' which is cannot open\n"
+msgstr ""
+
 #: src/widgets/FinderToolbar.vala:43
 msgid "Go up"
+msgstr ""
+
+#: src/consts/OptionKey.vala:107
+msgid "Invalid key was found\n"
+msgstr ""
+
+#: src/widgets/Window.vala:425
+msgid "Move down selected items"
+msgstr ""
+
+#: src/widgets/Window.vala:416
+msgid "Move up selected items"
+msgstr ""
+
+#: src/utils/Dialogs.vala:49 src/utils/Dialogs.vala:62
+msgid "Open File"
+msgstr ""
+
+#: src/widgets/FinderItem.vala:144
+msgid "Play this directory"
+msgstr ""
+
+#: src/widgets/FinderToolbar.vala:86
+msgid "Reload"
+msgstr ""
+
+#: src/widgets/Window.vala:434
+msgid "Remove selected items"
+msgstr ""
+
+#: src/widgets/Window.vala:458 src/widgets/HeaderBar.vala:125
+msgid "Save this playlist"
+msgstr ""
+
+#: src/widgets/HeaderBar.vala:73
+msgid "Show finder"
+msgstr ""
+
+#: src/widgets/HeaderBar.vala:67
+msgid "Show playlist"
+msgstr ""
+
+#: src/widgets/Finder.vala:144
+msgid "This directory is empty"
+msgstr ""
+
+#: src/widgets/Window.vala:443
+msgid "Unselect all items"
 msgstr ""
 
 #: src/widgets/FinderToolbar.vala:55
@@ -136,26 +155,19 @@ msgstr ""
 msgid "Zoom out"
 msgstr ""
 
-#: src/widgets/FinderToolbar.vala:86
-msgid "Reload"
+#: src/widgets/Window.vala:730 src/utils/Dialogs.vala:51
+#: src/utils/Dialogs.vala:64
+msgid "_Cancel"
 msgstr ""
 
-#: src/widgets/FinderToolbar.vala:96
-msgid "Bookmark this directory"
+#: src/widgets/Window.vala:729
+msgid "_OK"
 msgstr ""
 
-#: src/models/Options.vala:101 src/models/Options.vala:139
-#: src/strategy/MetadataReader.vala:67 src/strategy/DirectoryReader.vala:32
-#, c-format
-msgid "File does not exists (%s)\n"
+#: src/utils/Dialogs.vala:52 src/utils/Dialogs.vala:65
+msgid "_Open"
 msgstr ""
 
-#: src/strategy/MetadataReader.vala:71
-#, c-format
-msgid "File is not an audio file (%s)\n"
-msgstr ""
-
-#: src/strategy/DirectoryReader.vala:36
-#, c-format
-msgid "File is not a directory (%s)\n"
+#: src/widgets/Finder.vala:97
+msgid "icon file can not load.\n"
 msgstr ""
