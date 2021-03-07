@@ -245,7 +245,7 @@
             {
                 finder_revealer = new Gtk.Revealer();
                 {
-                    finder = Tatam.Finder.create_default_instance();
+                    finder = new Finder();
                     {
                         finder.dir_selected.connect((path) => {
                             location_entry.text = path;
@@ -276,8 +276,6 @@
 
                         finder.add_button_clicked.connect((path) => {
                             show_playlist();
-                            find_button.active = false;
-                            playlist_button.active = true;
                             setup_playlist.begin(path, true);
                         });
                     }
@@ -442,7 +440,11 @@
                                     {
                                         list_unselect_button.tooltip_text = _("Unselect all items");
                                         list_unselect_button.clicked.connect(() => {
-                                            playlist_view.unselect_all();
+                                            if (playlist_view.count_checked() == 0) {
+                                                playlist_view.select_all();
+                                            } else {
+                                                playlist_view.unselect_all();
+                                            }
                                         });
                                     }
 

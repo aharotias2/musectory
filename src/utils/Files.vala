@@ -212,16 +212,19 @@ namespace Tatam.Files {
     }
 
     public Gee.List<Tatam.FileInfo?> find_file_infos_recursively(string dir_path) throws FileError {
-        if (!GLib.FileUtils.test(dir_path, FileTest.IS_DIR)) {
-            return new Gee.ArrayList<Tatam.FileInfo?>();
-        }
-
-        var file_list = find_file_names_recursively(dir_path);
         FileInfoAdapter freader = new FileInfoAdapter();
         Gee.List<Tatam.FileInfo?> info_list = new Gee.ArrayList<Tatam.FileInfo?>();
-        foreach (string file_name in file_list) {
-            Tatam.FileInfo? finfo = freader.read_metadata_from_path(file_name);
+        if (!GLib.FileUtils.test(dir_path, FileTest.IS_DIR)) {
+            Tatam.FileInfo? finfo = freader.read_metadata_from_path(dir_path);
             info_list.add(finfo);
+        } else {
+            var file_list = find_file_names_recursively(dir_path);
+            debug("find_file_infos_recursively");
+            foreach (string file_name in file_list) {
+                debug("    file_name: %s", file_name);
+                Tatam.FileInfo? finfo = freader.read_metadata_from_path(file_name);
+                info_list.add(finfo);
+            }
         }
         return info_list;
     }

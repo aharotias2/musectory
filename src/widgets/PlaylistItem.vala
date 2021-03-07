@@ -283,8 +283,10 @@ namespace Tatam {
         }
 
         private void change_cursor(Gdk.CursorType cursor_type) {
-            this.get_parent_window().set_cursor(
-                new Gdk.Cursor.for_display(Gdk.Screen.get_default().get_display(), cursor_type));
+            if (get_parent_window().get_cursor().cursor_type != cursor_type) {
+                this.get_parent_window().set_cursor(
+                    new Gdk.Cursor.for_display(Gdk.Screen.get_default().get_display(), cursor_type));
+            }
         }
 
         private bool event_in_icon_area(Event event) {
@@ -306,6 +308,8 @@ namespace Tatam {
                 event_root_x = button_ev.x_root;
                 event_root_y = button_ev.y_root;
                 break;
+            default:
+                return false;
             }
             if (icon_root_x <= event_root_x <= icon_root_x + icon_area_alloc.width
                     && icon_root_y <= event_root_y <= icon_root_y + icon_area_alloc.height) {

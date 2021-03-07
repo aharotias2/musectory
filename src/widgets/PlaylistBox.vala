@@ -344,6 +344,28 @@ namespace Tatam {
             return true;
         }
 
+        public int count_checked() {
+            int result = 0;
+            uint length = store.get_n_items();
+            for (int i = 0; i < length; i++) {
+                var list_item = list_box.get_row_at_index(i) as PlaylistItem;
+                if (list_item.checked) {
+                    result++;
+                }
+            }
+            return result;
+        }
+
+        public void select_all() {
+            uint length = store.get_n_items();
+            for (int i = 0; i < length; i++) {
+                var list_item = list_box.get_row_at_index(i) as PlaylistItem;
+                if (!list_item.checked) {
+                    list_item.checked = true;
+                }
+            }
+        }
+
         public void unselect_all() {
             uint length = store.get_n_items();
             for (int i = 0; i < length; i++) {

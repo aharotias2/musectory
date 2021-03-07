@@ -36,36 +36,10 @@ namespace Tatam {
     }
 
     public class Finder : Bin, FinderInterface {
-        public class Builder {
-            public Gdk.Pixbuf parent_pixbuf_value;
-            public Gdk.Pixbuf folder_pixbuf_value;
-            public Gdk.Pixbuf file_pixbuf_value;
-            public Gdk.Pixbuf cd_pixbuf_value;
-
-            public Builder parent_pixbuf(Gdk.Pixbuf pixbuf) {
-                this.parent_pixbuf_value = pixbuf;
-                return this;
-            }
-
-            public Builder folder_pixbuf(Gdk.Pixbuf pixbuf) {
-                this.folder_pixbuf_value = pixbuf;
-                return this;
-            }
-
-            public Builder file_pixbuf(Gdk.Pixbuf pixbuf) {
-                this.file_pixbuf_value = pixbuf;
-                return this;
-            }
-
-            public Builder disc_pixbuf(Gdk.Pixbuf pixbuf) {
-                this.cd_pixbuf_value = pixbuf;
-                return this;
-            }
-
-            public Finder build() {
-                return new Finder(this);
-            }
-        }
+        public Gdk.Pixbuf parent_pixbuf_value { get; construct set; }
+        public Gdk.Pixbuf folder_pixbuf_value { get; construct set; }
+        public Gdk.Pixbuf file_pixbuf_value { get; construct set; }
+        public Gdk.Pixbuf cd_pixbuf_value { get; construct set; }
 
         const int max_icon_size = 256;
 
@@ -84,31 +58,31 @@ namespace Tatam {
         public string dir_path { get; set; }
         public bool activate_on_single_click { get; set; }
 
-        public static Finder create_default_instance() {
+        public Finder() {
             try {
                 IconTheme icon_theme = Gtk.IconTheme.get_default();
-                return new Finder.Builder()
-                       .file_pixbuf(icon_theme.load_icon(IconName.AUDIO_FILE, max_icon_size, 0))
-                       .disc_pixbuf(icon_theme.load_icon(IconName.MEDIA_OPTICAL, max_icon_size, 0))
-                       .folder_pixbuf(icon_theme.load_icon(IconName.FOLDER_MUSIC, max_icon_size, 0))
-                       .parent_pixbuf(icon_theme.load_icon(IconName.GO_UP, max_icon_size, 0))
-                       .build();
+                Object(
+                   file_pixbuf_value: icon_theme.load_icon(IconName.AUDIO_FILE, max_icon_size, 0),
+                   cd_pixbuf_value: icon_theme.load_icon(IconName.MEDIA_OPTICAL, max_icon_size, 0),
+                   folder_pixbuf_value: icon_theme.load_icon(IconName.FOLDER_MUSIC, max_icon_size, 0),
+                   parent_pixbuf_value: icon_theme.load_icon(IconName.GO_UP, max_icon_size, 0)
+               );
             } catch (GLib.Error e) {
                 stderr.printf(_("icon file can not load.\n"));
                 Process.exit(1);
             }
         }
 
-        private Finder(Builder builder) {
+        construct {
             debug("creating finder start");
             zoom_level = 9;
             count = 0;
             activate_on_single_click = true;
             icon_theme = Gtk.IconTheme.get_default();
-            FinderItem.file_pixbuf = builder.file_pixbuf_value;
-            FinderItem.cd_pixbuf = builder.cd_pixbuf_value;
-            FinderItem.folder_pixbuf = builder.folder_pixbuf_value;
-            FinderItem.parent_pixbuf = builder.parent_pixbuf_value;
+            FinderItem.file_pixbuf = file_pixbuf_value;
+            FinderItem.cd_pixbuf = cd_pixbuf_value;
+            FinderItem.folder_pixbuf = folder_pixbuf_value;
+            FinderItem.parent_pixbuf = parent_pixbuf_value;
             finder_stack = new Stack();
             {
                 var overlay_progress = new Overlay();
