@@ -43,7 +43,7 @@ namespace Tatam {
         public signal void add_button_clicked(string file_path);
         public signal void play_button_clicked(string file_path);
 
-        public FinderItem(Tatam.FileInfo file_info, int icon_size, bool use_popover = true) {
+        public FinderItem(Tatam.FileInfo file_info, int icon_size) {
             this.file_info = file_info;
             this.icon_size = icon_size;
             debug("file_path: " + file_info.path);
@@ -117,6 +117,7 @@ namespace Tatam {
                         bookmark_button = new Button.from_icon_name(IconName.Symbolic.USER_BOOKMARKS,
                                                                     IconSize.SMALL_TOOLBAR);
                         {
+                            bookmark_button.tooltip_text = _("Bookmark");
                             bookmark_button.valign = Align.CENTER;
                             bookmark_button.visible = false;
                             bookmark_button.get_style_context().add_class(StyleClass.FINDER_BUTTON);
@@ -128,6 +129,7 @@ namespace Tatam {
                         add_button = new Button.from_icon_name(IconName.Symbolic.LIST_ADD,
                                                                IconSize.SMALL_TOOLBAR);
                         {
+                            add_button.tooltip_text = _("Add to playlist");
                             add_button.valign = Align.CENTER;
                             add_button.visible = false;
                             add_button.get_style_context().add_class(StyleClass.FINDER_BUTTON);
@@ -139,6 +141,7 @@ namespace Tatam {
                         play_button = new Button.from_icon_name(IconName.Symbolic.MEDIA_PLAYBACK_START,
                                                                 IconSize.LARGE_TOOLBAR);
                         {
+                            play_button.tooltip_text = _("Play this directory");
                             play_button.valign = Align.CENTER;
                             play_button.visible = false;
                             play_button.get_style_context().add_class(StyleClass.FINDER_BUTTON);
@@ -149,33 +152,17 @@ namespace Tatam {
 
                         button_box.halign = Align.CENTER;
                         button_box.valign = Align.CENTER;
-                        if (use_popover) {
-                            if (file_info.type == Tatam.FileType.DIRECTORY
-                                || file_info.type == Tatam.FileType.DISC)
-                            {
-                                button_box.pack_start(
-                                    add_popover_to_button(bookmark_button, "Add to bookmark list"),
-                                    false, false);
-                            }
-                            button_box.pack_start(
-                                add_popover_to_button(play_button, "Play it"),
-                                false, false);
-                            button_box.pack_start(
-                                add_popover_to_button(add_button, "Add to playlist"),
-                                false, false);
-                        } else {
-                            if (file_info.type == Tatam.FileType.DIRECTORY
-                                || file_info.type == Tatam.FileType.DISC)
-                            {
-                                button_box.pack_start(bookmark_button, false, false);
-                            }
-                            button_box.pack_start(play_button, false, false);
-                            button_box.pack_start(add_button, false, false);
+                        if (file_info.type == Tatam.FileType.DIRECTORY || file_info.type == Tatam.FileType.DISC)
+                        {
+                            button_box.pack_start(bookmark_button, false, false);
                         }
+                        button_box.pack_start(play_button, false, false);
+                        button_box.pack_start(add_button, false, false);
                     }
 
                     widget_overlay2.add(icon_button);
                     widget_overlay2.add_overlay(button_box);
+                    widget_overlay2.set_overlay_pass_through(button_box, true);
                 }
 
                 ev_box.enter_notify_event.connect((event) => {

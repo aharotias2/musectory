@@ -23,7 +23,7 @@ namespace Tatam {
     public interface MusicPlayerInterface {
         public abstract State status { get; set; }
         public abstract double volume { get; set; }
-        public abstract void play(string file_path);
+        public abstract void play(string file_path) throws GLib.Error;
         public abstract void set_position(SmallTime small_time);
         public abstract void pause();
         public abstract void unpause();
@@ -71,7 +71,7 @@ namespace Tatam {
             debug("GstPlayer init ok");
         }
 
-        public void play(string file_path) {
+        public void play(string file_path) throws GLib.Error {
             if (playing_status == State.PLAYING) {
                 quit();
             }

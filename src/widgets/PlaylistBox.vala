@@ -148,6 +148,8 @@ namespace Tatam {
         public void set_index(uint index) {
             PlaylistItem? item = null;
             uint size = get_list_size();
+            tracker.current = index;
+            move_cursor(index);
             debug("PlaylistBox.set_track: index = %u, size = %u, current track = %u", index, size, tracker.current);
             uint i = 0;
             do {
@@ -165,8 +167,6 @@ namespace Tatam {
                 }
                 i++;
             } while (item != null && i < size);
-            tracker.current = index;
-            move_cursor(index);
         }
 
         public void toggle_status() {
@@ -269,6 +269,13 @@ namespace Tatam {
                         var new_list_item = list_box.get_row_at_index(i - 1) as PlaylistItem;
                         new_list_item.checked = true;
                         change_flag = true;
+                        if (i == tracker.current) {
+                            tracker.current--;
+                            move_cursor(tracker.current);
+                        } else if (i - 1 == tracker.current) {
+                            tracker.current++;
+                            move_cursor(tracker.current);
+                        }
                     }
                 }
             }
@@ -294,6 +301,13 @@ namespace Tatam {
                         var new_list_item = list_box.get_row_at_index(i + 1) as PlaylistItem;
                         new_list_item.checked = true;
                         change_flag = true;
+                        if (i == tracker.current) {
+                            tracker.current++;
+                            move_cursor(tracker.current);
+                        } else if (i + 1 == tracker.current) {
+                            tracker.current--;
+                            move_cursor(tracker.current);
+                        }
                     }
                 }
             }
@@ -307,11 +321,20 @@ namespace Tatam {
         public bool remove_items() {
             bool change_flag = false;
             uint length = store.get_n_items();
+            uint delete_count = 0;
             for (int i = (int) length - 1; i >= 0; i--) {
                 var list_item = list_box.get_row_at_index(i) as PlaylistItem;
                 if (list_item.checked) {
                     store.remove(i);
+                    delete_count++;
                     change_flag = true;
+                    if (i < tracker.current) {
+                        tracker.current--;
+                        move_cursor(tracker.current);
+                    } else if (i == tracker.current && delete_count == length) {
+                        tracker.current = -1;
+                        move_cursor(tracker.current);
+                    }
                 }
             }
             if (change_flag) {

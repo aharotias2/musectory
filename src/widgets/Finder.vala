@@ -21,7 +21,6 @@ using Gtk;
 
 namespace Tatam {
     public interface FinderInterface {
-        public abstract bool use_popover { get; set; }
         public abstract string dir_path { get; set; }
         public abstract bool activate_on_single_click { get; set; }
         public signal void dir_selected(string dir_path);
@@ -82,7 +81,6 @@ namespace Tatam {
 
         private Gee.List<Tatam.FileInfo?> file_info_list;
 
-        public bool use_popover { get; set; }
         public string dir_path { get; set; }
         public bool activate_on_single_click { get; set; }
 
@@ -216,7 +214,7 @@ namespace Tatam {
                     }
                 }
 
-                var item_widget = new FinderItem(file_info, size, use_popover);
+                var item_widget = new FinderItem(file_info, size);
                 {
                     switch (file_info.type) {
                     case Tatam.FileType.DIRECTORY:

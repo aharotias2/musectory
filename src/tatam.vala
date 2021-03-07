@@ -20,7 +20,7 @@
 public class TatamApplication : Gtk.Application {
     private string config_dir;
     private Tatam.Options options;
-    
+
     public static int main(string[] args) {
         Gst.init(ref args);
         TatamApplication app = new TatamApplication();

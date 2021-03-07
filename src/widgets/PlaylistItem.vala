@@ -23,13 +23,8 @@ namespace Tatam {
     public class PlaylistItem : ListBoxRow {
         public uint image_size { get; set; }
         public bool mouse_not_out_flag;
-        private PlaylistItemStatus status;
-        private PlaylistDrawingArea icon_area;
         public string track_title { get; private set; }
-        private Gdk.Pixbuf tooltip_image;
-        private MenuButton button;
         public Tatam.FileInfo file_info { get; set; }
-        private CheckButton check_button;
         public bool checked {
             get {
                 return check_button.active;
@@ -40,10 +35,19 @@ namespace Tatam {
         }
 
         private Image? image_artwork;
+        private PlaylistItemStatus status;
+        private PlaylistDrawingArea icon_area;
+        private Gdk.Pixbuf tooltip_image;
+        private MenuButton button;
+        private CheckButton check_button;
+        private DateTime? click_time1;
+        private DateTime? click_time2;
 
         public PlaylistItem(Tatam.FileInfo file, uint image_size) {
             mouse_not_out_flag = false;
             file_info = file;
+            click_time1 = null;
+            click_time2 = null;
             status = PlaylistItemStatus.NORMAL;
             debug("PlaylistItem.image_size = %u", image_size);
             this.image_size = image_size;
@@ -56,7 +60,7 @@ namespace Tatam {
                         image_artwork = null;
                         if (file.artwork != null) {
                             image_artwork = new Image.from_pixbuf(
-                                Tatam.PixbufUtils.scale(file.artwork, image_size));
+                                    Tatam.PixbufUtils.scale(file.artwork, image_size));
                             {
                                 image_artwork.set_size_request((int) image_size, (int) image_size);
                                 image_artwork.halign = Align.CENTER;
@@ -72,6 +76,10 @@ namespace Tatam {
                             icon_area.valign = Align.CENTER;
                             icon_area.index = get_index();
                             icon_area.does_draw_outline = true;
+                            icon_area.button_release_event.connect((event) => {
+                                clicked();
+                                return Source.CONTINUE;
+                            });
                         }
 
                         image_overlay.add_overlay(image_artwork);
@@ -153,6 +161,8 @@ namespace Tatam {
                 ev_box.leave_notify_event.connect((event) => {
                     mouse_not_out_flag = false;
                     on_leave();
+                    click_time1 = null;
+                    click_time2 = null;
                     return Source.CONTINUE;
                 });
                 ev_box.button_press_event.connect((event) => {
@@ -161,15 +171,29 @@ namespace Tatam {
                 });
                 ev_box.button_release_event.connect((event) => {
                     if (mouse_not_out_flag) {
-                        check_button.active = !check_button.active;
-                        if (check_button.active) {
-                            this.get_style_context().add_class("playlist_item_selected");
+                        if (check_double_click() || event_in_icon_area(event)) {
+                            activate();
                         } else {
-                            this.get_style_context().remove_class("playlist_item_selected");
+                            // toggle checked status
+                            check_button.active = !check_button.active;
+                            if (check_button.active) {
+                                this.get_style_context().add_class("playlist_item_selected");
+                            } else {
+                                this.get_style_context().remove_class("playlist_item_selected");
+                            }
                         }
                     }
                     return Source.CONTINUE;
                 });
+                ev_box.motion_notify_event.connect((event) => {
+                    if (event_in_icon_area(event)) {
+                        change_cursor(Gdk.CursorType.HAND2);
+                    } else {
+                        change_cursor(Gdk.CursorType.LEFT_PTR);
+                    }
+                    return Source.CONTINUE;
+                });
+                ev_box.add_events(EventMask.POINTER_MOTION_MASK);
                 ev_box.add(grid);
                 ev_box.show_all();
             }
@@ -229,7 +253,7 @@ namespace Tatam {
         public void set_status(PlaylistItemStatus status) {
             this.status = status;
             icon_area.status = status;
-            if (status == PlaylistItemStatus.PLAYING) {
+            if (status == PlaylistItemStatus.PLAYING || status == PlaylistItemStatus.PAUSED) {
                 this.get_style_context().add_class("playlist_item_playing");
             } else {
                 this.get_style_context().remove_class("playlist_item_playing");
@@ -256,6 +280,69 @@ namespace Tatam {
                 icon_area.set_area_size((int) size);
                 image_size = size;
             }
+        }
+
+        private void change_cursor(Gdk.CursorType cursor_type) {
+            this.get_parent_window().set_cursor(
+                new Gdk.Cursor.for_display(Gdk.Screen.get_default().get_display(), cursor_type));
+        }
+
+        private bool event_in_icon_area(Event event) {
+            Allocation icon_area_alloc;
+            icon_area.get_allocation(out icon_area_alloc);
+            Gdk.Window win = icon_area.get_window();
+            int icon_root_x, icon_root_y;
+            win.get_root_coords(0, 0, out icon_root_x, out icon_root_y);
+            double event_root_x = 0.0, event_root_y = 0.0;
+            switch (event.type) {
+            case EventType.BUTTON_PRESS:
+            case EventType.BUTTON_RELEASE:
+                var button_ev = (EventButton) event;
+                event_root_x = button_ev.x_root;
+                event_root_y = button_ev.y_root;
+                break;
+            case EventType.MOTION_NOTIFY:
+                var button_ev = (EventMotion) event;
+                event_root_x = button_ev.x_root;
+                event_root_y = button_ev.y_root;
+                break;
+            }
+            if (icon_root_x <= event_root_x <= icon_root_x + icon_area_alloc.width
+                    && icon_root_y <= event_root_y <= icon_root_y + icon_area_alloc.height) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        private bool check_double_click() {
+            bool result = false;
+            // determine double clicking in 0.5 second.
+            if (click_time1 == null) {
+                click_time1 = new DateTime.now_local();
+            } else {
+                click_time2 = new DateTime.now_local();
+                TimeSpan span = click_time2.difference(click_time1);
+                if (span < 500000) {
+                    // double clicked then activate it.
+                    result = true;
+                }
+                click_time1 = null;
+                click_time2 = null;
+            }
+            return result;
+        }
+
+        public void print_event_status(Event ev) {
+            print("event");
+            if (ev.type == EventType.ENTER_NOTIFY || ev.type == EventType.LEAVE_NOTIFY) {
+                EventCrossing event = (EventCrossing) ev;
+                print(" leave at %0.2f, %0.2f", event.x, event.y);
+            } else if (ev.type == EventType.BUTTON_RELEASE || ev.type == EventType.BUTTON_PRESS) {
+                EventButton event = (EventButton) ev;
+                print(" leave at %0.2f, %0.2f", event.x, event.y);
+            }
+            print("\n");
         }
     }
 }

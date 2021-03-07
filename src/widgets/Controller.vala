@@ -74,7 +74,7 @@ namespace Tatam {
         private uint artwork_size_value;
         private Gdk.Pixbuf? original_pixbuf;
         private uint state_change_counter;
-        
+
         public ControllerState play_pause_button_state {
             get {
                 return play_pause_button_state_value;
@@ -424,7 +424,7 @@ namespace Tatam {
         }
 
         public void hide_artwork() {
-            artwork_button.visible = false; 
+            artwork_button.visible = false;
             controller_second_box.margin_start = 10;
        }
 
