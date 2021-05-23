@@ -1,18 +1,18 @@
 /*
- * This file is part of tatam.
+ * This file is part of moegi-player.
  *
- *     tatam is free software: you can redistribute it and/or modify
+ *     moegi-player is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
  *
- *     tatam is distributed in the hope that it will be useful,
+ *     moegi-player is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
  *
  *     You should have received a copy of the GNU General Public License
- *     along with tatam.  If not, see <http://www.gnu.org/licenses/>.
+ *     along with moegi-player.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2018 Takayuki Tanaka
  */
@@ -21,14 +21,10 @@ using Gdk;
 using Gtk;
 using Cairo;
 
-namespace Tatam {
-    public enum PlaylistItemStatus {
-        NORMAL, PLAYING, PAUSED, HIDDEN,
-    }
-
+namespace Moegi {
     public class PlaylistDrawingArea : Bin {
         private DrawingArea area;
-        public PlaylistItemStatus status { get; set; }
+        public PlaylistItem.Status status { get; set; }
         public int size { get; set; }
         public RGBA circle_line_color { get; set; }
         public RGBA circle_fill_color { get; set; }
@@ -40,7 +36,7 @@ namespace Tatam {
         public double pause_height_percentage { get; set; }
 
         public PlaylistDrawingArea() {
-            status = PlaylistItemStatus.NORMAL;
+            status = NORMAL;
             size = 64;
             index = 1;
             does_draw_outline = false;
@@ -67,16 +63,16 @@ namespace Tatam {
         protected bool on_draw(Widget da, Context ctx) {
             draw_circle(da, ctx);
             switch (status) {
-            case PlaylistItemStatus.NORMAL:
+              case NORMAL:
                 draw_number(da, ctx);
                 break;
-            case PlaylistItemStatus.PLAYING:
+              case PLAYING:
                 draw_playback_icon(da, ctx);
                 break;
-            case PlaylistItemStatus.PAUSED:
+              case PAUSED:
                 draw_pause_icon(da, ctx);
                 break;
-            case PlaylistItemStatus.HIDDEN:
+              case HIDDEN:
             default:
                 break;
             }

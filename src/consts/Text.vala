@@ -1,26 +1,26 @@
 /*
- * This file is part of tatam.
+ * This file is part of moegi-player.
  *
- *     tatam is free software: you can redistribute it and/or modify
+ *     moegi-player is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
  *
- *     tatam is distributed in the hope that it will be useful,
+ *     moegi-player is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
  *
  *     You should have received a copy of the GNU General Public License
- *     along with tatam.  If not, see <http://www.gnu.org/licenses/>.
+ *     along with moegi-player.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2020 Takayuki Tanaka
  */
 
-namespace Tatam {
+namespace Moegi {
     namespace Text {
         public const string EMPTY = "";
-        public const string PROGRAM_NAME = "tatam";
+        public const string PROGRAM_NAME = "moegi-player";
         public const string DESCRIPTION = "フォルダで音楽を管理する人のためのプレイヤ";
         public const string COPYRIGHT = "Ⓒ 2017 Tanaka Takayuki";
         public const string SETTINGS = " settings";

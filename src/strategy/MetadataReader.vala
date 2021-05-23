@@ -1,25 +1,25 @@
 /*
- * This file is part of tatam.
+ * This file is part of moegi-player.
  *
- *     tatam is free software: you can redistribute it and/or modify
+ *     moegi-player is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
  *
- *     tatam is distributed in the hope that it will be useful,
+ *     moegi-player is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
  *
  *     You should have received a copy of the GNU General Public License
- *     along with tatam.  If not, see <http://www.gnu.org/licenses/>.
+ *     along with moegi-player.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2020 Takayuki Tanaka
  */
 
 using Gst;
 
-namespace Tatam {
+namespace Moegi {
     public class MetadataReader : GLib.Object {
         private static int count;
 
@@ -60,15 +60,15 @@ namespace Tatam {
             }
         }
 
-        public void get_metadata(string file_path) throws Tatam.Error, GLib.Error {
+        public void get_metadata(string file_path) throws Moegi.Error, GLib.Error {
             GLib.File file = GLib.File.new_for_path(file_path);
 
             if (!file.query_exists()) {
-                throw new Tatam.Error.FILE_DOES_NOT_EXISTS(_("File does not exists (%s)\n"), file_path);
+                throw new Moegi.Error.FILE_DOES_NOT_EXISTS(_("File does not exists (%s)\n"), file_path);
             }
 
             if (!file.query_info("standard::*", 0).get_content_type().has_prefix("audio")) {
-                throw new Tatam.Error.FILE_IS_NOT_AN_AUDIO(_("File is not an audio file (%s)\n"), file_path);
+                throw new Moegi.Error.FILE_IS_NOT_AN_AUDIO(_("File is not an audio file (%s)\n"), file_path);
             }
 
             uridecoder.set("uri", "file://" + file_path);
@@ -88,23 +88,23 @@ namespace Tatam {
                     if (message != null) {
                         switch (message.type) {
 
-                        case MessageType.EOS:
+                          case MessageType.EOS:
                             debug("Gst message (EOS)");
                             terminated = true;
                             break;
 
-                        case MessageType.ASYNC_DONE:
+                          case MessageType.ASYNC_DONE:
                             debug("Gst message (ASYNC_DONE)");
                             terminated = true;
                             break;
 
-                        case MessageType.ERROR:
+                          case MessageType.ERROR:
                             debug("Gst message (ERROR)");
                             GLib.Error error;
                             message.parse_error(out error, null);
-                            throw new Tatam.Error.GST_MESSAGE_ERROR(error.message);
+                            throw new Moegi.Error.GST_MESSAGE_ERROR(error.message);
 
-                        case MessageType.TAG:
+                          case MessageType.TAG:
                             debug("Gst message (TAG)");
                             TagList tag_list;
                             message.parse_tag(out tag_list);
@@ -122,7 +122,7 @@ namespace Tatam {
                                     }
                                 }
                             });
-                            GLib.Value duration_value = GLib.Value(typeof(Tatam.SmallTime));
+                            GLib.Value duration_value = GLib.Value(typeof(Moegi.SmallTime));
                             duration_value.set_object(get_duration());
                             tag_found("duration", duration_value);
                             return;

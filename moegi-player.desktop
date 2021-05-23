@@ -1,14 +1,13 @@
 [Desktop Entry]
 Version=1.0
-Name=tatam
+Name=moegi-player
 GenericName=Audio Player
-Comment=Audio Player mimic MFPlayer of Windows
+Comment=Audio Player
 MimeType=
-TryExec=tatam
-Exec=tatam
-Icon=tatam.png
+TryExec=moegi-player
+Exec=moegi-player
+Icon=moegi-player.png
 Type=Application
 Terminal=false
 Categories=AudioVideo;Audio;Player
-StartupWMClass=tatam
 Keywords=Music;Audio;Player;Media

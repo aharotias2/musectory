@@ -1,38 +1,28 @@
 /*
- * This file is part of tatam.
+ * This file is part of moegi-player.
  *
- *     tatam is free software: you can redistribute it and/or modify
+ *     moegi-player is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
  *
- *     tatam is distributed in the hope that it will be useful,
+ *     moegi-player is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
  *
  *     You should have received a copy of the GNU General Public License
- *     along with tatam.  If not, see <http://www.gnu.org/licenses/>.
+ *     along with moegi-player.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2018 Takayuki Tanaka
  */
 
-namespace Tatam {
-    public interface OptionsInterface {
-        public abstract string? get(OptionKey key);
-        public abstract void set(OptionKey key, string? value);
-        public abstract Gee.List<string> get_all(OptionKey key);
-        public abstract void remove_key(OptionKey key);
-        public abstract Gee.Set<OptionKey> keys();
-        public abstract void parse_args(ref unowned string[] args) throws Tatam.Error;
-        public abstract void parse_conf() throws Tatam.Error;
-    }
-
-    public class Options : OptionsInterface {
-        private Gee.Map<Tatam.OptionKey, Gee.List<string> > config_map;
+namespace Moegi {
+    public class Options {
+        private Gee.Map<Moegi.OptionKey, Gee.List<string> > config_map;
 
         public Options() {
-            config_map = new Gee.HashMap<Tatam.OptionKey, Gee.List<string> >();
+            config_map = new Gee.HashMap<Moegi.OptionKey, Gee.List<string> >();
             {
                 foreach (OptionKey key in OptionKey.values()) {
                     config_map.set(key, new Gee.ArrayList<string>());
@@ -81,24 +71,24 @@ namespace Tatam {
             return config_map.keys;
         }
 
-        public void parse_args(ref unowned string[] args) throws Tatam.Error {
+        public void parse_args(ref unowned string[] args) throws Moegi.Error {
             for (int i = 1; i < args.length; i++) {
                 OptionKey key;
                 try {
                     key = OptionKey.value_of(args[i]);
-                } catch (Tatam.Error e) {
-                    stderr.printf(@"TatamError: $(e.message) that is $(args[i])\n");
+                } catch (Moegi.Error e) {
+                    stderr.printf(@"MoegiError: $(e.message) that is $(args[i])\n");
                     continue;
                 }
                 switch (key) {
-                case Tatam.OptionKey.CSS_PATH:
-                case Tatam.OptionKey.CONFIG_DIR:
+                  case Moegi.OptionKey.CSS_PATH:
+                  case Moegi.OptionKey.CONFIG_DIR:
                     File option_file = File.new_for_path(args[i + 1]);
                     if (option_file.query_exists()) {
                         config_map.get(key).add(option_file.get_path());
                         i++;
                     } else {
-                        throw new Tatam.Error.FILE_DOES_NOT_EXISTS(_("File does not exists (%s)\n").printf(option_file.get_path()));
+                        throw new Moegi.Error.FILE_DOES_NOT_EXISTS(_("File does not exists (%s)\n").printf(option_file.get_path()));
                     }
                     break;
                 default:
@@ -110,10 +100,10 @@ namespace Tatam {
             }
         }
 
-        public void parse_conf() throws Tatam.Error {
+        public void parse_conf() throws Moegi.Error {
             try {
                 string? config_dir = config_map.get(OptionKey.CONFIG_DIR).last();
-                string config_file_path = config_dir + "/" + Tatam.PROGRAM_NAME + ".conf";
+                string config_file_path = config_dir + "/" + Moegi.PROGRAM_NAME + ".conf";
                 File config_file = File.new_for_path(config_file_path);
                 DataInputStream dis = new DataInputStream(config_file.read());
                 string? line = null;
@@ -122,21 +112,21 @@ namespace Tatam {
                     string key = line.substring(0, pos_eq);
                     string option_value = line.substring(pos_eq + 1);
                     debug(@"config key = $(key), value = $(option_value)");
-                    Tatam.OptionKey option_key;
+                    Moegi.OptionKey option_key;
                     try {
                         option_key = OptionKey.value_of(key);
-                    } catch (Tatam.Error e) {
-                        stderr.printf(@"TatamError: $(e.message)\n");
+                    } catch (Moegi.Error e) {
+                        stderr.printf(@"MoegiError: $(e.message)\n");
                         continue;
                     }
                     switch (option_key) {
-                    case Tatam.OptionKey.CSS_PATH:
-                    case Tatam.OptionKey.CONFIG_DIR:
+                      case Moegi.OptionKey.CSS_PATH:
+                      case Moegi.OptionKey.CONFIG_DIR:
                         File option_file = File.new_for_path(option_value);
                         if (option_file.query_exists()) {
                             config_map.get(option_key).add(option_file.get_path());
                         } else {
-                            throw new Tatam.Error.FILE_DOES_NOT_EXISTS(_("File does not exists (%s)\n").printf(option_file.get_path()));
+                            throw new Moegi.Error.FILE_DOES_NOT_EXISTS(_("File does not exists (%s)\n").printf(option_file.get_path()));
                         }
                         break;
                     default:
@@ -144,8 +134,8 @@ namespace Tatam {
                         break;
                     }
                 }
-            } catch (Tatam.Error e) {
-                stderr.printf(@"TatamError: $(e.message)\n");
+            } catch (Moegi.Error e) {
+                stderr.printf(@"MoegiError: $(e.message)\n");
                 throw e;
             } catch (GLib.IOError e) {
                 stderr.printf(@"IOError: $(e.message)\n");

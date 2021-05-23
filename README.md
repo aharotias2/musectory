@@ -1,8 +1,10 @@
-# Tatam
+Moegi-player
+====================================================================================================
 
-A simple GTK+3 music player written in vala.
+A simple GTK+3 music player.
 
-## Screenshots
+Screenshots
+----------------------------------------------------------------------------------------------------
 
 finder screen
 ![The Finder Screen](tatam-screenshot-finder.jpg "The Finder Screen")
@@ -10,7 +12,8 @@ finder screen
 playlist screen
 ![The Playlist Screen](tatam-screenshot-playlist.jpg "The Playlist Screen")
 
-## Features
+Features
+----------------------------------------------------------------------------------------------------
 
 ### Finder view actions:
 * Click "Play" button on a music file, then this app adds the music file into the newly created playlist plays it.
@@ -33,10 +36,11 @@ playlist screen
 * Shuffling the playlist
 * Repeating the playlist
 * Seaking the currently playing music.
-* Stylesheet is editable in the ~/.tatam directory.
-* Playlist is editable that names are with ".m3u" extension in the ~/.tatam directory.
+* Stylesheet is editable in the ~/.moegi directory.
+* Playlist is editable that names are with ".m3u" extension in the ~/.moegi directory.
 
-## Requirements
+Requirements
+----------------------------------------------------------------------------------------------------
 
 * vala
 * gtk+-3.0
@@ -44,21 +48,24 @@ playlist screen
 * gstreamer-1.0
 * meson
 
-## Build
+Build
+----------------------------------------------------------------------------------------------------
 
 ```
-cd tatam
+cd moegi-player
 meson --prefix=/usr/local builddir
 cd builddir
 meson compile
 ```
 
-## Install
+Install
+----------------------------------------------------------------------------------------------------
 
 ```
 sudo meson install
 ```
 
-## Other informations
-* It uses /tmp/tatam directory. You should chmod your user name on this directory.
-* It creates directory "~/.tatam" to put configuration and resource files.
+Other informations
+----------------------------------------------------------------------------------------------------
+* It uses /tmp/moegi directory. You should chmod your user name on this directory.
+* It creates directory "~/.moegi" to put configuration and resource files.

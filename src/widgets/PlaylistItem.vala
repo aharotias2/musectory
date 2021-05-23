@@ -1,30 +1,34 @@
 /*
- * This file is part of tatam.
+ * This file is part of moegi-player.
  *
- *     tatam is free software: you can redistribute it and/or modify
+ *     moegi-player is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
  *
- *     tatam is distributed in the hope that it will be useful,
+ *     moegi-player is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
  *
  *     You should have received a copy of the GNU General Public License
- *     along with tatam.  If not, see <http://www.gnu.org/licenses/>.
+ *     along with moegi-player.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2020 Takayuki Tanaka
  */
 
 using Gtk, Gdk, Pango;
 
-namespace Tatam {
+namespace Moegi {
     public class PlaylistItem : ListBoxRow {
+        public enum Status {
+            NORMAL, PLAYING, PAUSED, HIDDEN,
+        }
+
         public uint image_size { get; set; }
         public bool mouse_not_out_flag;
         public string track_title { get; private set; }
-        public Tatam.FileInfo file_info { get; set; }
+        public Moegi.FileInfo file_info { get; set; }
         public bool checked {
             get {
                 return check_button.active;
@@ -35,7 +39,7 @@ namespace Tatam {
         }
 
         private Image? image_artwork;
-        private PlaylistItemStatus status;
+        private Status status;
         private PlaylistDrawingArea icon_area;
         private Gdk.Pixbuf tooltip_image;
         private MenuButton button;
@@ -43,12 +47,12 @@ namespace Tatam {
         private DateTime? click_time1;
         private DateTime? click_time2;
 
-        public PlaylistItem(Tatam.FileInfo file, uint image_size) {
+        public PlaylistItem(Moegi.FileInfo file, uint image_size) {
             mouse_not_out_flag = false;
             file_info = file;
             click_time1 = null;
             click_time2 = null;
-            status = PlaylistItemStatus.NORMAL;
+            status = NORMAL;
             debug("PlaylistItem.image_size = %u", image_size);
             this.image_size = image_size;
             EventBox ev_box = new EventBox();
@@ -60,7 +64,7 @@ namespace Tatam {
                         image_artwork = null;
                         if (file.artwork != null) {
                             image_artwork = new Image.from_pixbuf(
-                                    Tatam.PixbufUtils.scale(file.artwork, image_size));
+                                    Moegi.PixbufUtils.scale(file.artwork, image_size));
                             {
                                 image_artwork.set_size_request((int) image_size, (int) image_size);
                                 image_artwork.halign = Align.CENTER;
@@ -70,7 +74,7 @@ namespace Tatam {
 
                         icon_area = new PlaylistDrawingArea();
                         {
-                            icon_area.status = PlaylistItemStatus.NORMAL;
+                            icon_area.status = NORMAL;
                             icon_area.set_area_size((int) image_size);
                             icon_area.halign = Align.CENTER;
                             icon_area.valign = Align.CENTER;
@@ -222,14 +226,14 @@ namespace Tatam {
 
         public void on_enter() {
             switch (status) {
-            case PlaylistItemStatus.PLAYING:
-                icon_area.status = PlaylistItemStatus.PAUSED;
+              case PLAYING:
+                icon_area.status = PAUSED;
                 break;
-            case PlaylistItemStatus.PAUSED:
-            case PlaylistItemStatus.NORMAL:
-                icon_area.status = PlaylistItemStatus.PLAYING;
+              case PAUSED:
+              case NORMAL:
+                icon_area.status = PLAYING;
                 break;
-            case PlaylistItemStatus.HIDDEN:
+              case HIDDEN:
                 return;
             }
             icon_area.queue_draw();
@@ -237,25 +241,25 @@ namespace Tatam {
 
         public void on_leave() {
             switch (status) {
-            case PlaylistItemStatus.PLAYING:
-                icon_area.status = PlaylistItemStatus.PLAYING;
+              case PLAYING:
+                icon_area.status = PLAYING;
                 break;
-            case PlaylistItemStatus.PAUSED:
-                icon_area.status = PlaylistItemStatus.PAUSED;
+              case PAUSED:
+                icon_area.status = PAUSED;
                 break;
-            case PlaylistItemStatus.NORMAL:
-                icon_area.status = PlaylistItemStatus.NORMAL;
+              case NORMAL:
+                icon_area.status = NORMAL;
                 break;
-            case PlaylistItemStatus.HIDDEN:
+              case HIDDEN:
                 return;
             }
             icon_area.queue_draw();
         }
 
-        public void set_status(PlaylistItemStatus status) {
+        public void set_status(Status status) {
             this.status = status;
             icon_area.status = status;
-            if (status == PlaylistItemStatus.PLAYING || status == PlaylistItemStatus.PAUSED) {
+            if (status == PLAYING || status == PAUSED) {
                 this.get_style_context().add_class("playlist_item_playing");
             } else {
                 this.get_style_context().remove_class("playlist_item_playing");
@@ -264,14 +268,14 @@ namespace Tatam {
 
         public void clicked() {
             switch (status) {
-            case PlaylistItemStatus.PLAYING:
-                set_status(PlaylistItemStatus.PAUSED);
+              case PLAYING:
+                set_status(PAUSED);
                 break;
-            case PlaylistItemStatus.PAUSED:
-            case PlaylistItemStatus.NORMAL:
-                set_status(PlaylistItemStatus.PLAYING);
+              case PAUSED:
+              case NORMAL:
+                set_status(PLAYING);
                 break;
-            case PlaylistItemStatus.HIDDEN:
+              case HIDDEN:
                 return;
             }
             icon_area.queue_draw();
@@ -300,13 +304,13 @@ namespace Tatam {
             win.get_root_coords(0, 0, out icon_root_x, out icon_root_y);
             double event_root_x = 0.0, event_root_y = 0.0;
             switch (event.type) {
-            case EventType.BUTTON_PRESS:
-            case EventType.BUTTON_RELEASE:
+              case EventType.BUTTON_PRESS:
+              case EventType.BUTTON_RELEASE:
                 var button_ev = (EventButton) event;
                 event_root_x = button_ev.x_root;
                 event_root_y = button_ev.y_root;
                 break;
-            case EventType.MOTION_NOTIFY:
+              case EventType.MOTION_NOTIFY:
                 var button_ev = (EventMotion) event;
                 event_root_x = button_ev.x_root;
                 event_root_y = button_ev.y_root;

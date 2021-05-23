@@ -1,30 +1,35 @@
 /*
- * This file is part of tatam.
+ * This file is part of moegi-player.
  *
- *     tatam is free software: you can redistribute it and/or modify
+ *     moegi-player is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
  *
- *     tatam is distributed in the hope that it will be useful,
+ *     moegi-player is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
  *
  *     You should have received a copy of the GNU General Public License
- *     along with tatam.  If not, see <http://www.gnu.org/licenses/>.
+ *     along with moegi-player.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2020 Takayuki Tanaka
  */
 
 using Gtk;
 
-namespace Tatam {
+namespace Moegi {
     private class FinderItem : FlowBoxChild {
         public static Gdk.Pixbuf? file_pixbuf;
         public static Gdk.Pixbuf? cd_pixbuf;
         public static Gdk.Pixbuf? folder_pixbuf;
         public static Gdk.Pixbuf? parent_pixbuf;
+
+        public signal void clicked(string file_path);
+        public signal void bookmark_button_clicked(string file_path);
+        public signal void add_button_clicked(string file_path);
+        public signal void play_button_clicked(string file_path);
 
         public int icon_size { get; set; }
 
@@ -33,17 +38,11 @@ namespace Tatam {
         private Button bookmark_button;
         private Button play_button;
         private Image icon_image;
-        private Tatam.FileInfo file_info;
-
+        private Moegi.FileInfo file_info;
         private Gdk.Pixbuf? icon_pixbuf;
         private Image? mini_icon;
 
-        public signal void clicked(string file_path);
-        public signal void bookmark_button_clicked(string file_path);
-        public signal void add_button_clicked(string file_path);
-        public signal void play_button_clicked(string file_path);
-
-        public FinderItem(Tatam.FileInfo file_info, int icon_size) {
+        public FinderItem(Moegi.FileInfo file_info, int icon_size) {
             this.file_info = file_info;
             this.icon_size = icon_size;
             debug("file_path: " + file_info.path);
@@ -59,7 +58,7 @@ namespace Tatam {
                             icon_pixbuf = create_icon_pixbuf();
 
                             icon_image = new Image.from_pixbuf(
-                                    Tatam.PixbufUtils.scale(icon_pixbuf, this.icon_size));
+                                    Moegi.PixbufUtils.scale(icon_pixbuf, this.icon_size));
                             {
                                 icon_image.get_style_context().add_class(StyleClass.FINDER_ICON);
                             }
@@ -79,9 +78,9 @@ namespace Tatam {
 
                             Image mini_icon = null;
                             {
-                                if (file_info.type == Tatam.FileType.FILE) {
+                                if (file_info.type == Moegi.FileType.FILE) {
                                     mini_icon = new Image.from_icon_name(IconName.AUDIO_FILE, IconSize.LARGE_TOOLBAR);
-                                } else if (file_info.type == Tatam.FileType.DISC) {
+                                } else if (file_info.type == Moegi.FileType.DISC) {
                                     mini_icon = new Image.from_icon_name(IconName.FOLDER, IconSize.LARGE_TOOLBAR);
                                     mini_icon.visible = false;
                                 }
@@ -152,7 +151,7 @@ namespace Tatam {
 
                         button_box.halign = Align.CENTER;
                         button_box.valign = Align.CENTER;
-                        if (file_info.type == Tatam.FileType.DIRECTORY || file_info.type == Tatam.FileType.DISC)
+                        if (file_info.type == Moegi.FileType.DIRECTORY || file_info.type == Moegi.FileType.DISC)
                         {
                             button_box.pack_start(bookmark_button, false, false);
                         }
@@ -192,7 +191,7 @@ namespace Tatam {
 
         public void set_image_size(int size) {
             this.icon_size = size;
-            icon_image.pixbuf = Tatam.PixbufUtils.scale(icon_pixbuf, this.icon_size);
+            icon_image.pixbuf = Moegi.PixbufUtils.scale(icon_pixbuf, this.icon_size);
         }
 
         private EventBox add_popover_to_button(Button button, string pop_text) {
@@ -225,13 +224,13 @@ namespace Tatam {
 
         private Gdk.Pixbuf? create_icon_pixbuf() {
             switch (file_info.type) {
-            case Tatam.FileType.DISC:
+              case Moegi.FileType.DISC:
                 debug("file_info.type: disc");
                 load_artwork_async.begin((res, obj) => {
                     Gdk.Pixbuf? artwork_pixbuf = load_artwork_async.end(obj);
                     if (artwork_pixbuf != null) {
                         icon_pixbuf = artwork_pixbuf;
-                        icon_image.pixbuf = Tatam.PixbufUtils.scale(icon_pixbuf, this.icon_size);
+                        icon_image.pixbuf = Moegi.PixbufUtils.scale(icon_pixbuf, this.icon_size);
                         if (mini_icon != null) {
                             mini_icon.visible = true;
                         }
@@ -239,11 +238,11 @@ namespace Tatam {
                 });
                 return cd_pixbuf;
 
-            case Tatam.FileType.DIRECTORY:
+              case Moegi.FileType.DIRECTORY:
                 debug("file_info.type: directory");
                 return folder_pixbuf;
 
-            case Tatam.FileType.FILE:
+              case Moegi.FileType.FILE:
             default:
                 debug("file_info.type: file");
                 if (file_info.artwork != null) {
@@ -261,8 +260,8 @@ namespace Tatam {
                 Gdk.Pixbuf? artwork_pixbuf = null;
                 try {
                     artwork_pixbuf = Files.load_first_artwork(file_info.path, icon_size);
-                } catch (Tatam.Error e) {
-                    stderr.printf(@"Tatam.Error: $(e.message)\n");
+                } catch (Moegi.Error e) {
+                    stderr.printf(@"Moegi.Error: $(e.message)\n");
                 } catch (FileError e) {
                     stderr.printf(@"FileError: $(e.message)\n");
                 }

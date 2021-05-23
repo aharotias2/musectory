@@ -1,56 +1,38 @@
 /*
- * This file is part of tatam.
+ * This file is part of moegi-player.
  *
- *     tatam is free software: you can redistribute it and/or modify
+ *     moegi-player is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
  *
- *     tatam is distributed in the hope that it will be useful,
+ *     moegi-player is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
  *
  *     You should have received a copy of the GNU General Public License
- *     along with tatam.  If not, see <http://www.gnu.org/licenses/>.
+ *     along with moegi-player.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2020 Takayuki Tanaka
  */
 
 using Gtk;
 
-namespace Tatam {
-    public enum SwitchButtonState {
-        FINDER, PLAYLIST
-    }
+namespace Moegi {
+    public class HeaderBar : Gtk.HeaderBar {
+        public enum SwitchButtonState {
+            FINDER, PLAYLIST
+        }
 
-    public enum FoldButtonState {
-        OPENED, FOLDED
-    }
-
-    public interface HeaderBarInterface {
-        public abstract SwitchButtonState switch_button_state { get; set; }
-        public abstract FoldButtonState fold_button_state { get; set; }
-        public abstract string? switch_button_icon_name { owned get; set; }
+        public enum FoldButtonState {
+            OPENED, FOLDED
+        }
 
         public signal void switch_button_clicked(SwitchButtonState switch_button_state);
         public signal void add_button_clicked();
         public signal void fold_button_clicked(FoldButtonState fold_button_state);
         public signal void about_button_clicked();
-
-        public abstract void disable_switch_button();
-        public abstract void enable_switch_button();
-        public abstract void show_add_button();
-        public abstract void hide_add_button();
-    }
-
-    public class HeaderBar : Gtk.HeaderBar, HeaderBarInterface {
-        private Button switch_button;
-        private Button add_button;
-        private ToggleButton fold_button;
-        private Button about_button;
-
-        private SwitchButtonState switch_button_state_value;
 
         public SwitchButtonState switch_button_state {
             get {
@@ -60,13 +42,13 @@ namespace Tatam {
             set {
                 Image? image = this.switch_button.image as Image;
                 switch (switch_button_state_value = value) {
-                case SwitchButtonState.FINDER:
+                  case SwitchButtonState.FINDER:
                     if (image != null) {
                         image.icon_name = IconName.Symbolic.VIEW_LIST;
                     }
                     this.switch_button.tooltip_text = _("Show playlist");
                     break;
-                case SwitchButtonState.PLAYLIST:
+                  case SwitchButtonState.PLAYLIST:
                     if (image != null) {
                         image.icon_name = IconName.Symbolic.GO_PREVIOUS;
                     }
@@ -76,8 +58,6 @@ namespace Tatam {
             }
         }
 
-        private FoldButtonState fold_button_state_value;
-
         public FoldButtonState fold_button_state {
             get {
                 return fold_button_state_value;
@@ -85,17 +65,24 @@ namespace Tatam {
 
             set {
                 switch (fold_button_state_value = value) {
-                case FoldButtonState.OPENED:
+                  case FoldButtonState.OPENED:
                     this.fold_button.image = new Image.from_icon_name(IconName.Symbolic.GO_DOWN, IconSize.BUTTON);
                     this.switch_button.sensitive = false;
                     break;
-                case FoldButtonState.FOLDED:
+                  case FoldButtonState.FOLDED:
                     this.fold_button.image = new Image.from_icon_name(IconName.Symbolic.GO_UP, IconSize.BUTTON);
                     this.switch_button.sensitive = true;
                     break;
                 }
             }
         }
+
+        private Button switch_button;
+        private Button add_button;
+        private ToggleButton fold_button;
+        private Button about_button;
+        private SwitchButtonState switch_button_state_value;
+        private FoldButtonState fold_button_state_value;
 
         public HeaderBar() {
             this.switch_button_state = SwitchButtonState.FINDER;

@@ -1,28 +1,26 @@
 /*
- * This file is part of tatam.
+ * This file is part of moegi-player.
  *
- *     tatam is free software: you can redistribute it and/or modify
+ *     moegi-player is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
  *
- *     tatam is distributed in the hope that it will be useful,
+ *     moegi-player is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
  *
  *     You should have received a copy of the GNU General Public License
- *     along with tatam.  If not, see <http://www.gnu.org/licenses/>.
+ *     along with moegi-player.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2018 Takayuki Tanaka
  */
 
 using Gtk;
 
-namespace Tatam {
-    public interface FinderInterface {
-        public abstract string dir_path { get; set; }
-        public abstract bool activate_on_single_click { get; set; }
+namespace Moegi {
+    public class Finder : Bin {
         public signal void dir_selected(string dir_path);
         public signal void dir_changed(string dir_path);
         public signal void bookmark_button_clicked(string file_path);
@@ -30,18 +28,15 @@ namespace Tatam {
         public signal void play_button_clicked(string file_path);
         public signal void icon_image_resized(int icon_size);
         public signal void file_button_clicked(string file_path);
-        public abstract async void change_dir(string dir_path);
-        public abstract void zoom_out();
-        public abstract void zoom_in();
-    }
 
-    public class Finder : Bin, FinderInterface {
         public Gdk.Pixbuf parent_pixbuf_value { get; construct set; }
         public Gdk.Pixbuf folder_pixbuf_value { get; construct set; }
         public Gdk.Pixbuf file_pixbuf_value { get; construct set; }
         public Gdk.Pixbuf cd_pixbuf_value { get; construct set; }
+        public string dir_path { get; set; }
+        public bool activate_on_single_click { get; set; }
 
-        const int max_icon_size = 256;
+        const int MAX_ICON_SIZE = 256;
 
         private int count;
         private IconTheme icon_theme;
@@ -52,20 +47,16 @@ namespace Tatam {
         private Revealer progress_revealer;
         private Label empty_dir_label;
         private Stack finder_stack;
-
-        private Gee.List<Tatam.FileInfo?> file_info_list;
-
-        public string dir_path { get; set; }
-        public bool activate_on_single_click { get; set; }
+        private Gee.List<Moegi.FileInfo?> file_info_list;
 
         public Finder() {
             try {
                 IconTheme icon_theme = Gtk.IconTheme.get_default();
                 Object(
-                   file_pixbuf_value: icon_theme.load_icon(IconName.AUDIO_FILE, max_icon_size, 0),
-                   cd_pixbuf_value: icon_theme.load_icon(IconName.MEDIA_OPTICAL, max_icon_size, 0),
-                   folder_pixbuf_value: icon_theme.load_icon(IconName.FOLDER_MUSIC, max_icon_size, 0),
-                   parent_pixbuf_value: icon_theme.load_icon(IconName.GO_UP, max_icon_size, 0)
+                   file_pixbuf_value: icon_theme.load_icon(IconName.AUDIO_FILE, MAX_ICON_SIZE, 0),
+                   cd_pixbuf_value: icon_theme.load_icon(IconName.MEDIA_OPTICAL, MAX_ICON_SIZE, 0),
+                   folder_pixbuf_value: icon_theme.load_icon(IconName.FOLDER_MUSIC, MAX_ICON_SIZE, 0),
+                   parent_pixbuf_value: icon_theme.load_icon(IconName.GO_UP, MAX_ICON_SIZE, 0)
                );
             } catch (GLib.Error e) {
                 stderr.printf(_("icon file can not load.\n"));
@@ -136,8 +127,8 @@ namespace Tatam {
             progress_revealer.reveal_child = true;
             dir_selected(dir_path);
 
-            var thread = new Thread<Gee.List<Tatam.FileInfo?> >(null, () => {
-                Gee.List<Tatam.FileInfo?> result_list = Tatam.Files.get_file_info_list_in_dir(dir_path);
+            var thread = new Thread<Gee.List<Moegi.FileInfo?> >(null, () => {
+                Gee.List<Moegi.FileInfo?> result_list = Moegi.Files.get_file_info_list_in_dir(dir_path);
                 Idle.add(change_dir.callback);
                 return result_list;
             });
@@ -174,14 +165,14 @@ namespace Tatam {
             Idle.add(change_dir.callback);
             yield;
 
-            foreach (Tatam.FileInfo file_info in this.file_info_list) {
+            foreach (Moegi.FileInfo file_info in this.file_info_list) {
                 if (file_info.name == "..") {
                     continue;
                 }
 
-                if (file_info.type == Tatam.FileType.DIRECTORY) {
+                if (file_info.type == Moegi.FileType.DIRECTORY) {
                     try {
-                        file_info.type = Tatam.Files.get_file_type(file_info.path);
+                        file_info.type = Moegi.Files.get_file_type(file_info.path);
                     } catch (FileError e) {
                         stderr.printf(_("FileError catched with file_info.path '%s' which is cannot open\n").printf(file_info.path));
                         break;
@@ -191,8 +182,8 @@ namespace Tatam {
                 var item_widget = new FinderItem(file_info, size);
                 {
                     switch (file_info.type) {
-                    case Tatam.FileType.DIRECTORY:
-                    case Tatam.FileType.DISC:
+                      case Moegi.FileType.DIRECTORY:
+                      case Moegi.FileType.DISC:
                         item_widget.clicked.connect(() => {
                             change_dir.begin(file_info.path);
                             file_button_clicked(file_info.path);
@@ -202,7 +193,7 @@ namespace Tatam {
                         });
                         break;
 
-                    case Tatam.FileType.FILE:
+                      case Moegi.FileType.FILE:
                         item_widget.clicked.connect(() => {
                             play_button_clicked(file_info.path);
                         });
@@ -289,16 +280,16 @@ namespace Tatam {
 
         private int get_level_size() {
             switch (zoom_level) {
-            case 1: return 32;
-            case 2: return 36;
-            case 3: return 42;
-            case 4: return 48;
-            case 5: return 52;
-            case 6: return 64;
-            case 7: return 72;
-            case 8: return 96;
-            case 9: return 128;
-            case 10: return 196;
+              case 1: return 32;
+              case 2: return 36;
+              case 3: return 42;
+              case 4: return 48;
+              case 5: return 52;
+              case 6: return 64;
+              case 7: return 72;
+              case 8: return 96;
+              case 9: return 128;
+              case 10: return 196;
             default: return 128;
             }
         }

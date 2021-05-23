@@ -1,60 +1,31 @@
 /*
- * This file is part of tatam.
+ * This file is part of moegi-player.
  *
- *     tatam is free software: you can redistribute it and/or modify
+ *     moegi-player is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
  *
- *     tatam is distributed in the hope that it will be useful,
+ *     moegi-player is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
  *
  *     You should have received a copy of the GNU General Public License
- *     along with tatam.  If not, see <http://www.gnu.org/licenses/>.
+ *     along with moegi-player.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2018 Takayuki Tanaka
  */
 
 using Gtk;
 using Pango;
-using Tatam;
+using Moegi;
 
-namespace Tatam {
-    public interface PlaylistBoxInterface {
-        public abstract string? playlist_name { get; set; }
-        public abstract uint image_size { get; set; }
-        public abstract uint get_list_size();
-        public abstract Tatam.FileInfo? get_file_info();
-        public abstract Tatam.FileInfo? get_file_info_at_index(uint index);
-        public abstract PlaylistItem? get_current_item();
-        public abstract PlaylistItem? get_item_at_index(uint index);
-        public abstract void add_item(Tatam.FileInfo? item);
-        public abstract void add_items_all(Gee.List<Tatam.FileInfo?> list);
-        public abstract void toggle_status();
-        public abstract void set_shuffling(bool shuffle_on);
-        public abstract void set_repeating(bool repeat_on);
-        public abstract uint get_index();
-        public abstract void set_index(uint index);
-        public abstract uint max_index();
-        public abstract bool has_previous();
-        public abstract bool has_next();
-        public abstract void next();
-        public abstract void previous();
-        public abstract void remove_item_at_index(uint index);
-        public abstract void remove_all();
-        public abstract void set_artwork_size(uint size);
-        public abstract void load_list_from_file(string m3u_file_path) throws GLib.Error, FileError;
-        public abstract bool move_up_items();
-        public abstract bool move_down_items();
-        public abstract bool remove_items();
-        public abstract void unselect_all();
-        public signal void item_activated(uint index, Tatam.FileInfo item);
+namespace Moegi {
+    public class PlaylistBox : Bin {
+        public signal void item_activated(uint index, Moegi.FileInfo item);
         public signal void playlist_changed();
-    }
 
-    public class PlaylistBox : Bin, PlaylistBoxInterface {
         private GLib.ListStore? store;
         private ScrolledWindow? scrolled;
         private FileInfoAdapter freader;
@@ -66,7 +37,7 @@ namespace Tatam {
         public PlaylistBox() {
             freader = new FileInfoAdapter();
             name = null;
-            store = new GLib.ListStore(typeof(Tatam.FileInfo));
+            store = new GLib.ListStore(typeof(Moegi.FileInfo));
             tracker = new Tracker();
             scrolled = new ScrolledWindow(null, null);
             {
@@ -92,12 +63,12 @@ namespace Tatam {
             return store.get_n_items();
         }
 
-        public Tatam.FileInfo? get_file_info() {
-            return (Tatam.FileInfo?)store.get_item(tracker.current);
+        public Moegi.FileInfo? get_file_info() {
+            return (Moegi.FileInfo?)store.get_item(tracker.current);
         }
 
-        public Tatam.FileInfo? get_file_info_at_index(uint index) {
-            return (Tatam.FileInfo?)store.get_item(index);
+        public Moegi.FileInfo? get_file_info_at_index(uint index) {
+            return (Moegi.FileInfo?)store.get_item(index);
         }
 
         public PlaylistItem? get_current_item() {
@@ -110,7 +81,7 @@ namespace Tatam {
             return item;
         }
 
-        public void add_item(Tatam.FileInfo? file_info) {
+        public void add_item(Moegi.FileInfo? file_info) {
             if (file_info != null) {
                 store.append(file_info);
                 tracker.reset(get_list_size(), tracker.current);
@@ -118,8 +89,8 @@ namespace Tatam {
             }
         }
 
-        public void add_items_all(Gee.List<Tatam.FileInfo?> file_list) {
-            foreach (Tatam.FileInfo? file_info in file_list) {
+        public void add_items_all(Gee.List<Moegi.FileInfo?> file_list) {
+            foreach (Moegi.FileInfo? file_info in file_list) {
                 if (file_info != null) {
                     store.append(file_info);
                 }
@@ -159,10 +130,10 @@ namespace Tatam {
                         if (i == tracker.current) {
                             item.clicked();
                         } else {
-                            item.set_status(PlaylistItemStatus.PLAYING);
+                            item.set_status(PLAYING);
                         }
                     } else {
-                        item.set_status(PlaylistItemStatus.NORMAL);
+                        item.set_status(NORMAL);
                     }
                 }
                 i++;
@@ -224,11 +195,11 @@ namespace Tatam {
             string contents;
             if (GLib.FileUtils.test(m3u_file_path, FileTest.EXISTS)) {
                 GLib.FileUtils.get_contents(m3u_file_path, out contents);
-                Gee.List<string> file_path_list = Tatam.StringUtils.array_to_list(contents.split("\n"));
+                Gee.List<string> file_path_list = Moegi.StringUtils.array_to_list(contents.split("\n"));
                 remove_all();
                 foreach (string file_path in file_path_list) {
                     if (file_path.length > 0 && Files.mimetype_is_audio(file_path)) {
-                        Tatam.FileInfo file_info = freader.read_metadata_from_path(file_path);
+                        Moegi.FileInfo file_info = freader.read_metadata_from_path(file_path);
                         add_item(file_info);
                         debug("load_list_from_file: added %s", file_path);
                     }
@@ -239,7 +210,7 @@ namespace Tatam {
         }
 
         private Widget create_list_item(Object object) {
-            PlaylistItem list_item = new PlaylistItem((Tatam.FileInfo)object, image_size);
+            PlaylistItem list_item = new PlaylistItem((Moegi.FileInfo)object, image_size);
             {
                 list_item.set_index(get_list_size());
             }

@@ -1,38 +1,24 @@
 /*
- * This file is part of tatam.
+ * This file is part of moegi-player.
  *
- *     tatam is free software: you can redistribute it and/or modify
+ *     moegi-player is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
  *
- *     tatam is distributed in the hope that it will be useful,
+ *     moegi-player is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
  *
  *     You should have received a copy of the GNU General Public License
- *     along with tatam.  If not, see <http://www.gnu.org/licenses/>.
+ *     along with moegi-player.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2018 Takayuki Tanaka
  */
 
-namespace Tatam {
-    public interface TrackerInterface {
-        public abstract uint current { get; set; }
-        public abstract uint length { get; }
-        public abstract uint max { get; }
-        public abstract uint min { get; }
-        public abstract bool repeating { get; set; }
-        public abstract bool shuffling { get; set; }
-        public abstract void reset(uint length, uint index);
-        public abstract bool has_next();
-        public abstract bool has_previous();
-        public abstract uint next();
-        public abstract uint previous();
-    }
-
-    public class Tracker : TrackerInterface {
+namespace Moegi {
+    public class Tracker {
         bool repeating_value;
         bool shuffling_value;
         uint[] seq;

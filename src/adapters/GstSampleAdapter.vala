@@ -1,28 +1,28 @@
 /*
- * This file is part of tatam.
+ * This file is part of moegi-player.
  *
- *     tatam is free software: you can redistribute it and/or modify
+ *     moegi-player is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
  *
- *     tatam is distributed in the hope that it will be useful,
+ *     moegi-player is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
  *
  *     You should have received a copy of the GNU General Public License
- *     along with tatam.  If not, see <http://www.gnu.org/licenses/>.
+ *     along with moegi-player.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2020 Takayuki Tanaka
  */
 
-namespace Tatam {
+namespace Moegi {
     public class GstSampleAdapter : Object {
         public Gdk.Pixbuf? read_pixbuf_from_audio_path(string file_path) {
             Gdk.Pixbuf? pixbuf = null;
             try {
-                MetadataReader meta_reader = new Tatam.MetadataReader();
+                MetadataReader meta_reader = new Moegi.MetadataReader();
                 meta_reader.tag_found.connect((tag, value) => {
                     if (tag == "image") {
                         Gst.Sample? sample = (Gst.Sample?)value.get_boxed();
@@ -34,8 +34,8 @@ namespace Tatam {
                     return true;
                 });
                 meta_reader.get_metadata(file_path);
-            } catch (Tatam.Error e) {
-                stderr.printf(@"Tatam.Error: $(e.message)\n");
+            } catch (Moegi.Error e) {
+                stderr.printf(@"Moegi.Error: $(e.message)\n");
             } catch (GLib.Error e) {
                 stderr.printf(@"GLib.Error: $(e.message)\n");
             }

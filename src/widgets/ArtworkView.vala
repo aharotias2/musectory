@@ -1,40 +1,47 @@
 /*
- * This file is part of tatam.
+ * This file is part of moegi-player.
  *
- *     tatam is free software: you can redistribute it and/or modify
+ *     moegi-player is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
  *
- *     tatam is distributed in the hope that it will be useful,
+ *     moegi-player is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
  *
  *     You should have received a copy of the GNU General Public License
- *     along with tatam.  If not, see <http://www.gnu.org/licenses/>.
+ *     along with moegi-player.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2020 Takayuki Tanaka
  */
 
 using Gtk;
 
-namespace Tatam {
-    public interface ArtworkViewInterface {
+namespace Moegi {
+    public class ArtworkView : Bin {
+        public Gdk.Pixbuf? artwork { get; set; }
         public signal void close_button_clicked();
-        public abstract Gdk.Pixbuf? artwork { get; set; }
-        public abstract void fit_image();
-        public abstract void set_image_from_icon_name(string icon_name);
-    }
 
-    public class ArtworkView : Bin, ArtworkViewInterface {
+        public void fit_image() {
+            if (artwork != null) {
+                int width = artwork_container.get_allocated_width();
+                int height = artwork_container.get_allocated_height();
+                artwork_image.pixbuf = PixbufUtils.scale(artwork, int.min(width, height));
+            }
+        }
+
+        public void set_image_from_icon_name(string icon_name) {
+            artwork_image.set_from_icon_name(icon_name, IconSize.LARGE_TOOLBAR);
+        }
+
         private Overlay artwork_view_overlay;
         private Button close_button;
         private ScrolledWindow artwork_container;
         private Image artwork_image;
-        public Gdk.Pixbuf? artwork { get; set; }
 
-        public ArtworkView() {
+        construct {
             artwork_view_overlay = new Overlay();
             {
                 close_button = new Button.from_icon_name(IconName.Symbolic.WINDOW_CLOSE, IconSize.BUTTON);
@@ -64,18 +71,6 @@ namespace Tatam {
             }
 
             add(artwork_view_overlay);
-        }
-
-        public void fit_image() {
-            if (artwork != null) {
-                int width = artwork_container.get_allocated_width();
-                int height = artwork_container.get_allocated_height();
-                artwork_image.pixbuf = PixbufUtils.scale(artwork, int.min(width, height));
-            }
-        }
-
-        public void set_image_from_icon_name(string icon_name) {
-            artwork_image.set_from_icon_name(icon_name, IconSize.LARGE_TOOLBAR);
         }
     }
 }

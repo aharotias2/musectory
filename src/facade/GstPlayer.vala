@@ -1,37 +1,26 @@
 /*
- * This file is part of tatam.
+ * This file is part of moegi-player.
  *
- *     tatam is free software: you can redistribute it and/or modify
+ *     moegi-player is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
  *
- *     tatam is distributed in the hope that it will be useful,
+ *     moegi-player is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
  *
  *     You should have received a copy of the GNU General Public License
- *     along with tatam.  If not, see <http://www.gnu.org/licenses/>.
+ *     along with moegi-player.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2018 Takayuki Tanaka
  */
 
 using Gst;
 
-namespace Tatam {
-    public interface MusicPlayerInterface {
-        public abstract State status { get; set; }
-        public abstract double volume { get; set; }
-        public abstract void play(string file_path) throws GLib.Error;
-        public abstract void set_position(SmallTime small_time);
-        public abstract void pause();
-        public abstract void unpause();
-        public abstract void quit();
-        public abstract void destroy();
-    }
-
-    public class GstPlayer : GLib.Object, MusicPlayerInterface {
+namespace Moegi {
+    public class GstPlayer : GLib.Object {
         private Element playbin;
         private Gst.State playing_status;
         private double volume_value;
@@ -95,20 +84,20 @@ namespace Tatam {
 
         private bool handle_message(Gst.Bus bus, Message message) {
             switch (message.type) {
-            case MessageType.ERROR:
+              case MessageType.ERROR:
                 debug("message error");
                 GLib.Error error;
                 string error_message;
                 message.parse_error(out error, out error_message);
                 error_occured(error);
                 return false;
-            case MessageType.EOS:
+              case MessageType.EOS:
                 debug("message eos");
                 playing_status = State.NULL;
                 playbin.set_state(playing_status);
                 finished();
                 return false;
-            case MessageType.STATE_CHANGED:
+              case MessageType.STATE_CHANGED:
                 if (message.src == playbin) {
                     Gst.State old_state, new_state, pending_state;
                     message.parse_state_changed(out old_state, out new_state, out pending_state);

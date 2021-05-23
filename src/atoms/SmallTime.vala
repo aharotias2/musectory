@@ -1,37 +1,30 @@
 /*
- * This file is part of tatam.
+ * This file is part of moegi-player.
  *
- *     tatam is free software: you can redistribute it and/or modify
+ *     moegi-player is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
  *
- *     tatam is distributed in the hope that it will be useful,
+ *     moegi-player is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
  *
  *     You should have received a copy of the GNU General Public License
- *     along with tatam.  If not, see <http://www.gnu.org/licenses/>.
+ *     along with moegi-player.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2020 Takayuki Tanaka
  */
 
-namespace Tatam {
-    public interface SmallTimeInterface {
+namespace Moegi {
+    public class SmallTime : GLib.Object {
         public const string TIME_PATTERN = "^([0-9]*:)?([0-5]?[0-9]:)?[0-5]?[0-9](\\.[0-5])?$";
         public const int HOUR_IN_MILLISECONDS = 3600000;
         public const int MINUTE_IN_MILLISECONDS = 60000;
         public const int SECOND_IN_MILLISECONDS = 1000;
         public const int DECISECOND_IN_MILLISECONDS = 100;
-        public abstract int milliseconds { get; set; }
-        public abstract double seconds { get; }
-        public abstract SmallTime minus(SmallTime subject);
-        public abstract string to_string();
-        public abstract string to_string_without_deciseconds();
-    }
 
-    public class SmallTime : GLib.Object, SmallTimeInterface {
         public static Regex? time_regex;
 
         public enum FormatType {
@@ -131,7 +124,7 @@ namespace Tatam {
             string[] parts2;
             int small_time = 0;
             switch (parts1.length) {
-            case 3:
+              case 3:
                 parts2 = parts1[2].split(".");
                 small_time += int.parse(parts1[0]) * HOUR_IN_MILLISECONDS;
                 small_time += int.parse(parts1[1]) * MINUTE_IN_MILLISECONDS;
@@ -140,7 +133,7 @@ namespace Tatam {
                     small_time += int.parse(parts2[1].substring(0, 1)) * DECISECOND_IN_MILLISECONDS;
                 }
                 break;
-            case 2:
+              case 2:
                 parts2 = parts1[1].split(".");
                 small_time += int.parse(parts1[0]) * MINUTE_IN_MILLISECONDS;
                 small_time += int.parse(parts2[0]) * SECOND_IN_MILLISECONDS;
@@ -148,14 +141,14 @@ namespace Tatam {
                     small_time += int.parse(parts2[1].substring(0, 1)) * DECISECOND_IN_MILLISECONDS;
                 }
                 break;
-            case 1:
+              case 1:
                 parts2 = parts1[0].split(".");
                 small_time += int.parse(parts2[0]) * SECOND_IN_MILLISECONDS;
                 if (parts2.length >= 2) {
                     small_time += int.parse(parts2[1].substring(0, 1)) * DECISECOND_IN_MILLISECONDS;
                 }
                 break;
-            case 0:
+              case 0:
                 small_time = 0;
                 break;
             }
@@ -177,19 +170,19 @@ namespace Tatam {
 
         private void set_to_string_func(FormatType format_type = MINUMUM) {
             switch (format_type) {
-            case FormatType.HOURS_MINUTES_SECONDS_DECISECONDS:
+              case FormatType.HOURS_MINUTES_SECONDS_DECISECONDS:
                 to_string_func = to_string_with_hours;
                 to_string_without_deciseconds_func = to_string_with_hours_without_deciseconds;
                 break;
-            case FormatType.MINUTES_SECONDS_DECISECONDS:
+              case FormatType.MINUTES_SECONDS_DECISECONDS:
                 to_string_func = to_string_without_hours;
                 to_string_without_deciseconds_func = to_string_without_hours_and_deciseconds;
                 break;
-            case FormatType.SECONDS_DECISECONDS:
+              case FormatType.SECONDS_DECISECONDS:
                 to_string_func = to_string_without_minutes;
                 to_string_without_deciseconds_func = to_string_without_minutes_and_deciseconds;
                 break;
-            case FormatType.MINUMUM:
+              case FormatType.MINUMUM:
             default:
                 if (milliseconds_value > HOUR_IN_MILLISECONDS) {
                     this.format_type = FormatType.HOURS_MINUTES_SECONDS_DECISECONDS;

@@ -1,26 +1,26 @@
 /*
- * This file is part of tatam.
+ * This file is part of moegi-player.
  *
- *     tatam is free software: you can redistribute it and/or modify
+ *     moegi-player is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
  *
- *     tatam is distributed in the hope that it will be useful,
+ *     moegi-player is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
  *
  *     You should have received a copy of the GNU General Public License
- *     along with tatam.  If not, see <http://www.gnu.org/licenses/>.
+ *     along with moegi-player.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2020 Takayuki Tanaka
  */
 
 using Gtk;
 
-namespace Tatam {
-    public interface ControllerInterface {
+namespace Moegi {
+    public class Controller : Bin {
         public const double SMALL_STEP_MILLISECONDS = 100.0;
         public const double BIG_STEP_MILLISECONDS = 10000.0;
         public signal void artwork_clicked();
@@ -33,48 +33,6 @@ namespace Tatam {
         public signal void shuffle_button_toggled(bool shuffle_on);
         public signal void repeat_button_toggled(bool repeat_on);
 
-        public abstract ControllerState play_pause_button_state { get; set; }
-        public abstract int music_total_time { get; set; }
-        public abstract int music_current_time { get; set; }
-        public abstract string music_title { get; set; }
-        public abstract int artwork_size { get; set; }
-        public abstract double volume { get; set; }
-
-        public abstract void set_artwork(Gdk.Pixbuf pixbuf);
-        public abstract void show_buttons();
-        public abstract void hide_buttons();
-        public abstract void show_artwork();
-        public abstract void hide_artwork();
-        public abstract bool has_artwork();
-        public abstract void activate_buttons(bool track_is_first, bool track_is_last);
-        public abstract void deactivate_buttons();
-        public abstract void pause();
-        public abstract void unpause();
-    }
-
-    public class Controller : Bin, ControllerInterface {
-        private Button artwork_button;
-        private Image artwork;
-        private ButtonBox controller_second_box;
-        private Button play_pause_button;
-        private Button next_track_button;
-        private Button prev_track_button;
-        private Label music_title_label;
-        private Scale time_bar;
-        private Label time_label_current;
-        private Label time_label_rest;
-        private ToggleButton toggle_shuffle_button;
-        private ToggleButton toggle_repeat_button;
-        private Scale volume_bar;
-
-        private ControllerState play_pause_button_state_value;
-        private SmallTime music_total_time_value;
-        private SmallTime music_current_time_value;
-        private SmallTime music_rest_time_value;
-        private int artwork_size_value;
-        private Gdk.Pixbuf? original_pixbuf;
-        private int state_change_counter;
-
         public ControllerState play_pause_button_state {
             get {
                 return play_pause_button_state_value;
@@ -84,7 +42,7 @@ namespace Tatam {
                 if (play_pause_button_state_value != value) {
                     play_pause_button_state_value = value;
                     switch (play_pause_button_state) {
-                    case ControllerState.PLAY:
+                      case ControllerState.PLAY:
                         int state_change_count_save = state_change_counter + 1;
                         Image? icon = play_pause_button.image as Image;
                         if (icon != null) {
@@ -102,14 +60,14 @@ namespace Tatam {
                         });
                         debug("play_pause_button_state was set to PLAY");
                         break;
-                    case ControllerState.PAUSE:
+                      case ControllerState.PAUSE:
                         Image? icon = play_pause_button.image as Image;
                         if (icon != null) {
                             icon.icon_name = IconName.Symbolic.MEDIA_PLAYBACK_START;
                         }
                         debug("play_pause_button_state was set to PAUSE");
                         break;
-                    case ControllerState.FINISHED:
+                      case ControllerState.FINISHED:
                         Image? icon = play_pause_button.image as Image;
                         if (icon != null) {
                             icon.icon_name = IconName.Symbolic.MEDIA_PLAYBACK_START;
@@ -190,9 +148,30 @@ namespace Tatam {
             }
         }
 
+        private Button artwork_button;
+        private Image artwork;
+        private ButtonBox controller_second_box;
+        private Button play_pause_button;
+        private Button next_track_button;
+        private Button prev_track_button;
+        private Label music_title_label;
+        private Scale time_bar;
+        private Label time_label_current;
+        private Label time_label_rest;
+        private ToggleButton toggle_shuffle_button;
+        private ToggleButton toggle_repeat_button;
+        private Scale volume_bar;
+        private ControllerState play_pause_button_state_value;
+        private SmallTime music_total_time_value;
+        private SmallTime music_current_time_value;
+        private SmallTime music_rest_time_value;
+        private int artwork_size_value;
+        private Gdk.Pixbuf? original_pixbuf;
+        private int state_change_counter;
+
         public void set_artwork(Gdk.Pixbuf pixbuf) {
             original_pixbuf = pixbuf;
-            Gdk.Pixbuf resized_pixbuf = Tatam.PixbufUtils.scale(original_pixbuf, (int) this.artwork_size);
+            Gdk.Pixbuf resized_pixbuf = Moegi.PixbufUtils.scale(original_pixbuf, (int) this.artwork_size);
             artwork.pixbuf = resized_pixbuf;
         }
 
@@ -222,12 +201,12 @@ namespace Tatam {
                     {
                         play_pause_button.clicked.connect(() => {
                             switch (play_pause_button_state) {
-                            case ControllerState.FINISHED:
-                            case ControllerState.PAUSE: {
+                              case ControllerState.FINISHED:
+                              case ControllerState.PAUSE: {
                                 unpause();
                                 play_button_clicked();
                             } break;
-                            case ControllerState.PLAY: {
+                              case ControllerState.PLAY: {
                                 pause();
                                 pause_button_clicked();
                             } break;

@@ -1,47 +1,33 @@
 /*
- * This file is part of tatam.
+ * This file is part of moegi-player.
  *
- *     tatam is free software: you can redistribute it and/or modify
+ *     moegi-player is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
  *
- *     tatam is distributed in the hope that it will be useful,
+ *     moegi-player is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
  *
  *     You should have received a copy of the GNU General Public License
- *     along with tatam.  If not, see <http://www.gnu.org/licenses/>.
+ *     along with moegi-player.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2020 Takayuki Tanaka
  */
 
 using Gtk;
 
-namespace Tatam {
-    public interface SidebarInterface {
-        public abstract int max_width { get; set; }
-        public abstract int min_width { get; set; }
-        public abstract int max_height { get; set; }
-        public abstract int min_height { get; set; }
-        public abstract void add_bookmark(string file_path);
-        public abstract bool has_bookmark(string bookmark_path);
-        public abstract void remove_bookmark(string bookmark_path);
-        public abstract Gee.List<string> get_bookmarks();
-        public abstract bool has_playlist(string playlist_name);
-        public abstract void add_playlist(string playlist_name, string playlist_path);
-        public abstract void remove_bookmark_all();
-        public abstract void remove_playlist_all();
+namespace Moegi {
+    public class Sidebar : Bin {
         public signal void bookmark_directory_selected(string dir_path);
         public signal bool bookmark_del_button_clicked(string dir_path);
         public signal void playlist_selected(string playlist_name, string playlist_path);
         public signal bool playlist_del_button_clicked(string playlist_path);
         public signal void file_chooser_called();
         public signal void bookmark_added(string file_path);
-    }
 
-    public class Sidebar : Bin, SidebarInterface {
         public int max_width { get; set; }
         public int min_width { get; set; }
         public int max_height { get; set; }

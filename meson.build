@@ -1,11 +1,11 @@
 project(
-    'com.github.aharotias2.tatam',
+    'com.github.aharotias2.moegi-player',
     'vala', 'c',
     version: '1.0.0'
 )
 
 i18n = import('i18n')
-add_project_arguments('-DGETTEXT_PACKAGE="tatam"', language:'c')
+add_project_arguments('-DGETTEXT_PACKAGE="moegi"', language:'c')
 
 posix_dep = meson.get_compiler('vala').find_library('posix')
 libm_dep = meson.get_compiler('c').find_library('libm')
@@ -13,8 +13,8 @@ libm_dep = meson.get_compiler('c').find_library('libm')
 subdir('po')
 
 executable(
-    'tatam',
-    'src/tatam.vala',
+    'moegi-player',
+    'src/moegi-player.vala',
     'src/consts/enums.vala',
     'src/consts/OptionKey.vala',
     'src/consts/IconNames.vala',
@@ -26,6 +26,7 @@ executable(
     'src/utils/RGBAUtils.vala',
     'src/utils/NumberUtils.vala',
     'src/utils/StringUtils.vala',
+    'src/utils/StringUtils.c',
     'src/utils/TimeUtils.vala',
     'src/utils/PixbufUtils.vala',
     'src/utils/Files.vala',
@@ -61,5 +62,5 @@ executable(
     ],
     install: true
 )
-install_data('tatam.desktop', install_dir: 'share/applications')
-install_data('tatam.png', install_dir: 'share/pixmaps')
+install_data('moegi-player.desktop', install_dir: 'share/applications')
+install_data('moegi-player.png', install_dir: 'share/pixmaps')

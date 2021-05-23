@@ -1,4 +1,4 @@
-i18n.gettext('tatam',
+i18n.gettext('moegi-player',
     args: [
         '--directory=' + meson.source_root(),
         '--from-code=UTF-8',
