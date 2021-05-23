@@ -7,10 +7,10 @@ Screenshots
 ----------------------------------------------------------------------------------------------------
 
 finder screen
-![The Finder Screen](tatam-screenshot-finder.jpg "The Finder Screen")
+![The Finder Screen](moegi-screenshot-finder.jpg "The Finder Screen")
 
 playlist screen
-![The Playlist Screen](tatam-screenshot-playlist.jpg "The Playlist Screen")
+![The Playlist Screen](moegi-screenshot-playlist.jpg "The Playlist Screen")
 
 Features
 ----------------------------------------------------------------------------------------------------
