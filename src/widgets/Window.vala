@@ -75,6 +75,9 @@
                     {
                         find_button.image = new Gtk.Image.from_icon_name(Moegi.IconName.Symbolic.FOLDER_OPEN,
                                 Gtk.IconSize.SMALL_TOOLBAR);
+                        find_button.image.margin_start = 30;
+                        find_button.image.margin_end = 30;
+                        find_button.tooltip_text = _("Find Files");
                         find_button.clicked.connect(() => {
                             if (find_button.active) {
                                 playlist_button.active = false;
@@ -90,6 +93,9 @@
                     {
                         playlist_button.image = new Gtk.Image.from_icon_name(Moegi.IconName.Symbolic.EMBLEM_MUSIC,
                                 Gtk.IconSize.SMALL_TOOLBAR);
+                        playlist_button.image.margin_start = 30;
+                        playlist_button.image.margin_end = 30;
+                        playlist_button.tooltip_text = _("View Playlist");
                         playlist_button.clicked.connect(() => {
                             if (playlist_button.active) {
                                 find_button.active = false;
@@ -101,55 +107,11 @@
                         });
                     }
 
-                    left_button_box.layout_style = Gtk.ButtonBoxStyle.EXPAND;
+                    left_button_box.halign = CENTER;
+                    left_button_box.margin = 0;
+                    left_button_box.layout_style = EXPAND;
                     left_button_box.add(find_button);
                     left_button_box.add(playlist_button);
-                }
-
-                var location_box = new Gtk.ButtonBox(Gtk.Orientation.HORIZONTAL);
-                {
-                    parent_button = new Gtk.Button.from_icon_name(Moegi.IconName.Symbolic.GO_UP);
-                    {
-                        parent_button.clicked.connect(() => {
-                            File dir = File.new_for_path(location).get_parent();
-                            location = dir.get_path();
-                        });
-                    }
-
-                    header_bookmark_button = new Gtk.Button.from_icon_name(Moegi.IconName.Symbolic.BOOKMARK_NEW);
-                    {
-                        header_bookmark_button.clicked.connect(() => {
-                            if (!sidebar.has_bookmark(location)) {
-                                sidebar.add_bookmark(location);
-                            } else if (Moegi.Dialogs.confirm(_("Do you really remove this bookmark?"), this)) {
-                                sidebar.remove_bookmark(location);
-                            }
-                        });
-                    }
-
-                    location_entry = new Gtk.Entry();
-                    {
-                        location_entry.hexpand = true;
-                        location_entry.activate.connect(() => {
-                            finder.change_dir.begin(location);
-                        });
-                    }
-
-                    header_reload_button = new Gtk.Button.from_icon_name(Moegi.IconName.Symbolic.VIEW_REFRESH);
-                    {
-                        header_reload_button.clicked.connect(() => {
-                            finder.change_dir.begin(location);
-                        });
-                    }
-
-                    location_box.pack_start(header_bookmark_button, false, true);
-                    location_box.pack_start(parent_button, false, true);
-                    location_box.pack_start(location_entry, true, true);
-                    location_box.pack_start(header_reload_button, false, true);
-                    location_box.layout_style = Gtk.ButtonBoxStyle.EXPAND;
-                    location_box.homogeneous = false;
-                    location_box.margin_start = 30;
-                    location_box.margin_end = 30;
                 }
 
                 menu_button = new Gtk.Button.from_icon_name(Moegi.IconName.Symbolic.OPEN_MENU);
@@ -235,9 +197,8 @@
                     });
                 }
 
-                header_bar.pack_start(left_button_box);
-                header_bar.set_custom_title(location_box);
-                header_bar.pack_end(menu_button);
+                header_bar.set_custom_title(left_button_box);
+                header_bar.pack_start(menu_button);
                 header_bar.show_close_button = true;
             }
 
@@ -245,42 +206,94 @@
             {
                 finder_revealer = new Gtk.Revealer();
                 {
-                    finder = new Finder();
+                    var finder_box = new Gtk.Box(VERTICAL, 0);
                     {
-                        finder.dir_selected.connect((path) => {
-                            location_entry.text = path;
-                        });
-
-                        finder.bookmark_button_clicked.connect((file_path) => {
-                            if (!sidebar.has_bookmark(file_path)) {
-                                sidebar.add_bookmark(file_path);
-                            } else if (Moegi.Dialogs.confirm(_("Do you really remove this bookmark?"), this)) {
-                                sidebar.remove_bookmark(file_path);
+                        var location_box = new Gtk.ButtonBox(Gtk.Orientation.HORIZONTAL);
+                        {
+                            parent_button = new Gtk.Button.from_icon_name(Moegi.IconName.Symbolic.GO_UP);
+                            {
+                                parent_button.clicked.connect(() => {
+                                    File dir = File.new_for_path(location).get_parent();
+                                    location = dir.get_path();
+                                });
                             }
-                        });
 
-                        finder.play_button_clicked.connect((path) => {
-                            setup_playlist.begin(path, false, (res, obj) => {
-                                if (playlist_view.get_file_info() != null) {
-                                    try {
-                                        playlist_view.set_index(0);
-                                        gst_player.play(playlist_view.get_file_info().path);
-                                        show_playlist();
-                                    } catch (GLib.Error err) {
-                                        Dialogs.error(err.message, this);
+                            header_bookmark_button = new Gtk.Button.from_icon_name(Moegi.IconName.Symbolic.BOOKMARK_NEW);
+                            {
+                                header_bookmark_button.clicked.connect(() => {
+                                    if (!sidebar.has_bookmark(location)) {
+                                        sidebar.add_bookmark(location);
+                                    } else if (Moegi.Dialogs.confirm(_("Do you really remove this bookmark?"), this)) {
+                                        sidebar.remove_bookmark(location);
                                     }
+                                });
+                            }
+
+                            location_entry = new Gtk.Entry();
+                            {
+                                location_entry.hexpand = true;
+                                location_entry.activate.connect(() => {
+                                    finder.change_dir.begin(location);
+                                });
+                            }
+
+                            header_reload_button = new Gtk.Button.from_icon_name(Moegi.IconName.Symbolic.VIEW_REFRESH);
+                            {
+                                header_reload_button.clicked.connect(() => {
+                                    finder.change_dir.begin(location);
+                                });
+                            }
+
+                            location_box.pack_start(header_bookmark_button, false, true);
+                            location_box.pack_start(parent_button, false, true);
+                            location_box.pack_start(location_entry, true, true);
+                            location_box.pack_start(header_reload_button, false, true);
+                            location_box.layout_style = Gtk.ButtonBoxStyle.EXPAND;
+                            location_box.homogeneous = false;
+                            location_box.margin = 5;
+                        }
+
+
+                        finder = new Finder();
+                        {
+                            finder.dir_selected.connect((path) => {
+                                location_entry.text = path;
+                            });
+
+                            finder.bookmark_button_clicked.connect((file_path) => {
+                                if (!sidebar.has_bookmark(file_path)) {
+                                    sidebar.add_bookmark(file_path);
+                                } else if (Moegi.Dialogs.confirm(_("Do you really remove this bookmark?"), this)) {
+                                    sidebar.remove_bookmark(file_path);
                                 }
                             });
-                            show_playlist();
-                        });
 
-                        finder.add_button_clicked.connect((path) => {
-                            show_playlist();
-                            setup_playlist.begin(path, true);
-                        });
+                            finder.play_button_clicked.connect((path) => {
+                                setup_playlist.begin(path, false, (res, obj) => {
+                                    if (playlist_view.get_file_info() != null) {
+                                        try {
+                                            playlist_view.set_index(0);
+                                            gst_player.play(playlist_view.get_file_info().path);
+                                            show_playlist();
+                                        } catch (GLib.Error err) {
+                                            Dialogs.error(err.message, this);
+                                        }
+                                    }
+                                });
+                                show_playlist();
+                            });
+
+                            finder.add_button_clicked.connect((path) => {
+                                show_playlist();
+                                setup_playlist.begin(path, true);
+                            });
+                        }
+
+                        finder_box.pack_start(location_box, false, false);
+                        finder_box.pack_start(finder, true, true);
                     }
 
-                    finder_revealer.add(finder);
+                    finder_revealer.add(finder_box);
                     finder_revealer.reveal_child = true;
                     finder_revealer.transition_type = Gtk.RevealerTransitionType.SLIDE_DOWN;
                 }
@@ -411,7 +424,7 @@
                                 {
                                     var move_up_button = new Gtk.Button.from_icon_name(IconName.Symbolic.GO_UP, Gtk.IconSize.SMALL_TOOLBAR);
                                     {
-                                        move_up_button.tooltip_text = _("Move up selected items");
+                                        move_up_button.tooltip_text = _("Move the selected items up");
                                         move_up_button.clicked.connect(() => {
                                             playlist_view.move_up_items();
                                         });
@@ -420,7 +433,7 @@
                                     var move_down_button = new Gtk.Button.from_icon_name(
                                             IconName.Symbolic.GO_DOWN, Gtk.IconSize.SMALL_TOOLBAR);
                                     {
-                                        move_down_button.tooltip_text = _("Move down selected items");
+                                        move_down_button.tooltip_text = _("Move the selected items down");
                                         move_down_button.clicked.connect(() => {
                                             playlist_view.move_down_items();
                                         });

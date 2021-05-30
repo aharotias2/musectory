@@ -205,6 +205,7 @@ namespace Moegi {
             add(ev_box);
 
             has_tooltip = true;
+            selectable = false;
             tooltip_text = "%s - %s\n%s%s%s".printf(
                 (file.title != null ? file.title : (file.name != null ? file.name : "Unkown Track")),
                 (file.artist != null ? file.artist : "Unkown Artist"),
