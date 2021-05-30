@@ -5,15 +5,18 @@ project(
 )
 
 i18n = import('i18n')
-add_project_arguments('-DGETTEXT_PACKAGE="moegi"', language:'c')
+add_project_arguments(
+  '-DGETTEXT_PACKAGE="@0@"'.format(meson.project_name()),
+  language:'c')
 
 posix_dep = meson.get_compiler('vala').find_library('posix')
 libm_dep = meson.get_compiler('c').find_library('libm')
 
 subdir('po')
+subdir('data')
 
 executable(
-    'moegi-player',
+    meson.project_name(),
     'src/moegi-player.vala',
     'src/consts/enums.vala',
     'src/consts/OptionKey.vala',
@@ -62,5 +65,5 @@ executable(
     ],
     install: true
 )
-install_data('moegi-player.desktop', install_dir: 'share/applications')
-install_data('moegi-player.png', install_dir: 'share/pixmaps')
+install_data(meson.project_name() + '.desktop', install_dir: 'share/applications')
+meson.add_install_script('meson/post_install.sh')

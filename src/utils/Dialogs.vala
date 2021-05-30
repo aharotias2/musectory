@@ -20,6 +20,44 @@
 using Gtk;
 
 namespace Moegi.Dialogs {
+    public void show_app_dialog(Window parent_window) {
+        var dialog = new AboutDialog();
+        dialog.set_destroy_with_parent(true);
+        dialog.set_transient_for(parent_window);
+        dialog.set_modal(true);
+        dialog.artists = {"Takayuki Tanaka"};
+        dialog.authors = {"Takayuki Tanaka"};
+        dialog.documenters = null;
+        dialog.translator_credits = null;
+        dialog.program_name = Moegi.PROGRAM_NAME;
+        dialog.comments = "Music player with file finder";
+        dialog.copyright = "Copyright (C) 2018-2021 Takayuki Tanaka";
+        dialog.version = "2.0.3";
+        dialog.license =
+"""This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.""";
+        dialog.wrap_license = true;
+        dialog.website = "https://github.com/aharotias2/moegi-player";
+        dialog.website_label = "Moegi Player @ Github";
+        dialog.logo_icon_name = "com.github.aharotias2.moegi-player";
+        dialog.response.connect((response_id) => {
+            if (response_id == ResponseType.CANCEL || response_id == ResponseType.DELETE_EVENT) {
+                dialog.hide_on_delete();
+            }
+        });
+        dialog.present();
+    }
+
     public bool confirm(string message, Window parent_window) {
         MessageDialog m = new MessageDialog(parent_window,
                 DialogFlags.MODAL, MessageType.WARNING, ButtonsType.OK_CANCEL, message);

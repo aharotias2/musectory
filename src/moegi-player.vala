@@ -29,7 +29,7 @@ public class MoegiApplication : Gtk.Application {
     }
 
     public MoegiApplication() {
-        Object(application_id: "com.github.aharotias2.moegi-player",
+        Object(application_id: Moegi.PROGRAM_NAME,
                 flags: ApplicationFlags.FLAGS_NONE);
     }
 

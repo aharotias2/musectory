@@ -18,5 +18,5 @@
  */
 
 namespace Moegi {
-    public const string PROGRAM_NAME = "moegi";
+    public const string PROGRAM_NAME = "com.github.aharotias2.moegi-player";
 }

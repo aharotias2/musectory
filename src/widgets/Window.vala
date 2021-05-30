@@ -69,49 +69,12 @@
         private void setup_widgets() {
             var header_bar = new Gtk.HeaderBar();
             {
-                var left_button_box = new Gtk.ButtonBox(Gtk.Orientation.HORIZONTAL);
+                var app_icon = new Gtk.Button.from_icon_name("com.github.aharotias2.moegi-player", SMALL_TOOLBAR);
                 {
-                    find_button = new Gtk.ToggleButton();
-                    {
-                        find_button.image = new Gtk.Image.from_icon_name(Moegi.IconName.Symbolic.FOLDER_OPEN,
-                                Gtk.IconSize.SMALL_TOOLBAR);
-                        find_button.image.margin_start = 30;
-                        find_button.image.margin_end = 30;
-                        find_button.tooltip_text = _("Find Files");
-                        find_button.clicked.connect(() => {
-                            if (find_button.active) {
-                                playlist_button.active = false;
-                                show_finder();
-                            } else {
-                                playlist_button.active = true;
-                                show_playlist();
-                            }
-                        });
-                    }
-
-                    playlist_button = new Gtk.ToggleButton();
-                    {
-                        playlist_button.image = new Gtk.Image.from_icon_name(Moegi.IconName.Symbolic.EMBLEM_MUSIC,
-                                Gtk.IconSize.SMALL_TOOLBAR);
-                        playlist_button.image.margin_start = 30;
-                        playlist_button.image.margin_end = 30;
-                        playlist_button.tooltip_text = _("View Playlist");
-                        playlist_button.clicked.connect(() => {
-                            if (playlist_button.active) {
-                                find_button.active = false;
-                                show_playlist();
-                            } else {
-                                find_button.active = true;
-                                show_finder();
-                            }
-                        });
-                    }
-
-                    left_button_box.halign = CENTER;
-                    left_button_box.margin = 0;
-                    left_button_box.layout_style = EXPAND;
-                    left_button_box.add(find_button);
-                    left_button_box.add(playlist_button);
+                    app_icon.get_style_context().add_class("flat");
+                    app_icon.clicked.connect(() => {
+                        Dialogs.show_app_dialog(this);
+                    });
                 }
 
                 menu_button = new Gtk.Button.from_icon_name(Moegi.IconName.Symbolic.OPEN_MENU);
@@ -191,13 +154,58 @@
                         sidebar_popover.modal = true;
                     }
 
-                    menu_button.relief = Gtk.ReliefStyle.NONE;
                     menu_button.clicked.connect(() => {
                         sidebar_popover.visible = !sidebar_popover.visible;
                     });
                 }
 
+                var left_button_box = new Gtk.ButtonBox(Gtk.Orientation.HORIZONTAL);
+                {
+                    find_button = new Gtk.ToggleButton();
+                    {
+                        find_button.image = new Gtk.Image.from_icon_name(Moegi.IconName.Symbolic.FOLDER_OPEN,
+                                Gtk.IconSize.SMALL_TOOLBAR);
+                        find_button.image.margin_start = 30;
+                        find_button.image.margin_end = 30;
+                        find_button.tooltip_text = _("Find Files");
+                        find_button.clicked.connect(() => {
+                            if (find_button.active) {
+                                playlist_button.active = false;
+                                show_finder();
+                            } else {
+                                playlist_button.active = true;
+                                show_playlist();
+                            }
+                        });
+                    }
+
+                    playlist_button = new Gtk.ToggleButton();
+                    {
+                        playlist_button.image = new Gtk.Image.from_icon_name(Moegi.IconName.Symbolic.EMBLEM_MUSIC,
+                                Gtk.IconSize.SMALL_TOOLBAR);
+                        playlist_button.image.margin_start = 30;
+                        playlist_button.image.margin_end = 30;
+                        playlist_button.tooltip_text = _("View Playlist");
+                        playlist_button.clicked.connect(() => {
+                            if (playlist_button.active) {
+                                find_button.active = false;
+                                show_playlist();
+                            } else {
+                                find_button.active = true;
+                                show_finder();
+                            }
+                        });
+                    }
+
+                    left_button_box.halign = CENTER;
+                    left_button_box.margin = 0;
+                    left_button_box.layout_style = EXPAND;
+                    left_button_box.add(find_button);
+                    left_button_box.add(playlist_button);
+                }
+
                 header_bar.set_custom_title(left_button_box);
+                header_bar.pack_start(app_icon);
                 header_bar.pack_start(menu_button);
                 header_bar.show_close_button = true;
             }
