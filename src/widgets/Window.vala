@@ -37,9 +37,9 @@
         private Gtk.Revealer finder_revealer;
         private Gtk.Revealer playlist_revealer;
         private Moegi.Finder finder;
+        private Gtk.Label total_time_label_value;
         private Gtk.Dialog save_playlist_dialog;
         private Gtk.Box box_1;
-
         private bool playing;
         private Moegi.FileInfoAdapter? file_info_reader;
         private Moegi.FileInfo? current_music;
@@ -424,11 +424,22 @@
                                         }
                                     }
                                 });
+                                playlist_view.playlist_changed.connect(() => {
+                                    total_time_label_value.label = playlist_view.total_time.to_string();
+                                });
                             }
 
                             Gtk.Box box_4 = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 4);
                             {
-                                Gtk.ButtonBox box_5 = new Gtk.ButtonBox(Gtk.Orientation.HORIZONTAL);
+                                Gtk.Box box_5 = new Gtk.Box(HORIZONTAL, 10);
+                                {
+                                    Gtk.Label total_time_label_key = new Gtk.Label(_("Total time:"));
+                                    total_time_label_value = new Gtk.Label("");
+                                    box_5.pack_start(total_time_label_key, false, false);
+                                    box_5.pack_start(total_time_label_value, false, false);
+                                }
+
+                                Gtk.ButtonBox box_6 = new Gtk.ButtonBox(Gtk.Orientation.HORIZONTAL);
                                 {
                                     var move_up_button = new Gtk.Button.from_icon_name(IconName.Symbolic.GO_UP, Gtk.IconSize.SMALL_TOOLBAR);
                                     {
@@ -469,11 +480,11 @@
                                         });
                                     }
 
-                                    box_5.layout_style = Gtk.ButtonBoxStyle.EXPAND;
-                                    box_5.add(move_up_button);
-                                    box_5.add(move_down_button);
-                                    box_5.add(list_remove_button);
-                                    box_5.add(list_unselect_button);
+                                    box_6.layout_style = Gtk.ButtonBoxStyle.EXPAND;
+                                    box_6.add(move_up_button);
+                                    box_6.add(move_down_button);
+                                    box_6.add(list_remove_button);
+                                    box_6.add(list_unselect_button);
                                 }
 
                                 Gtk.Button save_button = new Gtk.Button.from_icon_name(Moegi.IconName.Symbolic.DOCUMENT_SAVE);
@@ -500,8 +511,9 @@
                                     });
                                 }
 
+                                box_4.pack_start(box_5, false, false);
                                 box_4.pack_end(save_button, false, false);
-                                box_4.pack_end(box_5, false, false);
+                                box_4.pack_end(box_6, false, false);
                             }
 
                             box_3.margin = 2;

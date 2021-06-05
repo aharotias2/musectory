@@ -33,6 +33,7 @@ namespace Moegi {
         private ListBox? list_box;
         public string? playlist_name { get; set; }
         public uint image_size { get; set; }
+        public SmallTime total_time { get; private set; }
 
         public PlaylistBox() {
             freader = new FileInfoAdapter();
@@ -85,6 +86,7 @@ namespace Moegi {
             if (file_info != null) {
                 store.append(file_info);
                 tracker.reset(get_list_size(), tracker.current);
+                calc_total_time();
                 playlist_changed();
             }
         }
@@ -101,6 +103,7 @@ namespace Moegi {
         public void remove_item_at_index(uint n) {
             store.remove(n);
             tracker.reset(get_list_size(), tracker.current < tracker.max ? tracker.current : tracker.max - 1);
+            calc_total_time();
             playlist_changed();
         }
 
@@ -205,6 +208,7 @@ namespace Moegi {
                     }
                 }
                 tracker.reset(file_path_list.size, 0);
+                calc_total_time();
                 playlist_changed();
             }
         }
@@ -310,6 +314,7 @@ namespace Moegi {
             }
             if (change_flag) {
                 renumber_items();
+                calc_total_time();
                 playlist_changed();
             }
             return true;
@@ -345,6 +350,19 @@ namespace Moegi {
                     list_item.checked = false;
                 }
             }
+        }
+
+        private async void calc_total_time() {
+            int total_milliseconds = 0;
+            uint length = store.get_n_items();
+            for (int i = 0; i < length; i++) {
+                var list_item = list_box.get_row_at_index(i) as PlaylistItem;
+                if (list_item == null) {
+                    return;
+                }
+                total_milliseconds += list_item.file_info.time_length.milliseconds;
+            }
+            total_time = new SmallTime.from_milliseconds(total_milliseconds);
         }
 
         private void renumber_items() {
