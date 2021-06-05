@@ -356,11 +356,11 @@ namespace Moegi {
             int total_milliseconds = 0;
             uint length = store.get_n_items();
             for (int i = 0; i < length; i++) {
-                var list_item = list_box.get_row_at_index(i) as PlaylistItem;
-                if (list_item == null) {
+                var file_info = store.get_item(i) as FileInfo;
+                if (file_info == null) {
                     return;
                 }
-                total_milliseconds += list_item.file_info.time_length.milliseconds;
+                total_milliseconds += file_info.time_length.milliseconds;
             }
             total_time = new SmallTime.from_milliseconds(total_milliseconds);
         }
