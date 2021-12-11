@@ -86,7 +86,7 @@ namespace Moegi {
             if (file_info != null) {
                 store.append(file_info);
                 tracker.reset(get_list_size(), tracker.current);
-                calc_total_time();
+                calc_total_time.begin();
                 playlist_changed();
             }
         }
@@ -103,7 +103,7 @@ namespace Moegi {
         public void remove_item_at_index(uint n) {
             store.remove(n);
             tracker.reset(get_list_size(), tracker.current < tracker.max ? tracker.current : tracker.max - 1);
-            calc_total_time();
+            calc_total_time.begin();
             playlist_changed();
         }
 
@@ -208,7 +208,7 @@ namespace Moegi {
                     }
                 }
                 tracker.reset(file_path_list.size, 0);
-                calc_total_time();
+                calc_total_time.begin();
                 playlist_changed();
             }
         }
@@ -314,7 +314,7 @@ namespace Moegi {
             }
             if (change_flag) {
                 renumber_items();
-                calc_total_time();
+                calc_total_time.begin();
                 playlist_changed();
             }
             return true;

@@ -96,8 +96,12 @@ namespace Moegi.Files {
             file_list = (owned) file_list_local;
         } catch (Moegi.Error e) {
             stderr.printf(@"Moegi.Error: $(e.message)\n");
+            dir_list = new Gee.ArrayList<string>();
+            file_list = new Gee.ArrayList<string>();
         } catch (GLib.Error e) {
             stderr.printf(@"GLib.Error: $(e.message)\n");
+            dir_list = new Gee.ArrayList<string>();
+            file_list = new Gee.ArrayList<string>();
         }
     }
 

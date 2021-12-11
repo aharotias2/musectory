@@ -42,7 +42,6 @@ namespace Moegi {
         private Status status;
         private PlaylistDrawingArea icon_area;
         private Gdk.Pixbuf tooltip_image;
-        private MenuButton button;
         private CheckButton check_button;
         private DateTime? click_time1;
         private DateTime? click_time2;
