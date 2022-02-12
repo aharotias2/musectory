@@ -1,25 +1,25 @@
 /*
- * This file is part of moegi-player.
+ * This file is part of musectory-player.
  *
- *     moegi-player is free software: you can redistribute it and/or modify
+ *     musectory-player is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
  *
- *     moegi-player is distributed in the hope that it will be useful,
+ *     musectory-player is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
  *
  *     You should have received a copy of the GNU General Public License
- *     along with moegi-player.  If not, see <http://www.gnu.org/licenses/>.
+ *     along with musectory-player.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2020 Takayuki Tanaka
  */
 
 using Gst;
 
-namespace Moegi {
+namespace Musectory {
     public class MetadataReader : GLib.Object {
         private static int count;
 
@@ -60,15 +60,15 @@ namespace Moegi {
             }
         }
 
-        public void get_metadata(string file_path) throws Moegi.Error, GLib.Error {
+        public void get_metadata(string file_path) throws Musectory.Error, GLib.Error {
             GLib.File file = GLib.File.new_for_path(file_path);
 
             if (!file.query_exists()) {
-                throw new Moegi.Error.FILE_DOES_NOT_EXISTS(_("File does not exists (%s)\n"), file_path);
+                throw new Musectory.Error.FILE_DOES_NOT_EXISTS(_("File does not exists (%s)\n"), file_path);
             }
 
             if (!file.query_info("standard::*", 0).get_content_type().has_prefix("audio")) {
-                throw new Moegi.Error.FILE_IS_NOT_AN_AUDIO(_("File is not an audio file (%s)\n"), file_path);
+                throw new Musectory.Error.FILE_IS_NOT_AN_AUDIO(_("File is not an audio file (%s)\n"), file_path);
             }
 
             uridecoder.set("uri", "file://" + file_path);
@@ -102,7 +102,7 @@ namespace Moegi {
                             debug("Gst message (ERROR)");
                             GLib.Error error;
                             message.parse_error(out error, null);
-                            throw new Moegi.Error.GST_MESSAGE_ERROR(error.message);
+                            throw new Musectory.Error.GST_MESSAGE_ERROR(error.message);
 
                           case MessageType.TAG:
                             debug("Gst message (TAG)");
@@ -122,7 +122,7 @@ namespace Moegi {
                                     }
                                 }
                             });
-                            GLib.Value duration_value = GLib.Value(typeof(Moegi.SmallTime));
+                            GLib.Value duration_value = GLib.Value(typeof(Musectory.SmallTime));
                             duration_value.set_object(get_duration());
                             tag_found("duration", duration_value);
                             return;

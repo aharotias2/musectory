@@ -1,29 +1,29 @@
 /*
- * This file is part of moegi-player.
+ * This file is part of musectory-player.
  *
- *     moegi-player is free software: you can redistribute it and/or modify
+ *     musectory-player is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
  *
- *     moegi-player is distributed in the hope that it will be useful,
+ *     musectory-player is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
  *
  *     You should have received a copy of the GNU General Public License
- *     along with moegi-player.  If not, see <http://www.gnu.org/licenses/>.
+ *     along with musectory-player.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2018 Takayuki Tanaka
  */
 
 using Gtk;
 using Pango;
-using Moegi;
+using Musectory;
 
-namespace Moegi {
+namespace Musectory {
     public class PlaylistBox : Bin {
-        public signal void item_activated(uint index, Moegi.FileInfo item);
+        public signal void item_activated(uint index, Musectory.FileInfo item);
         public signal void playlist_changed();
 
         private GLib.ListStore? store;
@@ -38,7 +38,7 @@ namespace Moegi {
         public PlaylistBox() {
             freader = new FileInfoAdapter();
             name = null;
-            store = new GLib.ListStore(typeof(Moegi.FileInfo));
+            store = new GLib.ListStore(typeof(Musectory.FileInfo));
             tracker = new Tracker();
             scrolled = new ScrolledWindow(null, null);
             {
@@ -64,12 +64,12 @@ namespace Moegi {
             return store.get_n_items();
         }
 
-        public Moegi.FileInfo? get_file_info() {
-            return (Moegi.FileInfo?)store.get_item(tracker.current);
+        public Musectory.FileInfo? get_file_info() {
+            return (Musectory.FileInfo?)store.get_item(tracker.current);
         }
 
-        public Moegi.FileInfo? get_file_info_at_index(uint index) {
-            return (Moegi.FileInfo?)store.get_item(index);
+        public Musectory.FileInfo? get_file_info_at_index(uint index) {
+            return (Musectory.FileInfo?)store.get_item(index);
         }
 
         public PlaylistItem? get_current_item() {
@@ -82,7 +82,7 @@ namespace Moegi {
             return item;
         }
 
-        public void add_item(Moegi.FileInfo? file_info) {
+        public void add_item(Musectory.FileInfo? file_info) {
             if (file_info != null) {
                 store.append(file_info);
                 tracker.reset(get_list_size(), tracker.current);
@@ -91,8 +91,8 @@ namespace Moegi {
             }
         }
 
-        public void add_items_all(Gee.List<Moegi.FileInfo?> file_list) {
-            foreach (Moegi.FileInfo? file_info in file_list) {
+        public void add_items_all(Gee.List<Musectory.FileInfo?> file_list) {
+            foreach (Musectory.FileInfo? file_info in file_list) {
                 if (file_info != null) {
                     store.append(file_info);
                 }
@@ -198,11 +198,11 @@ namespace Moegi {
             string contents;
             if (GLib.FileUtils.test(m3u_file_path, FileTest.EXISTS)) {
                 GLib.FileUtils.get_contents(m3u_file_path, out contents);
-                Gee.List<string> file_path_list = Moegi.StringUtils.array_to_list(contents.split("\n"));
+                Gee.List<string> file_path_list = Musectory.StringUtils.array_to_list(contents.split("\n"));
                 remove_all();
                 foreach (string file_path in file_path_list) {
                     if (file_path.length > 0 && Files.mimetype_is_audio(file_path)) {
-                        Moegi.FileInfo file_info = freader.read_metadata_from_path(file_path);
+                        Musectory.FileInfo file_info = freader.read_metadata_from_path(file_path);
                         add_item(file_info);
                         debug("load_list_from_file: added %s", file_path);
                     }
@@ -214,7 +214,7 @@ namespace Moegi {
         }
 
         private Widget create_list_item(Object object) {
-            PlaylistItem list_item = new PlaylistItem((Moegi.FileInfo)object, image_size);
+            PlaylistItem list_item = new PlaylistItem((Musectory.FileInfo)object, image_size);
             {
                 list_item.set_index(get_list_size());
             }

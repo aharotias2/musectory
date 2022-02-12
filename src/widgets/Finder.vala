@@ -1,25 +1,25 @@
 /*
- * This file is part of moegi-player.
+ * This file is part of musectory-player.
  *
- *     moegi-player is free software: you can redistribute it and/or modify
+ *     musectory-player is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
  *
- *     moegi-player is distributed in the hope that it will be useful,
+ *     musectory-player is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
  *
  *     You should have received a copy of the GNU General Public License
- *     along with moegi-player.  If not, see <http://www.gnu.org/licenses/>.
+ *     along with musectory-player.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2018 Takayuki Tanaka
  */
 
 using Gtk;
 
-namespace Moegi {
+namespace Musectory {
     public class Finder : Bin {
         public signal void dir_selected(string dir_path);
         public signal void dir_changed(string dir_path);
@@ -47,7 +47,7 @@ namespace Moegi {
         private Revealer progress_revealer;
         private Label empty_dir_label;
         private Stack finder_stack;
-        private Gee.List<Moegi.FileInfo?> file_info_list;
+        private Gee.List<Musectory.FileInfo?> file_info_list;
 
         public Finder() {
             try {
@@ -127,8 +127,8 @@ namespace Moegi {
             progress_revealer.reveal_child = true;
             dir_selected(dir_path);
 
-            var thread = new Thread<Gee.List<Moegi.FileInfo?> >(null, () => {
-                Gee.List<Moegi.FileInfo?> result_list = Moegi.Files.get_file_info_list_in_dir(dir_path);
+            var thread = new Thread<Gee.List<Musectory.FileInfo?> >(null, () => {
+                Gee.List<Musectory.FileInfo?> result_list = Musectory.Files.get_file_info_list_in_dir(dir_path);
                 Idle.add(change_dir.callback);
                 return result_list;
             });
@@ -165,14 +165,14 @@ namespace Moegi {
             Idle.add(change_dir.callback);
             yield;
 
-            foreach (Moegi.FileInfo file_info in this.file_info_list) {
+            foreach (Musectory.FileInfo file_info in this.file_info_list) {
                 if (file_info.name == "..") {
                     continue;
                 }
 
-                if (file_info.type == Moegi.FileType.DIRECTORY) {
+                if (file_info.type == Musectory.FileType.DIRECTORY) {
                     try {
-                        file_info.type = Moegi.Files.get_file_type(file_info.path);
+                        file_info.type = Musectory.Files.get_file_type(file_info.path);
                     } catch (FileError e) {
                         stderr.printf(_("FileError catched with file_info.path '%s' which is cannot open\n").printf(file_info.path));
                         break;
@@ -182,8 +182,8 @@ namespace Moegi {
                 var item_widget = new FinderItem(file_info, size);
                 {
                     switch (file_info.type) {
-                      case Moegi.FileType.DIRECTORY:
-                      case Moegi.FileType.DISC:
+                      case Musectory.FileType.DIRECTORY:
+                      case Musectory.FileType.DISC:
                         item_widget.clicked.connect(() => {
                             change_dir.begin(file_info.path);
                             file_button_clicked(file_info.path);
@@ -193,7 +193,7 @@ namespace Moegi {
                         });
                         break;
 
-                      case Moegi.FileType.FILE:
+                      case Musectory.FileType.FILE:
                         item_widget.clicked.connect(() => {
                             play_button_clicked(file_info.path);
                         });

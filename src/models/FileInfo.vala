@@ -1,23 +1,23 @@
 /*
- * This file is part of moegi-player.
+ * This file is part of musectory-player.
  *
- *     moegi-player is free software: you can redistribute it and/or modify
+ *     musectory-player is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
  *
- *     moegi-player is distributed in the hope that it will be useful,
+ *     musectory-player is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
  *
  *     You should have received a copy of the GNU General Public License
- *     along with moegi-player.  If not, see <http://www.gnu.org/licenses/>.
+ *     along with musectory-player.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2018 Takayuki Tanaka
  */
 
-namespace Moegi {
+namespace Musectory {
     public class FileInfo : Object {
         public string dir;
         public string name;
@@ -34,11 +34,11 @@ namespace Moegi {
         public uint track_count;
         public uint date;
         public SmallTime time_length;
-        public Moegi.FileType type;
+        public Musectory.FileType type;
         public Gdk.Pixbuf artwork;
 
         public FileInfo copy() {
-            Moegi.FileInfo cp = new Moegi.FileInfo();
+            Musectory.FileInfo cp = new Musectory.FileInfo();
             cp.dir = this.dir;
             cp.name = this.name;
             cp.path = this.path;

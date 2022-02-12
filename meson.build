@@ -1,5 +1,5 @@
 project(
-    'com.github.aharotias2.moegi-player',
+    'com.github.aharotias2.musectory',
     'vala', 'c',
     version: '1.0.0'
 )
@@ -17,7 +17,7 @@ subdir('data')
 
 executable(
     meson.project_name(),
-    'src/moegi-player.vala',
+    'src/musectory.vala',
     'src/consts/enums.vala',
     'src/consts/OptionKey.vala',
     'src/consts/IconNames.vala',

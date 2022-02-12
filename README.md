@@ -1,4 +1,4 @@
-Moegi-player
+Musectory
 ====================================================================================================
 
 A simple GTK+3 music player.
@@ -7,10 +7,10 @@ Screenshots
 ----------------------------------------------------------------------------------------------------
 
 finder screen
-![The Finder Screen](moegi-screenshot-finder.jpg "The Finder Screen")
+![The Finder Screen](musectory-screenshot-finder.jpg "The Finder Screen")
 
 playlist screen
-![The Playlist Screen](moegi-screenshot-playlist.jpg "The Playlist Screen")
+![The Playlist Screen](musectory-screenshot-playlist.jpg "The Playlist Screen")
 
 Features
 ----------------------------------------------------------------------------------------------------
@@ -36,8 +36,8 @@ Features
 * Shuffling the playlist
 * Repeating the playlist
 * Seaking the currently playing music.
-* Stylesheet is editable in the ~/.moegi directory.
-* Playlist is editable that names are with ".m3u" extension in the ~/.moegi directory.
+* Stylesheet is editable in the ~/.musectory directory.
+* Playlist is editable that names are with ".m3u" extension in the ~/.musectory directory.
 
 Requirements
 ----------------------------------------------------------------------------------------------------
@@ -52,7 +52,7 @@ Build
 ----------------------------------------------------------------------------------------------------
 
 ```
-cd moegi-player
+cd musectory
 meson --prefix=/usr/local builddir
 cd builddir
 meson compile
@@ -67,5 +67,6 @@ sudo meson install
 
 Other informations
 ----------------------------------------------------------------------------------------------------
-* It uses /tmp/moegi directory. You should chmod your user name on this directory.
-* It creates directory "~/.moegi" to put configuration and resource files.
+* It uses /tmp/musectory directory. You should chmod your user name on this directory.
+* It creates directory "~/.musectory" to put configuration and resource files.
+

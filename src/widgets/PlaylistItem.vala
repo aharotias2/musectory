@@ -1,25 +1,25 @@
 /*
- * This file is part of moegi-player.
+ * This file is part of musectory-player.
  *
- *     moegi-player is free software: you can redistribute it and/or modify
+ *     musectory-player is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
  *
- *     moegi-player is distributed in the hope that it will be useful,
+ *     musectory-player is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
  *
  *     You should have received a copy of the GNU General Public License
- *     along with moegi-player.  If not, see <http://www.gnu.org/licenses/>.
+ *     along with musectory-player.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2020 Takayuki Tanaka
  */
 
 using Gtk, Gdk, Pango;
 
-namespace Moegi {
+namespace Musectory {
     public class PlaylistItem : ListBoxRow {
         public enum Status {
             NORMAL, PLAYING, PAUSED, HIDDEN,
@@ -28,7 +28,7 @@ namespace Moegi {
         public uint image_size { get; set; }
         public bool mouse_not_out_flag;
         public string track_title { get; private set; }
-        public Moegi.FileInfo file_info { get; set; }
+        public Musectory.FileInfo file_info { get; set; }
         public bool checked {
             get {
                 return check_button.active;
@@ -46,7 +46,7 @@ namespace Moegi {
         private DateTime? click_time1;
         private DateTime? click_time2;
 
-        public PlaylistItem(Moegi.FileInfo file, uint image_size) {
+        public PlaylistItem(Musectory.FileInfo file, uint image_size) {
             mouse_not_out_flag = false;
             file_info = file;
             click_time1 = null;
@@ -63,7 +63,7 @@ namespace Moegi {
                         image_artwork = null;
                         if (file.artwork != null) {
                             image_artwork = new Image.from_pixbuf(
-                                    Moegi.PixbufUtils.scale(file.artwork, image_size));
+                                    Musectory.PixbufUtils.scale(file.artwork, image_size));
                             {
                                 image_artwork.set_size_request((int) image_size, (int) image_size);
                                 image_artwork.halign = Align.CENTER;

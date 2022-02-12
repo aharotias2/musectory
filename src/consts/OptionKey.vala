@@ -1,23 +1,23 @@
 /*
- * This file is part of moegi-player.
+ * This file is part of musectory-player.
  *
- *     moegi-player is free software: you can redistribute it and/or modify
+ *     musectory-player is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
  *
- *     moegi-player is distributed in the hope that it will be useful,
+ *     musectory-player is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
  *
  *     You should have received a copy of the GNU General Public License
- *     along with moegi-player.  If not, see <http://www.gnu.org/licenses/>.
+ *     along with musectory-player.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2020 Takayuki Tanaka
  */
 
-namespace Moegi {
+namespace Musectory {
     private const string CONFIG_DIR_VALUE_SHORT = "-d";
     private const string CSS_PATH_VALUE_SHORT = "-c";
     private const string LAST_VISITED_DIR_VALUE_SHORT = "-v";
@@ -55,13 +55,13 @@ namespace Moegi {
 
         public static OptionKey[] values() {
             return {
-                       CONFIG_DIR, CSS_PATH, LAST_VISITED_DIR, LAST_PLAYLIST_NAME,
-                       FINDER_ICON_SIZE, PLAYLIST_THUMBNAIL_SIZE, CONTROLLER_IMAGE_SIZE_MIN,
-                       CONTROLLER_IMAGE_SIZE_MAX, BOOKMARK_DIR, PLAYLIST_ITEM
+                CONFIG_DIR, CSS_PATH, LAST_VISITED_DIR, LAST_PLAYLIST_NAME,
+                FINDER_ICON_SIZE, PLAYLIST_THUMBNAIL_SIZE, CONTROLLER_IMAGE_SIZE_MIN,
+                CONTROLLER_IMAGE_SIZE_MAX, BOOKMARK_DIR, PLAYLIST_ITEM
             };
         }
 
-        public static OptionKey value_of(string key_name) throws Moegi.Error {
+        public static OptionKey value_of(string key_name) throws Musectory.Error {
             switch (key_name) {
               case CONFIG_DIR_VALUE_SHORT:
               case CONFIG_DIR_VALUE_LONG:
@@ -104,7 +104,7 @@ namespace Moegi {
                 return PLAYLIST_ITEM;
 
             default:
-                throw new Moegi.Error.OPTION_KEY_ERROR(_("Invalid key was found\n"));
+                throw new Musectory.Error.OPTION_KEY_ERROR(_("Invalid key was found\n"));
             }
         }
 

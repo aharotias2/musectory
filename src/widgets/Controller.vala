@@ -1,25 +1,25 @@
 /*
- * This file is part of moegi-player.
+ * This file is part of musectory-player.
  *
- *     moegi-player is free software: you can redistribute it and/or modify
+ *     musectory-player is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
  *
- *     moegi-player is distributed in the hope that it will be useful,
+ *     musectory-player is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
  *
  *     You should have received a copy of the GNU General Public License
- *     along with moegi-player.  If not, see <http://www.gnu.org/licenses/>.
+ *     along with musectory-player.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2020 Takayuki Tanaka
  */
 
 using Gtk;
 
-namespace Moegi {
+namespace Musectory {
     public class Controller : Bin {
         public const double SMALL_STEP_MILLISECONDS = 100.0;
         public const double BIG_STEP_MILLISECONDS = 10000.0;
@@ -171,7 +171,7 @@ namespace Moegi {
 
         public void set_artwork(Gdk.Pixbuf pixbuf) {
             original_pixbuf = pixbuf;
-            Gdk.Pixbuf resized_pixbuf = Moegi.PixbufUtils.scale(original_pixbuf, (int) this.artwork_size);
+            Gdk.Pixbuf resized_pixbuf = Musectory.PixbufUtils.scale(original_pixbuf, (int) this.artwork_size);
             artwork.pixbuf = resized_pixbuf;
         }
 

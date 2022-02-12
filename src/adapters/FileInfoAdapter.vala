@@ -1,47 +1,47 @@
 /*
- * This file is part of moegi-player.
+ * This file is part of musectory-player.
  *
- *     moegi-player is free software: you can redistribute it and/or modify
+ *     musectory-player is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
  *
- *     moegi-player is distributed in the hope that it will be useful,
+ *     musectory-player is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
  *
  *     You should have received a copy of the GNU General Public License
- *     along with moegi-player.  If not, see <http://www.gnu.org/licenses/>.
+ *     along with musectory-player.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2020 Takayuki Tanaka
  */
 
-namespace Moegi {
+namespace Musectory {
     public class FileInfoAdapter : Object {
-        public Moegi.FileInfo? read_metadata_from_path(string file_path) {
+        public Musectory.FileInfo? read_metadata_from_path(string file_path) {
             GLib.File file = GLib.File.new_for_path(file_path);
-            Moegi.FileInfo file_info = new Moegi.FileInfo();
+            Musectory.FileInfo file_info = new Musectory.FileInfo();
             file_info.dir = file.get_parent().get_path();
             file_info.path = file.get_path();
             file_info.name = file.get_basename();
-            file_info.type = Moegi.FileType.MUSIC;
+            file_info.type = Musectory.FileType.MUSIC;
             try {
-                MetadataReader meta_reader = new Moegi.MetadataReader();
+                MetadataReader meta_reader = new Musectory.MetadataReader();
                 meta_reader.tag_found.connect((tag, value) => {
                     file_info_set_value(ref file_info, tag, value);
                     return true;
                 });
                 meta_reader.get_metadata(file_path);
-            } catch (Moegi.Error e) {
-                stderr.printf(@"Moegi.Error: $(e.message)\n");
+            } catch (Musectory.Error e) {
+                stderr.printf(@"Musectory.Error: $(e.message)\n");
             } catch (GLib.Error e) {
                 stderr.printf(@"GLib.Error: $(e.message)\n");
             }
             return file_info;
         }
 
-        private void file_info_set_value(ref Moegi.FileInfo file_info, string tag, Value? value) {
+        private void file_info_set_value(ref Musectory.FileInfo file_info, string tag, Value? value) {
             string tag_lower = tag.down();
             debug(@"Tag: $(tag)");
             switch (tag_lower) {
@@ -94,7 +94,7 @@ namespace Moegi {
                 break;
 
               case "duration":
-                file_info.time_length = (Moegi.SmallTime)value.get_object();
+                file_info.time_length = (Musectory.SmallTime)value.get_object();
                 break;
 
               case "image":

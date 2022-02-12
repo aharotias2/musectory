@@ -1,28 +1,28 @@
 /*
- * This file is part of moegi-player.
+ * This file is part of musectory-player.
  *
- *     moegi-player is free software: you can redistribute it and/or modify
+ *     musectory-player is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
  *
- *     moegi-player is distributed in the hope that it will be useful,
+ *     musectory-player is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
  *
  *     You should have received a copy of the GNU General Public License
- *     along with moegi-player.  If not, see <http://www.gnu.org/licenses/>.
+ *     along with musectory-player.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2018 Takayuki Tanaka
  */
 
-namespace Moegi {
+namespace Musectory {
     public class Options {
-        private Gee.Map<Moegi.OptionKey, Gee.List<string> > config_map;
+        private Gee.Map<Musectory.OptionKey, Gee.List<string> > config_map;
 
         public Options() {
-            config_map = new Gee.HashMap<Moegi.OptionKey, Gee.List<string> >();
+            config_map = new Gee.HashMap<Musectory.OptionKey, Gee.List<string> >();
             {
                 foreach (OptionKey key in OptionKey.values()) {
                     config_map.set(key, new Gee.ArrayList<string>());
@@ -71,24 +71,24 @@ namespace Moegi {
             return config_map.keys;
         }
 
-        public void parse_args(ref unowned string[] args) throws Moegi.Error {
+        public void parse_args(ref unowned string[] args) throws Musectory.Error {
             for (int i = 1; i < args.length; i++) {
                 OptionKey key;
                 try {
                     key = OptionKey.value_of(args[i]);
-                } catch (Moegi.Error e) {
-                    stderr.printf(@"MoegiError: $(e.message) that is $(args[i])\n");
+                } catch (Musectory.Error e) {
+                    stderr.printf(@"MusectoryError: $(e.message) that is $(args[i])\n");
                     continue;
                 }
                 switch (key) {
-                  case Moegi.OptionKey.CSS_PATH:
-                  case Moegi.OptionKey.CONFIG_DIR:
+                  case Musectory.OptionKey.CSS_PATH:
+                  case Musectory.OptionKey.CONFIG_DIR:
                     File option_file = File.new_for_path(args[i + 1]);
                     if (option_file.query_exists()) {
                         config_map.get(key).add(option_file.get_path());
                         i++;
                     } else {
-                        throw new Moegi.Error.FILE_DOES_NOT_EXISTS(_("File does not exists (%s)\n").printf(option_file.get_path()));
+                        throw new Musectory.Error.FILE_DOES_NOT_EXISTS(_("File does not exists (%s)\n").printf(option_file.get_path()));
                     }
                     break;
                 default:
@@ -100,10 +100,10 @@ namespace Moegi {
             }
         }
 
-        public void parse_conf() throws Moegi.Error {
+        public void parse_conf() throws Musectory.Error {
             try {
                 string? config_dir = config_map.get(OptionKey.CONFIG_DIR).last();
-                string config_file_path = config_dir + "/" + Moegi.PROGRAM_NAME + ".conf";
+                string config_file_path = config_dir + "/" + Musectory.PROGRAM_NAME + ".conf";
                 File config_file = File.new_for_path(config_file_path);
                 DataInputStream dis = new DataInputStream(config_file.read());
                 string? line = null;
@@ -112,21 +112,21 @@ namespace Moegi {
                     string key = line.substring(0, pos_eq);
                     string option_value = line.substring(pos_eq + 1);
                     debug(@"config key = $(key), value = $(option_value)");
-                    Moegi.OptionKey option_key;
+                    Musectory.OptionKey option_key;
                     try {
                         option_key = OptionKey.value_of(key);
-                    } catch (Moegi.Error e) {
-                        stderr.printf(@"MoegiError: $(e.message)\n");
+                    } catch (Musectory.Error e) {
+                        stderr.printf(@"MusectoryError: $(e.message)\n");
                         continue;
                     }
                     switch (option_key) {
-                      case Moegi.OptionKey.CSS_PATH:
-                      case Moegi.OptionKey.CONFIG_DIR:
+                      case Musectory.OptionKey.CSS_PATH:
+                      case Musectory.OptionKey.CONFIG_DIR:
                         File option_file = File.new_for_path(option_value);
                         if (option_file.query_exists()) {
                             config_map.get(option_key).add(option_file.get_path());
                         } else {
-                            throw new Moegi.Error.FILE_DOES_NOT_EXISTS(_("File does not exists (%s)\n").printf(option_file.get_path()));
+                            throw new Musectory.Error.FILE_DOES_NOT_EXISTS(_("File does not exists (%s)\n").printf(option_file.get_path()));
                         }
                         break;
                     default:
@@ -134,8 +134,8 @@ namespace Moegi {
                         break;
                     }
                 }
-            } catch (Moegi.Error e) {
-                stderr.printf(@"MoegiError: $(e.message)\n");
+            } catch (Musectory.Error e) {
+                stderr.printf(@"MusectoryError: $(e.message)\n");
                 throw e;
             } catch (GLib.IOError e) {
                 stderr.printf(@"IOError: $(e.message)\n");

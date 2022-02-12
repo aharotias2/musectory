@@ -1,26 +1,26 @@
 /*
- * This file is part of moegi-player.
+ * This file is part of musectory-player.
  *
- *     moegi-player is free software: you can redistribute it and/or modify
+ *     musectory-player is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
  *
- *     moegi-player is distributed in the hope that it will be useful,
+ *     musectory-player is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
  *
  *     You should have received a copy of the GNU General Public License
- *     along with moegi-player.  If not, see <http://www.gnu.org/licenses/>.
+ *     along with musectory-player.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2020 Takayuki Tanaka
  */
 
- namespace Moegi {
+ namespace Musectory {
      public class Window : Gtk.Window {
-        private Moegi.Options options;
-        private Moegi.GstPlayer? gst_player;
+        private Musectory.Options options;
+        private Musectory.GstPlayer? gst_player;
         private string config_dir;
         private Gtk.Entry location_entry;
         private Gtk.Button menu_button;
@@ -30,19 +30,19 @@
         private Gtk.ToggleButton find_button;
         private Gtk.ToggleButton playlist_button;
         private Gtk.Popover sidebar_popover;
-        private Moegi.Sidebar sidebar;
-        private Moegi.Controller controller;
-        private Moegi.PlaylistBox playlist_view;
-        private Moegi.ArtworkView artwork_view;
+        private Musectory.Sidebar sidebar;
+        private Musectory.Controller controller;
+        private Musectory.PlaylistBox playlist_view;
+        private Musectory.ArtworkView artwork_view;
         private Gtk.Revealer finder_revealer;
         private Gtk.Revealer playlist_revealer;
-        private Moegi.Finder finder;
+        private Musectory.Finder finder;
         private Gtk.Label total_time_label_value;
         private Gtk.Dialog save_playlist_dialog;
         private Gtk.Box box_1;
         private bool playing;
-        private Moegi.FileInfoAdapter? file_info_reader;
-        private Moegi.FileInfo? current_music;
+        private Musectory.FileInfoAdapter? file_info_reader;
+        private Musectory.FileInfo? current_music;
 
         private string location {
             get {
@@ -54,22 +54,22 @@
             }
         }
 
-        public Window(Moegi.Options options) {
+        public Window(Musectory.Options options) {
             this.options = options;
-            config_dir = options.get(Moegi.OptionKey.CONFIG_DIR);
+            config_dir = options.get(Musectory.OptionKey.CONFIG_DIR);
             playing = false;
             setup_gst_player();
             setup_file_info_adapter();
             setup_widgets();
             init_bookmarks_of_sidebar();
             init_playlists_of_sidebar();
-            setup_css(options.get(Moegi.OptionKey.CSS_PATH));
+            setup_css(options.get(Musectory.OptionKey.CSS_PATH));
         }
 
         private void setup_widgets() {
             var header_bar = new Gtk.HeaderBar();
             {
-                var app_icon = new Gtk.Button.from_icon_name("com.github.aharotias2.moegi-player", SMALL_TOOLBAR);
+                var app_icon = new Gtk.Button.from_icon_name("com.github.aharotias2.musectory-player", SMALL_TOOLBAR);
                 {
                     app_icon.get_style_context().add_class("flat");
                     app_icon.clicked.connect(() => {
@@ -77,11 +77,11 @@
                     });
                 }
 
-                menu_button = new Gtk.Button.from_icon_name(Moegi.IconName.Symbolic.OPEN_MENU);
+                menu_button = new Gtk.Button.from_icon_name(Musectory.IconName.Symbolic.OPEN_MENU);
                 {
                     sidebar_popover = new Gtk.Popover(menu_button);
                     {
-                        sidebar = new Moegi.Sidebar();
+                        sidebar = new Musectory.Sidebar();
                         {
                             sidebar.bookmark_directory_selected.connect((dir_path) => {
                                 sidebar_popover.visible = false;
@@ -95,7 +95,7 @@
 
                             sidebar.bookmark_del_button_clicked.connect((dir_path) => {
                                 sidebar_popover.visible = false;
-                                return Moegi.Dialogs.confirm(_("Do you really remove this bookmark?"), this);
+                                return Musectory.Dialogs.confirm(_("Do you really remove this bookmark?"), this);
                             });
 
                             sidebar.playlist_selected.connect((playlist_name, playlist_path) => {
@@ -118,7 +118,7 @@
 
                             sidebar.playlist_del_button_clicked.connect((playlist_path) => {
                                 sidebar_popover.visible = false;
-                                bool answer = Moegi.Dialogs.confirm(_("Do you really remove this playlist?"), this);
+                                bool answer = Musectory.Dialogs.confirm(_("Do you really remove this playlist?"), this);
                                 if (answer) {
                                     File playlist_file = File.new_for_path(playlist_path);
                                     try {
@@ -132,7 +132,7 @@
 
                             sidebar.file_chooser_called.connect(() => {
                                 sidebar_popover.visible = false;
-                                string? dir_path = Moegi.Dialogs.choose_directory(this);
+                                string? dir_path = Musectory.Dialogs.choose_directory(this);
                                 if (dir_path != null) {
                                     location = dir_path;
                                 }
@@ -163,7 +163,7 @@
                 {
                     find_button = new Gtk.ToggleButton();
                     {
-                        find_button.image = new Gtk.Image.from_icon_name(Moegi.IconName.Symbolic.FOLDER_OPEN,
+                        find_button.image = new Gtk.Image.from_icon_name(Musectory.IconName.Symbolic.FOLDER_OPEN,
                                 Gtk.IconSize.SMALL_TOOLBAR);
                         find_button.image.margin_start = 30;
                         find_button.image.margin_end = 30;
@@ -181,7 +181,7 @@
 
                     playlist_button = new Gtk.ToggleButton();
                     {
-                        playlist_button.image = new Gtk.Image.from_icon_name(Moegi.IconName.Symbolic.EMBLEM_MUSIC,
+                        playlist_button.image = new Gtk.Image.from_icon_name(Musectory.IconName.Symbolic.EMBLEM_MUSIC,
                                 Gtk.IconSize.SMALL_TOOLBAR);
                         playlist_button.image.margin_start = 30;
                         playlist_button.image.margin_end = 30;
@@ -218,7 +218,7 @@
                     {
                         var location_box = new Gtk.ButtonBox(Gtk.Orientation.HORIZONTAL);
                         {
-                            parent_button = new Gtk.Button.from_icon_name(Moegi.IconName.Symbolic.GO_UP);
+                            parent_button = new Gtk.Button.from_icon_name(Musectory.IconName.Symbolic.GO_UP);
                             {
                                 parent_button.clicked.connect(() => {
                                     File dir = File.new_for_path(location).get_parent();
@@ -226,12 +226,12 @@
                                 });
                             }
 
-                            header_bookmark_button = new Gtk.Button.from_icon_name(Moegi.IconName.Symbolic.BOOKMARK_NEW);
+                            header_bookmark_button = new Gtk.Button.from_icon_name(Musectory.IconName.Symbolic.BOOKMARK_NEW);
                             {
                                 header_bookmark_button.clicked.connect(() => {
                                     if (!sidebar.has_bookmark(location)) {
                                         sidebar.add_bookmark(location);
-                                    } else if (Moegi.Dialogs.confirm(_("Do you really remove this bookmark?"), this)) {
+                                    } else if (Musectory.Dialogs.confirm(_("Do you really remove this bookmark?"), this)) {
                                         sidebar.remove_bookmark(location);
                                     }
                                 });
@@ -245,7 +245,7 @@
                                 });
                             }
 
-                            header_reload_button = new Gtk.Button.from_icon_name(Moegi.IconName.Symbolic.VIEW_REFRESH);
+                            header_reload_button = new Gtk.Button.from_icon_name(Musectory.IconName.Symbolic.VIEW_REFRESH);
                             {
                                 header_reload_button.clicked.connect(() => {
                                     finder.change_dir.begin(location);
@@ -271,7 +271,7 @@
                             finder.bookmark_button_clicked.connect((file_path) => {
                                 if (!sidebar.has_bookmark(file_path)) {
                                     sidebar.add_bookmark(file_path);
-                                } else if (Moegi.Dialogs.confirm(_("Do you really remove this bookmark?"), this)) {
+                                } else if (Musectory.Dialogs.confirm(_("Do you really remove this bookmark?"), this)) {
                                     sidebar.remove_bookmark(file_path);
                                 }
                             });
@@ -306,9 +306,9 @@
                     finder_revealer.transition_type = Gtk.RevealerTransitionType.SLIDE_DOWN;
                 }
 
-                controller = new Moegi.Controller();
+                controller = new Musectory.Controller();
                 {
-                    controller.artwork_size = int.parse(options.get(Moegi.OptionKey.CONTROLLER_IMAGE_SIZE_MIN));
+                    controller.artwork_size = int.parse(options.get(Musectory.OptionKey.CONTROLLER_IMAGE_SIZE_MIN));
                     controller.artwork_clicked.connect(() => {
                         if (playlist_revealer.child_revealed) {
                             controller.hide_artwork();
@@ -322,7 +322,7 @@
 
                     controller.play_button_clicked.connect(() => {
                         if (!playing) {
-                            Moegi.FileInfo? info = playlist_view.get_file_info();
+                            Musectory.FileInfo? info = playlist_view.get_file_info();
                             if (info != null) {
                                 try {
                                     gst_player.play(info.path);
@@ -344,7 +344,7 @@
                         if (playlist_view.has_next()) {
                             playlist_view.next();
                             set_controller_artwork();
-                            Moegi.FileInfo? info = playlist_view.get_file_info();
+                            Musectory.FileInfo? info = playlist_view.get_file_info();
                             if (info != null) {
                                 try {
                                     gst_player.play(info.path);
@@ -360,14 +360,14 @@
                             if (controller.music_current_time > 1000) {
                                 controller.music_current_time = 0;
                                 gst_player.quit();
-                                Moegi.FileInfo? info = playlist_view.get_file_info();
+                                Musectory.FileInfo? info = playlist_view.get_file_info();
                                 if (info != null) {
                                     gst_player.play(info.path);
                                 }
                             } else if (playlist_view.has_previous()) {
                                 playlist_view.previous();
                                 set_controller_artwork();
-                                Moegi.FileInfo? info = playlist_view.get_file_info();
+                                Musectory.FileInfo? info = playlist_view.get_file_info();
                                 if (info != null) {
                                     gst_player.play(info.path);
                                 }
@@ -378,7 +378,7 @@
                     });
 
                     controller.time_position_changed.connect((new_value) => {
-                        gst_player.set_position(new Moegi.SmallTime.from_milliseconds((int) new_value));
+                        gst_player.set_position(new Musectory.SmallTime.from_milliseconds((int) new_value));
                     });
 
                     controller.volume_changed.connect((value) => {
@@ -400,7 +400,7 @@
                     {
                         Gtk.Box box_3 = new Gtk.Box(Gtk.Orientation.VERTICAL, 0);
                         {
-                            playlist_view = new Moegi.PlaylistBox();
+                            playlist_view = new Musectory.PlaylistBox();
                             {
                                 playlist_view.image_size = 48;
                                 playlist_view.item_activated.connect((index, file_info) => {
@@ -414,7 +414,7 @@
                                         }
                                     } else {
                                         gst_player.quit();
-                                        Moegi.FileInfo? info = playlist_view.get_file_info();
+                                        Musectory.FileInfo? info = playlist_view.get_file_info();
                                         if (info != null) {
                                             try {
                                                 gst_player.play(info.path);
@@ -487,13 +487,13 @@
                                     box_6.add(list_unselect_button);
                                 }
 
-                                Gtk.Button save_button = new Gtk.Button.from_icon_name(Moegi.IconName.Symbolic.DOCUMENT_SAVE);
+                                Gtk.Button save_button = new Gtk.Button.from_icon_name(Musectory.IconName.Symbolic.DOCUMENT_SAVE);
                                 {
                                     save_button.tooltip_text = _("Save this playlist");
                                     save_button.clicked.connect(() => {
                                         Gee.List<string> file_path_list = new Gee.ArrayList<string>();
                                         for (int i = 0; i < playlist_view.get_list_size(); i++) {
-                                            Moegi.FileInfo? info = playlist_view.get_file_info_at_index(i);
+                                            Musectory.FileInfo? info = playlist_view.get_file_info_at_index(i);
                                             if (info != null) {
                                                 file_path_list.add(info.path);
                                             }
@@ -502,7 +502,7 @@
                                         if (playlist_view.playlist_name == null) {
                                             save_playlist(file_path_list);
                                         } else if (sidebar.has_playlist(playlist_name)) {
-                                            if (Moegi.Dialogs.confirm(_("A playlist %s exists. Do you overwrite it?").printf(playlist_name), this)) {
+                                            if (Musectory.Dialogs.confirm(_("A playlist %s exists. Do you overwrite it?").printf(playlist_name), this)) {
                                                 overwrite_playlist(playlist_name, file_path_list);
                                             } else {
                                                 save_playlist(file_path_list);
@@ -521,7 +521,7 @@
                             box_3.pack_start(box_4, false, false);
                         }
 
-                        artwork_view = new Moegi.ArtworkView();
+                        artwork_view = new Musectory.ArtworkView();
                         {
                             artwork_view.close_button_clicked.connect(() => {
                                 controller.show_artwork();
@@ -561,7 +561,7 @@
             find_button.active = true;
             controller.hide_artwork();
             init_playlist.begin();
-            finder.change_dir.begin(options.get(Moegi.OptionKey.LAST_VISITED_DIR));
+            finder.change_dir.begin(options.get(Musectory.OptionKey.LAST_VISITED_DIR));
         }
 
         public void quit() {
@@ -570,28 +570,28 @@
         }
 
         public void save_config_file() {
-            options.set(Moegi.OptionKey.LAST_VISITED_DIR, location);
-            options.set(Moegi.OptionKey.LAST_PLAYLIST_NAME, playlist_view.playlist_name);
-            options.remove_key(Moegi.OptionKey.BOOKMARK_DIR);
+            options.set(Musectory.OptionKey.LAST_VISITED_DIR, location);
+            options.set(Musectory.OptionKey.LAST_PLAYLIST_NAME, playlist_view.playlist_name);
+            options.remove_key(Musectory.OptionKey.BOOKMARK_DIR);
             foreach (string bookmark_dir in sidebar.get_bookmarks()) {
-                options.set(Moegi.OptionKey.BOOKMARK_DIR, bookmark_dir);
+                options.set(Musectory.OptionKey.BOOKMARK_DIR, bookmark_dir);
             }
-            options.remove_key(Moegi.OptionKey.PLAYLIST_ITEM);
+            options.remove_key(Musectory.OptionKey.PLAYLIST_ITEM);
             for (int i = 0; i < playlist_view.get_list_size(); i++) {
-                Moegi.FileInfo? info = playlist_view.get_file_info_at_index(i);
+                Musectory.FileInfo? info = playlist_view.get_file_info_at_index(i);
                 if (info != null) {
                     string playlist_item_path = info.path;
-                    options.set(Moegi.OptionKey.PLAYLIST_ITEM, playlist_item_path);
+                    options.set(Musectory.OptionKey.PLAYLIST_ITEM, playlist_item_path);
                 }
             }
-            Moegi.StringJoiner config_file_contents = new Moegi.StringJoiner("\n", null, "\n");
-            foreach (Moegi.OptionKey key in options.keys()) {
+            Musectory.StringJoiner config_file_contents = new Musectory.StringJoiner("\n", null, "\n");
+            foreach (Musectory.OptionKey key in options.keys()) {
                 switch (key) {
-                  case Moegi.OptionKey.CSS_PATH:
-                  case Moegi.OptionKey.CONFIG_DIR:
+                  case Musectory.OptionKey.CSS_PATH:
+                  case Musectory.OptionKey.CONFIG_DIR:
                     break;
-                  case Moegi.OptionKey.BOOKMARK_DIR:
-                  case Moegi.OptionKey.PLAYLIST_ITEM:
+                  case Musectory.OptionKey.BOOKMARK_DIR:
+                  case Musectory.OptionKey.PLAYLIST_ITEM:
                     foreach (string value in options.get_all(key)) {
                         config_file_contents.add(@"$(key.get_long_name())=$(value)");
                     }
@@ -602,8 +602,8 @@
                 }
             }
             try {
-                string config_dir = options.get(Moegi.OptionKey.CONFIG_DIR);
-                string config_file_path = @"$(config_dir)/$(Moegi.PROGRAM_NAME).conf";
+                string config_dir = options.get(Musectory.OptionKey.CONFIG_DIR);
+                string config_file_path = @"$(config_dir)/$(Musectory.PROGRAM_NAME).conf";
                 debug(@"Save config data to $(config_file_path)");
                 string config_data = config_file_contents.to_string();
                 debug(@"Saved config data contents: $(config_data)");
@@ -614,11 +614,11 @@
         }
 
         private void setup_gst_player() {
-            gst_player = new Moegi.GstPlayer();
+            gst_player = new Musectory.GstPlayer();
             gst_player.volume = 0.5;
             gst_player.started.connect(() => {
                 set_controller_artwork();
-                controller.play_pause_button_state = Moegi.ControllerState.PLAY;
+                controller.play_pause_button_state = Musectory.ControllerState.PLAY;
                 current_music = playlist_view.get_file_info();
 
                 if (current_music.artwork != null) {
@@ -633,7 +633,7 @@
                     }
                 } else {
                     controller.hide_artwork();
-                    artwork_view.set_image_from_icon_name(Moegi.IconName.AUDIO_FILE);
+                    artwork_view.set_image_from_icon_name(Musectory.IconName.AUDIO_FILE);
                 }
             });
 
@@ -646,7 +646,7 @@
                 debug("gst_player.finished was called");
                 if (playlist_view.has_next()) {
                     playlist_view.next();
-                    Moegi.FileInfo? next_file_info = playlist_view.get_file_info();
+                    Musectory.FileInfo? next_file_info = playlist_view.get_file_info();
                     if (next_file_info != null) {
                         string next_path = next_file_info.path;
                         try {
@@ -672,7 +672,7 @@
         }
 
         private void setup_file_info_adapter() {
-            file_info_reader = new Moegi.FileInfoAdapter();
+            file_info_reader = new Musectory.FileInfoAdapter();
         }
 
         private void show_finder() {
@@ -690,7 +690,7 @@
             playlist_revealer.reveal_child = false;
             box_1.set_child_packing(playlist_revealer, false, false, 0, Gtk.PackType.START);
 
-            controller.artwork_size = int.parse(options.get(Moegi.OptionKey.CONTROLLER_IMAGE_SIZE_MIN));
+            controller.artwork_size = int.parse(options.get(Musectory.OptionKey.CONTROLLER_IMAGE_SIZE_MIN));
         }
 
         private void show_playlist() {
@@ -708,11 +708,11 @@
             playlist_revealer.reveal_child = true;
             box_1.set_child_packing(playlist_revealer, true, true, 0, Gtk.PackType.START);
 
-            controller.artwork_size = int.parse(options.get(Moegi.OptionKey.CONTROLLER_IMAGE_SIZE_MAX));
+            controller.artwork_size = int.parse(options.get(Musectory.OptionKey.CONTROLLER_IMAGE_SIZE_MAX));
         }
 
         private void set_controller_artwork() {
-            Moegi.FileInfo? info = playlist_view.get_file_info();
+            Musectory.FileInfo? info = playlist_view.get_file_info();
             if (info == null) {
                 return;
             }
@@ -734,14 +734,14 @@
                 playlist_view.remove_all();
             }
             debug(@"setup playlist of $(path)\n");
-            var setup_playlist_thread = new Thread<Gee.List<Moegi.FileInfo?> >(null, () => {
+            var setup_playlist_thread = new Thread<Gee.List<Musectory.FileInfo?> >(null, () => {
                 try {
-                    var playlist_internal = Moegi.Files.find_file_infos_recursively(path);
+                    var playlist_internal = Musectory.Files.find_file_infos_recursively(path);
                     playlist_internal.sort((a, b) => StringUtils.compare_filenames(a.path, b.path));
                     return playlist_internal;
                 } catch (FileError e) {
                     stderr.printf(@"FileError: $(e.message)\n");
-                    return new Gee.ArrayList<Moegi.FileInfo?>();
+                    return new Gee.ArrayList<Musectory.FileInfo?>();
                 } finally {
                     Idle.add(setup_playlist.callback);
                 }
@@ -760,7 +760,7 @@
             if (save_playlist_dialog == null) {
                 Gtk.Entry playlist_name_entry;
                 Gee.List<string> copy_of_list = file_path_list;
-                save_playlist_dialog = new Gtk.Dialog.with_buttons(Moegi.PROGRAM_NAME + ": save playlist", this,
+                save_playlist_dialog = new Gtk.Dialog.with_buttons(Musectory.PROGRAM_NAME + ": save playlist", this,
                         Gtk.DialogFlags.MODAL | Gtk.DialogFlags.DESTROY_WITH_PARENT,
                         _("_OK"), Gtk.ResponseType.ACCEPT,
                         _("_Cancel"), Gtk.ResponseType.CANCEL);
@@ -798,7 +798,7 @@
 
         private void overwrite_playlist(string playlist_name, Gee.List<string> file_path_list) {
             string playlist_file_path = get_playlist_path_from_name(playlist_name);
-            Moegi.StringJoiner playlist_file_contents = new Moegi.StringJoiner("\n", null, "\n");
+            Musectory.StringJoiner playlist_file_contents = new Musectory.StringJoiner("\n", null, "\n");
             playlist_file_contents.add_all(file_path_list);
             try {
                 File file = File.new_for_path(playlist_file_path);
@@ -815,7 +815,7 @@
         }
 
         private void init_bookmarks_of_sidebar() {
-            Gee.List<string> bookmarks = options.get_all(Moegi.OptionKey.BOOKMARK_DIR);
+            Gee.List<string> bookmarks = options.get_all(Musectory.OptionKey.BOOKMARK_DIR);
             foreach (string bookmark_path in bookmarks) {
                 sidebar.add_bookmark(bookmark_path);
             }
@@ -823,10 +823,10 @@
 
         private void init_playlists_of_sidebar() {
             try {
-                Moegi.DirectoryReader dreader = new Moegi.DirectoryReader(config_dir);
+                Musectory.DirectoryReader dreader = new Musectory.DirectoryReader(config_dir);
                 dreader.file_found.connect((file) => {
                     if (file.get_basename().has_suffix(".m3u")) {
-                        string playlist_name = Moegi.FilePathUtils.remove_extension(file.get_basename());
+                        string playlist_name = Musectory.FilePathUtils.remove_extension(file.get_basename());
                         string playlist_path = file.get_path();
                         sidebar.add_playlist(playlist_name, playlist_path);
                     }
@@ -835,7 +835,7 @@
                 dreader.run();
             } catch (FileError e) {
                 stderr.printf(@"FileError: $(e.message)\n");
-            } catch (Moegi.Error e) {
+            } catch (Musectory.Error e) {
                 stderr.printf(@"FileError: $(e.message)\n");
             }
         }
@@ -844,12 +844,12 @@
             menu_button.sensitive = false;
             new Thread<bool>(null, () => {
                 try {
-                    Gee.List<string> last_playlist = options.get_all(Moegi.OptionKey.PLAYLIST_ITEM);
+                    Gee.List<string> last_playlist = options.get_all(Musectory.OptionKey.PLAYLIST_ITEM);
                     if (last_playlist.size == 0) {
                         return true;
                     }
                     foreach (string item in last_playlist) {
-                        Moegi.FileInfo info = file_info_reader.read_metadata_from_path(item);
+                        Musectory.FileInfo info = file_info_reader.read_metadata_from_path(item);
                         playlist_view.add_item(info);
                     }
                     return true;

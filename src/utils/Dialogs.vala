@@ -1,25 +1,25 @@
 /*
- * This file is part of moegi-player.
+ * This file is part of musectory-player.
  *
- *     moegi-player is free software: you can redistribute it and/or modify
+ *     musectory-player is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
  *
- *     moegi-player is distributed in the hope that it will be useful,
+ *     musectory-player is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
  *
  *     You should have received a copy of the GNU General Public License
- *     along with moegi-player.  If not, see <http://www.gnu.org/licenses/>.
+ *     along with musectory-player.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Copyright 2018 Takayuki Tanaka
  */
 
 using Gtk;
 
-namespace Moegi.Dialogs {
+namespace Musectory.Dialogs {
     public void show_app_dialog(Window parent_window) {
         var dialog = new AboutDialog();
         dialog.set_destroy_with_parent(true);
@@ -29,7 +29,7 @@ namespace Moegi.Dialogs {
         dialog.authors = {"Takayuki Tanaka"};
         dialog.documenters = null;
         dialog.translator_credits = null;
-        dialog.program_name = Moegi.PROGRAM_NAME;
+        dialog.program_name = Musectory.PROGRAM_NAME;
         dialog.comments = "Music player with file finder";
         dialog.copyright = "Copyright (C) 2018-2021 Takayuki Tanaka";
         dialog.version = "2.0.3";
@@ -47,9 +47,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.""";
         dialog.wrap_license = true;
-        dialog.website = "https://github.com/aharotias2/moegi-player";
-        dialog.website_label = "Moegi Player @ Github";
-        dialog.logo_icon_name = "com.github.aharotias2.moegi-player";
+        dialog.website = "https://github.com/aharotias2/musectory-player";
+        dialog.website_label = "Musectory Player @ Github";
+        dialog.logo_icon_name = "com.github.aharotias2.musectory-player";
         dialog.response.connect((response_id) => {
             if (response_id == ResponseType.CANCEL || response_id == ResponseType.DELETE_EVENT) {
                 dialog.hide_on_delete();
