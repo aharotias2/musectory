@@ -1,11 +1,11 @@
 [Desktop Entry]
 Version=1.0
-Name=moegi-player
+Name=Musectory
 GenericName=Audio Player
 Comment=Audio Player
 MimeType=
-Exec=com.github.aharotias2.moegi-player
-Icon=com.github.aharotias2.moegi-player
+Exec=com.github.aharotias2.musectory
+Icon=com.github.aharotias2.musectory
 Type=Application
 Terminal=false
 Categories=AudioVideo;Audio;Player
