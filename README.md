@@ -1,6 +1,7 @@
 Musectory
 ====================================================================================================
 
+![icon](data/icon/48/com.github.aharotias2.musectory.png)
 A simple GTK+3 music player.
 
 Screenshots
