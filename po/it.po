@@ -1,0 +1,184 @@
+# ITALIAN TRANSLATION FOR MUSECTORY.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# ALBANO BATTISTELLA <ALBANO_BATTISTELLA@HOTMAIL.COM>, 2022.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-06-05 16:41+0000\n"
+"PO-Revision-Date: 2022-03-09 20:36+1000\n"
+"Last-Translator: Albano Battistella <albano_battistella@hotmail.com>\n"
+"Language-Team: Italian <LL@li.org>\n"
+"Language: it\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/widgets/Window.vala:505
+#, c-format
+msgid "A playlist %s exists. Do you overwrite it?"
+msgstr "Esiste una playlist %s. La vuoi sovrascrivere?"
+
+#: src/widgets/FinderItem.vala:131
+msgid "Add to playlist"
+msgstr "Aggiungi alla playlist"
+
+#: src/widgets/FinderItem.vala:119
+msgid "Bookmark"
+msgstr "Segnalibro"
+
+#: src/widgets/FinderToolbar.vala:96
+msgid "Bookmark this directory"
+msgstr "Aggiungi questa directory ai preferiti"
+
+#: src/widgets/Sidebar.vala:64
+msgid "Choose directory..."
+msgstr "Scegli directory..."
+
+#: src/widgets/Sidebar.vala:106
+#, c-format
+msgid "Delete the bookmark \"%s\""
+msgstr "Elimina il segnalibro \"%s\""
+
+#: src/widgets/Sidebar.vala:170
+#, c-format
+msgid "Delete the playlist \"%s\""
+msgstr "Elimina la playlist \"%s\""
+
+#: src/widgets/Window.vala:98 src/widgets/Window.vala:234
+#: src/widgets/Window.vala:274
+msgid "Do you really remove this bookmark?"
+msgstr "Davvero vuoi rimuovere questo segnalibro?"
+
+#: src/widgets/Window.vala:121
+msgid "Do you really remove this playlist?"
+msgstr "Davvero vuoi rimuovere questa playlist?"
+
+#: src/widgets/Window.vala:877
+msgid "ERROR: failed to create a window\n"
+msgstr "ERRORE: impossibile creare una finestra\n"
+
+#: src/widgets/Window.vala:770
+msgid "Enter new playlist name:"
+msgstr "Inserisci il nuovo nome della playlist:"
+
+#: src/widgets/Window.vala:812
+msgid "Error: can not write to config file.\n"
+msgstr "Errore: impossibile scrivere nel file di configurazione.\n"
+
+#: src/widgets/Window.vala:127
+#, c-format
+msgid "Failed to delete a file (%s)"
+msgstr "Impossibile eliminare un file (%s)"
+
+#: src/strategy/MetadataReader.vala:67 src/strategy/DirectoryReader.vala:32
+#: src/models/Options.vala:91 src/models/Options.vala:129
+#, c-format
+msgid "File does not exists (%s)\n"
+msgstr "Il file non esiste (%s)\n"
+
+#: src/strategy/DirectoryReader.vala:36
+#, c-format
+msgid "File is not a directory (%s)\n"
+msgstr "Il file non è una directory (%s)\n"
+
+#: src/strategy/MetadataReader.vala:71
+#, c-format
+msgid "File is not an audio file (%s)\n"
+msgstr "Il file non è un file audio (%s)\n"
+
+#: src/widgets/Finder.vala:177
+#, c-format
+msgid "FileError catched with file_info.path '%s' which is cannot open\n"
+msgstr "Errore file rilevato con file_info.path '%s' che non può essere aperto\n"
+
+#: src/widgets/Window.vala:170
+msgid "Find Files"
+msgstr "Trova file"
+
+#: src/widgets/FinderToolbar.vala:43
+msgid "Go up"
+msgstr "Vai su"
+
+#: src/consts/OptionKey.vala:107
+msgid "Invalid key was found\n"
+msgstr "È stata trovata una chiave non valida\in"
+
+#: src/widgets/Window.vala:455
+msgid "Move the selected items down"
+msgstr "Sposta gli elementi selezionati verso il basso"
+
+#: src/widgets/Window.vala:446
+msgid "Move the selected items up"
+msgstr "Sposta gli elementi selezionati verso l'alto"
+
+#: src/utils/Dialogs.vala:87 src/utils/Dialogs.vala:100
+msgid "Open File"
+msgstr "Apri file"
+
+#: src/widgets/FinderItem.vala:143
+msgid "Play this directory"
+msgstr "Riproduci questa directory"
+
+#: src/widgets/FinderToolbar.vala:86
+msgid "Reload"
+msgstr "Ricarica"
+
+#: src/widgets/Window.vala:464
+msgid "Remove selected items"
+msgstr "Rimuovere gli elementi selezionati"
+
+#: src/widgets/Window.vala:492 src/widgets/HeaderBar.vala:112
+msgid "Save this playlist"
+msgstr "Salva questa playlist"
+
+#: src/widgets/HeaderBar.vala:55
+msgid "Show finder"
+msgstr "Visualizza ricerca"
+
+#: src/widgets/HeaderBar.vala:49
+msgid "Show playlist"
+msgstr "Mostra playlist"
+
+#: src/widgets/Finder.vala:109
+msgid "This directory is empty"
+msgstr "Questa directory è vuota"
+
+#: src/widgets/Window.vala:436
+msgid "Total time:"
+msgstr "Tempo totale:"
+
+#: src/widgets/Window.vala:473
+msgid "Unselect all items"
+msgstr "Deseleziona tutti gli elementi"
+
+#: src/widgets/Window.vala:188
+msgid "View Playlist"
+msgstr "Visualizza playlist"
+
+#: src/widgets/FinderToolbar.vala:55
+msgid "Zoom in"
+msgstr "Aumenta zoom"
+
+#: src/widgets/FinderToolbar.vala:65
+msgid "Zoom out"
+msgstr "Diminuisci zoom"
+
+#: src/widgets/Window.vala:766 src/utils/Dialogs.vala:89
+#: src/utils/Dialogs.vala:102
+msgid "_Cancel"
+msgstr "_Cancella"
+
+#: src/widgets/Window.vala:765
+msgid "_OK"
+msgstr "_OK"
+
+#: src/utils/Dialogs.vala:90 src/utils/Dialogs.vala:103
+msgid "_Open"
+msgstr "_Opri"
+
+#: src/widgets/Finder.vala:62
+msgid "icon file can not load.\n"
+msgstr "Impossibile caricare il file icona.\n"
