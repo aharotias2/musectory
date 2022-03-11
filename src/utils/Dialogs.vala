@@ -25,14 +25,14 @@ namespace Musectory.Dialogs {
         dialog.set_destroy_with_parent(true);
         dialog.set_transient_for(parent_window);
         dialog.set_modal(true);
-        dialog.artists = {"Takayuki Tanaka"};
-        dialog.authors = {"Takayuki Tanaka"};
+        dialog.artists = {"Takayuki Tanaka<aharotias2@gmail.com>"};
+        dialog.authors = {"Takayuki Tanaka<aharotias2@gmail.com>"};
         dialog.documenters = null;
-        dialog.translator_credits = null;
+        dialog.translator_credits = "Takayuki Tanaka (ja)<aharotias2@gmail.com>\nAlbano Battistella (it)<albano_battistella@hotmail.com>";
         dialog.program_name = Musectory.PROGRAM_NAME;
         dialog.comments = "Music player with file finder";
-        dialog.copyright = "Copyright (C) 2018-2021 Takayuki Tanaka";
-        dialog.version = "2.0.3";
+        dialog.copyright = "Copyright (C) 2018-2022 Takayuki Tanaka";
+        dialog.version = "2.1.0";
         dialog.license =
 """This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
